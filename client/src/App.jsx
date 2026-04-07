@@ -1,4 +1,4 @@
-import DragonCursor from "./component/DragonCursor";
+import DragonCursor from "./components/DragonCursor";
 
 export default function App() {
   return (
