@@ -15,7 +15,7 @@ const notFoundMiddleware = require('./middleware/not-found')
 const errorHandlerMiddleware = require('./middleware/error-handler')
 
 // Import Routers
-
+const wikiRouter = require('./routes/wiki.route')
 
 // Allowed Origins & Options
 const allowedOrigins = [
@@ -49,7 +49,7 @@ app.use(helmet())
 app.use(cors(corsOptions))
 
 // 2. Routes
-
+app.use('/api/v1/wiki', wikiRouter)
 
 // 3. Error Handling
 app.use(notFoundMiddleware)

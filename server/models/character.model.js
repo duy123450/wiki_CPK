@@ -9,11 +9,6 @@ const CharacterSchema = new mongoose.Schema({
         public_id: String
     },
     voiceActor: String, // Seiyuu
-    // Infinite loop specific to this character
-    actionClip: {
-        url: String,
-        public_id: String
-    }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Character', CharacterSchema);

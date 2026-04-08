@@ -14,7 +14,21 @@ const CategorySchema = new mongoose.Schema({
     order: {
         type: Number,
         default: 0 // Helps you sort which category appears first
+    },
+    slug: {
+        type: String,
+        unique: true,
+        lowercase: true
     }
 }, { timestamps: true });
+
+CategorySchema.pre('validate', function () {
+    if (this.name && !this.slug) {
+        this.slug = this.name
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/(^-|-$)/g, '');
+    }
+});
 
 module.exports = mongoose.model('Category', CategorySchema);
