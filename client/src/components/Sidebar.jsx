@@ -1,0 +1,571 @@
+import { useState } from "react";
+import {
+  ChevronDown,
+  BookOpen,
+  Music,
+  Users,
+  Film,
+  Scroll,
+  Star,
+  Map,
+  Sparkles,
+} from "lucide-react";
+
+// 🔁 Replace this with your Cloudinary URL later
+const LOGO_URL = "https://res.cloudinary.com/dvlaoxjzi/image/upload/q_auto/f_auto/v1775613442/661386943_1497013225103051_5810917340196605647_n_ta4cju.jpg"; // placeholder — swap with cloudinary link
+
+// Icon map for category icons from DB (matches category.model.js icon field)
+const ICON_MAP = {
+  users: Users,
+  music: Music,
+  film: Film,
+  "book-open": BookOpen,
+  scroll: Scroll,
+  star: Star,
+  map: Map,
+  sparkles: Sparkles,
+  "file-text": BookOpen, // default fallback
+};
+
+// Mock sidebar data — replace with API fetch from /api/v1/wiki/sidebar
+const MOCK_CATEGORIES = [
+  {
+    _id: "1",
+    name: "Characters",
+    icon: "users",
+    slug: "characters",
+    pages: [
+      { title: "Princess Kaguya", slug: "princess-kaguya" },
+      { title: "Yacchiyo", slug: "yacchiyo" },
+      { title: "Iroha", slug: "iroha" },
+      { title: "Roka", slug: "roka" },
+    ],
+  },
+  {
+    _id: "2",
+    name: "Lore & World",
+    icon: "scroll",
+    slug: "lore",
+    pages: [
+      { title: "Lunar History", slug: "lunar-history" },
+      { title: "The Moon Kingdom", slug: "moon-kingdom" },
+      { title: "Earth Legends", slug: "earth-legends" },
+    ],
+  },
+  {
+    _id: "3",
+    name: "Soundtrack",
+    icon: "music",
+    slug: "soundtrack",
+    pages: [
+      { title: "Opening Theme", slug: "opening-theme" },
+      { title: "Ending Theme", slug: "ending-theme" },
+      { title: "Full OST", slug: "full-ost" },
+    ],
+  },
+  {
+    _id: "4",
+    name: "Film",
+    icon: "film",
+    slug: "film",
+    pages: [
+      { title: "Movie Overview", slug: "movie-overview" },
+      { title: "Production Notes", slug: "production-notes" },
+    ],
+  },
+  {
+    _id: "5",
+    name: "Locations",
+    icon: "map",
+    slug: "locations",
+    pages: [
+      { title: "The Lunar Palace", slug: "lunar-palace" },
+      { title: "Bamboo Forest", slug: "bamboo-forest" },
+    ],
+  },
+];
+
+function CategoryItem({ category, activePage, onPageSelect }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const Icon = ICON_MAP[category.icon] || BookOpen;
+
+  const hasActivePage = category.pages?.some((p) => p.slug === activePage);
+
+  return (
+    <div className={`category-item ${hasActivePage ? "has-active" : ""}`}>
+      <button
+        className={`category-header ${isOpen ? "open" : ""}`}
+        onClick={() => setIsOpen((v) => !v)}
+        aria-expanded={isOpen}
+      >
+        <span className="category-icon-wrap">
+          <Icon size={14} strokeWidth={1.8} />
+        </span>
+        <span className="category-name">{category.name}</span>
+        <ChevronDown
+          size={12}
+          className={`chevron ${isOpen ? "rotated" : ""}`}
+        />
+      </button>
+
+      <div className={`pages-list ${isOpen ? "expanded" : ""}`}>
+        <div className="pages-inner">
+          {category.pages?.map((page) => (
+            <button
+              key={page.slug}
+              className={`page-link ${activePage === page.slug ? "active" : ""}`}
+              onClick={() => onPageSelect(page.slug)}
+            >
+              <span className="page-dot" />
+              {page.title}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function Sidebar() {
+  const [activePage, setActivePage] = useState("princess-kaguya");
+  const [isCollapsed, setIsCollapsed] = useState(false);
+
+  return (
+    <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Lato:wght@300;400;700&display=swap');
+
+        :root {
+          --sidebar-bg: #0a0b14;
+          --sidebar-border: rgba(180, 140, 255, 0.15);
+          --sidebar-width: 260px;
+          --sidebar-collapsed: 0px;
+
+          --accent-purple: #c084fc;
+          --accent-teal: #67e8f9;
+          --accent-gold: #fbbf24;
+          --text-primary: #e2d9f3;
+          --text-secondary: #8b7da8;
+          --text-muted: #4a4060;
+
+          --category-hover: rgba(192, 132, 252, 0.08);
+          --page-active-bg: rgba(103, 232, 249, 0.1);
+          --page-active-border: var(--accent-teal);
+          --glow-purple: 0 0 20px rgba(192, 132, 252, 0.3);
+        }
+
+        .cpk-sidebar {
+          position: fixed;
+          left: 0;
+          top: 0;
+          bottom: 0;
+          width: var(--sidebar-width);
+          background: var(--sidebar-bg);
+          border-right: 1px solid var(--sidebar-border);
+          display: flex;
+          flex-direction: column;
+          font-family: 'Lato', sans-serif;
+          overflow: hidden;
+          transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+          z-index: 100;
+
+          /* subtle noise texture */
+          background-image:
+            radial-gradient(ellipse at 20% 0%, rgba(192, 132, 252, 0.06) 0%, transparent 60%),
+            radial-gradient(ellipse at 80% 100%, rgba(103, 232, 249, 0.04) 0%, transparent 60%);
+        }
+
+        .cpk-sidebar.collapsed {
+          width: 0;
+        }
+
+        /* star field decoration */
+        .cpk-sidebar::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background-image:
+            radial-gradient(1px 1px at 20% 15%, rgba(255,255,255,0.4) 0%, transparent 100%),
+            radial-gradient(1px 1px at 75% 30%, rgba(255,255,255,0.3) 0%, transparent 100%),
+            radial-gradient(1px 1px at 40% 60%, rgba(255,255,255,0.35) 0%, transparent 100%),
+            radial-gradient(1px 1px at 85% 80%, rgba(255,255,255,0.25) 0%, transparent 100%),
+            radial-gradient(1px 1px at 10% 85%, rgba(255,255,255,0.3) 0%, transparent 100%),
+            radial-gradient(1.5px 1.5px at 55% 45%, rgba(192,132,252,0.5) 0%, transparent 100%),
+            radial-gradient(1px 1px at 30% 90%, rgba(103,232,249,0.4) 0%, transparent 100%);
+          pointer-events: none;
+          z-index: 0;
+        }
+
+        /* ── LOGO AREA ── */
+        .sidebar-logo {
+          position: relative;
+          z-index: 1;
+          padding: 20px 16px 16px;
+          border-bottom: 1px solid var(--sidebar-border);
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 10px;
+          flex-shrink: 0;
+        }
+
+        .logo-image-wrap {
+          position: relative;
+          width: 100%;
+          max-width: 200px;
+        }
+
+        .logo-image-wrap::after {
+          content: '';
+          position: absolute;
+          inset: -4px;
+          border-radius: 6px;
+          background: linear-gradient(135deg, rgba(192,132,252,0.2), rgba(103,232,249,0.15));
+          filter: blur(8px);
+          z-index: -1;
+        }
+
+        .logo-img {
+          width: 100%;
+          height: auto;
+          display: block;
+          object-fit: contain;
+          filter: drop-shadow(0 0 12px rgba(192,132,252,0.4));
+        }
+
+        .logo-subtitle {
+          font-family: 'Cinzel', serif;
+          font-size: 8px;
+          letter-spacing: 0.25em;
+          color: var(--text-muted);
+          text-transform: uppercase;
+          text-align: center;
+        }
+
+        /* ── WIKI LABEL ── */
+        .wiki-label {
+          position: relative;
+          z-index: 1;
+          padding: 14px 16px 8px;
+          flex-shrink: 0;
+        }
+
+        .wiki-label span {
+          font-family: 'Cinzel', serif;
+          font-size: 9px;
+          letter-spacing: 0.3em;
+          color: var(--accent-purple);
+          text-transform: uppercase;
+          opacity: 0.8;
+        }
+
+        /* ── NAV ── */
+        .sidebar-nav {
+          position: relative;
+          z-index: 1;
+          flex: 1;
+          overflow-y: auto;
+          overflow-x: hidden;
+          padding: 0 10px 16px;
+          scrollbar-width: thin;
+          scrollbar-color: rgba(192, 132, 252, 0.2) transparent;
+        }
+
+        .sidebar-nav::-webkit-scrollbar {
+          width: 3px;
+        }
+        .sidebar-nav::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .sidebar-nav::-webkit-scrollbar-thumb {
+          background: rgba(192, 132, 252, 0.25);
+          border-radius: 999px;
+        }
+
+        /* ── CATEGORY ── */
+        .category-item {
+          margin-bottom: 2px;
+        }
+
+        .category-header {
+          width: 100%;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 8px 10px;
+          border-radius: 8px;
+          background: transparent;
+          border: none;
+          cursor: pointer;
+          color: var(--text-secondary);
+          font-family: 'Cinzel', serif;
+          font-size: 10.5px;
+          letter-spacing: 0.08em;
+          font-weight: 600;
+          text-align: left;
+          transition: background 0.2s, color 0.2s;
+          white-space: nowrap;
+        }
+
+        .category-header:hover,
+        .category-header.open {
+          background: var(--category-hover);
+          color: var(--accent-purple);
+        }
+
+        .category-icon-wrap {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 22px;
+          height: 22px;
+          border-radius: 6px;
+          background: rgba(192, 132, 252, 0.1);
+          flex-shrink: 0;
+          transition: background 0.2s;
+        }
+
+        .category-header:hover .category-icon-wrap,
+        .category-header.open .category-icon-wrap {
+          background: rgba(192, 132, 252, 0.2);
+        }
+
+        .category-name {
+          flex: 1;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .chevron {
+          flex-shrink: 0;
+          opacity: 0.5;
+          transition: transform 0.25s ease, opacity 0.2s;
+        }
+        .chevron.rotated {
+          transform: rotate(-180deg);
+          opacity: 1;
+        }
+
+        /* ── PAGES LIST ── */
+        .pages-list {
+          display: grid;
+          grid-template-rows: 0fr;
+          transition: grid-template-rows 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .pages-list.expanded {
+          grid-template-rows: 1fr;
+        }
+
+        .pages-inner {
+          overflow: hidden;
+          padding-left: 30px;
+          padding-right: 4px;
+          padding-bottom: 0;
+          transition: padding-bottom 0.28s;
+        }
+        .pages-list.expanded .pages-inner {
+          padding-bottom: 4px;
+        }
+
+        .page-link {
+          width: 100%;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 6px 10px;
+          border-radius: 6px;
+          background: transparent;
+          border: none;
+          cursor: pointer;
+          color: var(--text-muted);
+          font-family: 'Lato', sans-serif;
+          font-size: 12px;
+          font-weight: 300;
+          letter-spacing: 0.02em;
+          text-align: left;
+          transition: all 0.2s;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          position: relative;
+        }
+
+        .page-link:hover {
+          color: var(--text-primary);
+          background: rgba(255, 255, 255, 0.04);
+        }
+
+        .page-link.active {
+          color: var(--accent-teal);
+          background: var(--page-active-bg);
+          border-left: 2px solid var(--accent-teal);
+          padding-left: 8px;
+          font-weight: 400;
+        }
+
+        .page-dot {
+          width: 4px;
+          height: 4px;
+          border-radius: 50%;
+          background: currentColor;
+          flex-shrink: 0;
+          opacity: 0.5;
+          transition: opacity 0.2s;
+        }
+        .page-link.active .page-dot {
+          opacity: 1;
+          box-shadow: 0 0 6px currentColor;
+        }
+
+        /* ── FOOTER ── */
+        .sidebar-footer {
+          position: relative;
+          z-index: 1;
+          border-top: 1px solid var(--sidebar-border);
+          padding: 12px 16px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex-shrink: 0;
+        }
+
+        .footer-orb {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background: var(--accent-gold);
+          box-shadow: 0 0 8px var(--accent-gold);
+          animation: pulse-orb 2.5s ease-in-out infinite;
+          flex-shrink: 0;
+        }
+
+        @keyframes pulse-orb {
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50% { opacity: 0.5; transform: scale(0.8); }
+        }
+
+        .footer-text {
+          font-family: 'Lato', sans-serif;
+          font-size: 10px;
+          color: var(--text-muted);
+          letter-spacing: 0.05em;
+        }
+
+        /* ── TOGGLE BUTTON ── */
+        .sidebar-toggle {
+          position: fixed;
+          top: 20px;
+          left: calc(var(--sidebar-width) + 12px);
+          z-index: 200;
+          width: 28px;
+          height: 28px;
+          border-radius: 6px;
+          background: var(--sidebar-bg);
+          border: 1px solid var(--sidebar-border);
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: var(--text-secondary);
+          transition: left 0.35s cubic-bezier(0.4, 0, 0.2, 1), color 0.2s, background 0.2s;
+        }
+
+        .sidebar-toggle:hover {
+          color: var(--accent-purple);
+          background: rgba(192, 132, 252, 0.1);
+        }
+
+        .sidebar-toggle.collapsed-btn {
+          left: 12px;
+        }
+
+        .toggle-bars {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+        .toggle-bars span {
+          display: block;
+          width: 14px;
+          height: 1.5px;
+          background: currentColor;
+          border-radius: 999px;
+          transition: transform 0.25s, opacity 0.25s, width 0.25s;
+          transform-origin: left center;
+        }
+        .sidebar-toggle.collapsed-btn .toggle-bars span:nth-child(1) {
+          width: 10px;
+        }
+        .sidebar-toggle.collapsed-btn .toggle-bars span:nth-child(3) {
+          width: 10px;
+        }
+
+        /* ── DIVIDER ── */
+        .nav-divider {
+          height: 1px;
+          background: var(--sidebar-border);
+          margin: 8px 10px;
+        }
+      `}</style>
+
+      {/* Toggle Button */}
+      <button
+        className={`sidebar-toggle ${isCollapsed ? "collapsed-btn" : ""}`}
+        onClick={() => setIsCollapsed((v) => !v)}
+        title={isCollapsed ? "Open sidebar" : "Close sidebar"}
+      >
+        <div className="toggle-bars">
+          <span />
+          <span />
+          <span />
+        </div>
+      </button>
+
+      <aside className={`cpk-sidebar ${isCollapsed ? "collapsed" : ""}`}>
+        {/* Logo */}
+        <div className="sidebar-logo">
+          <div className="logo-image-wrap">
+            {/* 🔁 Replace src with your Cloudinary URL */}
+            <img
+              src={LOGO_URL}
+              alt="Cosmic Princess Kaguya"
+              className="logo-img"
+              onError={(e) => {
+                // Fallback text logo if image fails
+                e.target.style.display = "none";
+              }}
+            />
+          </div>
+          <span className="logo-subtitle">Official Wiki</span>
+        </div>
+
+        {/* Nav label */}
+        <div className="wiki-label">
+          <span>Navigation</span>
+        </div>
+
+        {/* Nav */}
+        <nav className="sidebar-nav">
+          {MOCK_CATEGORIES.map((category, i) => (
+            <div key={category._id}>
+              <CategoryItem
+                category={category}
+                activePage={activePage}
+                onPageSelect={setActivePage}
+              />
+              {i < MOCK_CATEGORIES.length - 1 && i % 2 === 1 && (
+                <div className="nav-divider" />
+              )}
+            </div>
+          ))}
+        </nav>
+
+        {/* Footer */}
+        <div className="sidebar-footer">
+          <div className="footer-orb" />
+          <span className="footer-text">超かぐや姫 · CPK Wiki</span>
+        </div>
+      </aside>
+    </>
+  );
+}

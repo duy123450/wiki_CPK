@@ -1,12 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import yacchoPng from "../assets/YachiyoChibi.png";
-import irohaPng from "../assets/IrohaChibi.png";
-import rokaPng from "../assets/RokaChibi.png";
-import kaguyaPng from "../assets/KaguyaChibi.png";
-import MoonPeople from "../assets/MoonPeople.png";
-import NoiMikadoPng from "../assets/NoiMikadoChibi.png";
-import MamiPng from "../assets/MamiChibi.png";
-import ZoroPng from "../assets/ZoroChibi.png";
 
 // px distance between each segment in the chain
 const SEG_DIST = 55;
@@ -210,7 +202,7 @@ export default function DragonCursor() {
       <Seg
         pos={renderSegs[7]}
         flipped={flips[7]}
-        src={ZoroPng}
+        src="https://res.cloudinary.com/dvlaoxjzi/image/upload/q_auto/f_auto/v1775629481/ZoroChibi_mmr28n.png"
         alt="Zoro"
         shadow="0 4px 16px rgba(100,200,150,0.6)"
         zIndex={9992}
@@ -218,7 +210,7 @@ export default function DragonCursor() {
       <Seg
         pos={renderSegs[6]}
         flipped={flips[6]}
-        src={MamiPng}
+        src="https://res.cloudinary.com/dvlaoxjzi/image/upload/q_auto/f_auto/v1775629481/MamiChibi_ul1hrw.png"
         alt="Mami"
         shadow="0 4px 16px rgba(255,180,120,0.6)"
         zIndex={9993}
@@ -226,7 +218,7 @@ export default function DragonCursor() {
       <Seg
         pos={renderSegs[5]}
         flipped={flips[5]}
-        src={NoiMikadoPng}
+        src="https://res.cloudinary.com/dvlaoxjzi/image/upload/q_auto/f_auto/v1775629482/NoiMikadoChibi_cqqhdn.png"
         alt="NoiMikado"
         shadow="0 4px 16px rgba(220,100,200,0.6)"
         zIndex={9994}
@@ -234,7 +226,7 @@ export default function DragonCursor() {
       <Seg
         pos={renderSegs[4]}
         flipped={flips[4]}
-        src={MoonPeople}
+        src="https://res.cloudinary.com/dvlaoxjzi/image/upload/q_auto/f_auto/v1775629481/MoonPeople_ipnssa.png"
         alt="MoonPeople"
         shadow="0 4px 16px rgba(100,150,255,0.6)"
         zIndex={9995}
@@ -242,7 +234,7 @@ export default function DragonCursor() {
       <Seg
         pos={renderSegs[3]}
         flipped={flips[3]}
-        src={kaguyaPng}
+        src="https://res.cloudinary.com/dvlaoxjzi/image/upload/q_auto/f_auto/v1775629481/KaguyaChibi_fspqxf.png"
         alt="Kaguya"
         shadow="0 4px 16px rgba(255,150,180,0.6)"
         zIndex={9996}
@@ -250,7 +242,7 @@ export default function DragonCursor() {
       <Seg
         pos={renderSegs[2]}
         flipped={flips[2]}
-        src={rokaPng}
+        src="https://res.cloudinary.com/dvlaoxjzi/image/upload/q_auto/f_auto/v1775629482/RokaChibi_qefo1f.png"
         alt="Roka"
         shadow="0 4px 16px rgba(150,100,80,0.5)"
         zIndex={9997}
@@ -258,7 +250,7 @@ export default function DragonCursor() {
       <Seg
         pos={renderSegs[1]}
         flipped={flips[1]}
-        src={irohaPng}
+        src="https://res.cloudinary.com/dvlaoxjzi/image/upload/q_auto/f_auto/v1775629481/IrohaChibi_qwmv8n.png"
         alt="Iroha"
         shadow="0 4px 16px rgba(180,100,255,0.5)"
         zIndex={9998}
@@ -266,7 +258,7 @@ export default function DragonCursor() {
       <Seg
         pos={renderSegs[0]}
         flipped={flips[0]}
-        src={yacchoPng}
+        src="https://res.cloudinary.com/dvlaoxjzi/image/upload/q_auto/f_auto/v1775629481/YachiyoChibi_opfpce.png"
         alt="Yaccho"
         shadow="0 4px 16px rgba(100,160,255,0.5)"
         zIndex={9999}
