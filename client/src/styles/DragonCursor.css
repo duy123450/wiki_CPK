@@ -1,0 +1,35 @@
+@keyframes dragonSparkle {
+    0% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -130%) scale(0.3);
+    }
+}
+
+.dragon-sparkle {
+    position: fixed;
+    pointer-events: none;
+    z-index: 9996;
+    font-size: 14px;
+    animation: dragonSparkle 0.8s ease-out forwards;
+    transform: translate(-50%, -50%);
+    user-select: none;
+}
+
+.dragon-seg {
+    position: fixed;
+    pointer-events: none;
+    width: 80px;
+    height: 80px;
+    will-change: transform, left, top;
+}
+
+.dragon-seg img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
