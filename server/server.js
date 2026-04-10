@@ -45,8 +45,8 @@ app.use(rateLimit({
     max: 100
 }))
 app.use(express.json({ limit: '10kb' }))
-app.use(helmet())
 app.use(cors(corsOptions))
+app.use(helmet())
 
 // 2. Routes
 app.use('/api/v1/wiki', wikiRouter)
