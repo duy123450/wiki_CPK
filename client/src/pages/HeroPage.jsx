@@ -67,7 +67,9 @@ export default function HeroPage() {
   const [videoReady, setVideoReady] = useState(false);
   const [muted, setMuted] = useState(true);
 
-  const videoSrc = movie?.heroVideo?.url;
+  const videoSrc = Array.isArray(movie?.heroVideo)
+    ? movie.heroVideo[0]?.url
+    : movie?.heroVideo?.url;
   const title = movie?.title ?? "超かぐや姫";
   const tagline = movie?.tagline ?? "A tale of the moon and a heart's desire";
   const releaseDate = movie?.details?.releaseDate
