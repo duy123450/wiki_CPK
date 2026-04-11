@@ -16,11 +16,11 @@ const MovieSchema = new mongoose.Schema({
         required: [true, 'Synopsis is required']
     },
     // --- THE INFINITE LOOP SECTION ---
-    heroVideo: {
+    heroVideo: [{
         url: String,       // Cloudinary URL for the big background loop
         public_id: String,
         isLooping: { type: Boolean, default: true }
-    },
+    }],
     poster: {
         url: String,       // The main movie poster (Cloudinary)
         public_id: String
