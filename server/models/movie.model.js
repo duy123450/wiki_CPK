@@ -39,6 +39,11 @@ const MovieSchema = new mongoose.Schema({
         default: 0,
         min: 0,
         max: 10
+    },
+    slug: {
+        type: String,
+        lowercase: true,
+        unique: true
     }
 }, {
     timestamps: true,
