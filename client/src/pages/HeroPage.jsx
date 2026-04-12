@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/purity */
 import { useEffect, useRef, useState } from "react";
 import { getMovieInfo } from "../services/api";
 import "../styles/HeroPage.css";
@@ -65,7 +66,6 @@ export default function HeroPage() {
   const { data: movie, loading, error } = useMovieInfo();
   const videoRef = useRef(null);
   const [videoReady, setVideoReady] = useState(false);
-  const [muted, setMuted] = useState(true);
 
   const videoSrc = Array.isArray(movie?.heroVideo)
     ? movie.heroVideo[0]?.url
@@ -84,14 +84,6 @@ export default function HeroPage() {
     video.load();
     video.play().catch(() => {});
   }, [videoSrc]);
-
-  const toggleMute = () => {
-    const video = videoRef.current;
-    if (!video) return;
-    const next = !muted;
-    video.muted = next;
-    setMuted(next);
-  };
 
   return (
     <section className="hero-root">
@@ -130,7 +122,7 @@ export default function HeroPage() {
           <>
             <div className="hero-eyebrow">
               <span className="hero-eyebrow-dot" />
-              Official Wiki · Now Showing
+              Fan Wiki · Now Showing
             </div>
 
             <h1 className="hero-title">{title}</h1>
@@ -172,50 +164,6 @@ export default function HeroPage() {
         <div className="hero-scroll-line" />
         <span className="hero-scroll-text">Scroll</span>
       </div>
-
-      {/* ── mute toggle ── */}
-      {videoSrc && (
-        <button
-          className="hero-mute-btn"
-          onClick={toggleMute}
-          title={muted ? "Unmute" : "Mute"}
-          aria-label={
-            muted ? "Unmute background video" : "Mute background video"
-          }
-        >
-          {muted ? (
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-              <line x1="23" y1="9" x2="17" y2="15" />
-              <line x1="17" y1="9" x2="23" y2="15" />
-            </svg>
-          ) : (
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-              <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
-              <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
-            </svg>
-          )}
-        </button>
-      )}
     </section>
   );
 }

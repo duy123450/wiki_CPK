@@ -1,33 +1,61 @@
 const mongoose = require('mongoose');
 
 const SoundtrackSchema = new mongoose.Schema({
+    // Helps display the songs in the 1, 2, 3... order of the movie/video
+    trackNumber: {
+        type: Number,
+        default: 0
+    },
     title: {
         type: String,
         required: [true, 'Song title is required'],
         trim: true
     },
-    artist: {
+    vocal: {
         type: String,
-        required: [true, 'Artist name is required']
+        required: [true, 'Vocalist name is required']
+    },
+    producer: {
+        type: String,
+        default: "Unknown"
     },
     trackType: {
         type: String,
+        // Using your specific vocal track categories
         enum: ['Opening', 'Ending', 'Insert Song', 'BGM', 'Full Album'],
-        default: 'BGM'
+        default: 'Insert Song'
     },
-    // The unique ID from a Spotify URL
-    spotifyId: {
+    // The YouTube ID of the 39:53 movie/vocal collection video
+    youtubeId: {
         type: String,
-        required: [true, 'Spotify Track/Album ID is required']
+        required: [true, 'YouTube Video ID is required']
     },
-    // Connects this soundtrack to your Movie model
+    // START TIME: Where the song begins (in seconds)
+    // Example: If a song starts at 5:00, you store 300
+    startTime: {
+        type: Number,
+        required: [true, 'Start time in seconds is required'],
+        min: 0
+    },
+    // END TIME: Where the song ends (in seconds)
+    endTime: {
+        type: Number,
+        required: [true, 'End time in seconds is required'],
+        validate: {
+            validator: function(value) {
+                return value > this.startTime;
+            },
+            message: 'End time must be greater than start time'
+        }
+    },
+    // Links this track to the specific Movie entry in your database
     movie: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Movie',
         required: true
     },
-    // In case you want to display an infinite loop video while the music plays
-    backgroundLoop: {
+    // Optional: High-quality cover art for the UI
+    coverImage: {
         url: String,
         public_id: String
     }

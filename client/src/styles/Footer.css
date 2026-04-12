@@ -1,0 +1,419 @@
+.cpk-footer {
+    background: #070b14;
+    border-top: 1px solid rgba(148, 163, 184, 0.1);
+    padding: 60px 0 0;
+    font-family: 'Lato', 'Segoe UI', sans-serif;
+    color: #94a3b8;
+    position: relative;
+    overflow: hidden;
+}
+
+.cpk-footer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60%;
+    height: 1px;
+    background: linear-gradient(to right,
+            transparent,
+            rgba(192, 132, 252, 0.4),
+            rgba(103, 232, 249, 0.3),
+            transparent);
+}
+
+/* ── Main grid ── */
+.footer-main {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr 1.2fr;
+    gap: 48px;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 32px 48px;
+}
+
+/* ── Columns ── */
+.footer-col {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.footer-logo-title {
+    font-family: 'Cinzel Decorative', 'Cinzel', serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: #e2d9f3;
+    margin: 0;
+    line-height: 1.2;
+    letter-spacing: 0.02em;
+}
+
+.footer-logo-sub {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    color: #c084fc;
+    text-transform: uppercase;
+    margin: 0;
+    opacity: 0.8;
+}
+
+.footer-desc {
+    font-size: 13px;
+    line-height: 1.75;
+    color: #64748b;
+    margin: 4px 0 0;
+}
+
+.footer-desc--vn {
+    color: #4a5568;
+    font-size: 12px;
+    border-left: 2px solid rgba(192, 132, 252, 0.2);
+    padding-left: 10px;
+    margin-top: 0;
+}
+
+.footer-coded-by {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: #4a5568;
+    margin: 6px 0 0;
+    font-style: italic;
+}
+
+/* ── Column headings ── */
+.footer-col-title {
+    font-family: 'Cinzel', serif;
+    font-size: 9.5px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: #c084fc;
+    margin: 0 0 6px;
+    font-weight: 600;
+    line-height: 1.5;
+}
+
+/* ── Links ── */
+.footer-links {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.footer-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12.5px;
+    color: #64748b;
+    text-decoration: none;
+    transition: color 0.2s ease;
+    padding: 3px 0;
+}
+
+.footer-link:hover {
+    color: #67e8f9;
+}
+
+.footer-link-dot {
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.5;
+    flex-shrink: 0;
+    transition: opacity 0.2s;
+}
+
+.footer-link:hover .footer-link-dot {
+    opacity: 1;
+}
+
+/* ── Contact ── */
+.footer-contact-desc {
+    font-size: 13px;
+    color: #64748b;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.footer-contact-desc--vn {
+    font-size: 12px;
+    color: #4a5568;
+    border-left: 2px solid rgba(192, 132, 252, 0.2);
+    padding-left: 10px;
+}
+
+.footer-email-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12.5px;
+    color: #94a3b8;
+    text-decoration: none;
+    border: 1px solid rgba(148, 163, 184, 0.15);
+    border-radius: 6px;
+    padding: 8px 14px;
+    transition: color 0.2s, border-color 0.2s, background 0.2s;
+    width: fit-content;
+    margin-top: 4px;
+}
+
+.footer-email-btn:hover {
+    color: #67e8f9;
+    border-color: rgba(103, 232, 249, 0.3);
+    background: rgba(103, 232, 249, 0.05);
+}
+
+.footer-socials {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 4px;
+}
+
+.footer-social-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: #64748b;
+    text-decoration: none;
+    transition: color 0.2s;
+    width: fit-content;
+}
+
+.footer-social-link:hover {
+    color: #c084fc;
+}
+
+/* ── Divider ── */
+.footer-divider {
+    border: none;
+    border-top: 1px solid rgba(148, 163, 184, 0.08);
+    margin: 0;
+}
+
+/* ── Disclaimer wrapper ── */
+.footer-disclaimer-wrapper {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 28px 32px 36px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* ── Disclaimer header row ── */
+.footer-disclaimer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.footer-disclaimer-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(251, 191, 36, 0.25);
+    background: rgba(251, 191, 36, 0.06);
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #fbbf24;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.footer-scroll-hint {
+    font-size: 10.5px;
+    color: #475569;
+    letter-spacing: 0.08em;
+    font-style: italic;
+    flex-shrink: 0;
+    animation: hintPulse 3s ease-in-out infinite;
+}
+
+@keyframes hintPulse {
+
+    0%,
+    100% {
+        opacity: 0.4;
+    }
+
+    50% {
+        opacity: 1;
+    }
+}
+
+/* ── Scrollable disclaimer box ── */
+.footer-disclaimer-scroll {
+    height: 220px;
+    max-height: 220px;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: 20px 22px;
+    border: 1px solid rgba(148, 163, 184, 0.1);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.02);
+    box-sizing: border-box;
+    width: 100%;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(192, 132, 252, 0.3) rgba(255, 255, 255, 0.03);
+}
+
+.footer-disclaimer-scroll::-webkit-scrollbar {
+    width: 5px;
+}
+
+.footer-disclaimer-scroll::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 999px;
+}
+
+.footer-disclaimer-scroll::-webkit-scrollbar-thumb {
+    background: rgba(192, 132, 252, 0.3);
+    border-radius: 999px;
+}
+
+.footer-disclaimer-scroll::-webkit-scrollbar-thumb:hover {
+    background: rgba(192, 132, 252, 0.55);
+}
+
+/* ── Language blocks ── */
+.footer-disclaimer-lang-block {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 4px 0;
+}
+
+.footer-disclaimer-lang-label {
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: #c084fc;
+    margin: 0;
+    opacity: 0.8;
+}
+
+.footer-disclaimer-text {
+    font-size: 12px;
+    line-height: 1.85;
+    color: #475569;
+    margin: 0;
+}
+
+.footer-disclaimer-text strong {
+    color: #64748b;
+    font-weight: 600;
+}
+
+.footer-disclaimer-text em {
+    font-style: italic;
+    color: #556070;
+}
+
+.footer-inline-link {
+    color: #67e8f9;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    transition: color 0.2s;
+}
+
+.footer-inline-link:hover {
+    color: #c084fc;
+}
+
+/* ── Language separator ── */
+.footer-lang-sep {
+    height: 1px;
+    background: rgba(148, 163, 184, 0.08);
+    margin: 18px 0;
+    flex-shrink: 0;
+}
+
+/* ── Copyright ── */
+.footer-copyright {
+    font-size: 11px;
+    color: #334155;
+    margin: 4px 0 0;
+    line-height: 1.7;
+    letter-spacing: 0.02em;
+}
+
+.footer-copyright--vn {
+    color: #263244;
+    font-style: italic;
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+    .footer-main {
+        grid-template-columns: 1fr 1fr;
+        gap: 36px;
+    }
+
+    .footer-col--brand {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 600px) {
+    .cpk-footer {
+        padding: 40px 0 0;
+    }
+
+    .footer-main {
+        grid-template-columns: 1fr;
+        gap: 32px;
+        padding: 0 20px 36px;
+    }
+
+    .footer-col--brand {
+        grid-column: auto;
+    }
+
+    .footer-disclaimer-wrapper {
+        padding: 24px 20px 30px;
+    }
+
+    .footer-disclaimer-scroll {
+        height: 200px;
+        max-height: 200px;
+        padding: 14px 14px;
+    }
+
+    .footer-disclaimer-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .footer-disclaimer-badge {
+        font-size: 8px;
+        padding: 4px 10px;
+    }
+
+    .footer-logo-title {
+        font-size: 17px;
+    }
+
+    .footer-disclaimer-text {
+        font-size: 11px;
+    }
+}
