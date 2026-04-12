@@ -5,12 +5,14 @@
     --hero-bg: #05040f;
     --hero-text: #f0e8ff;
     --hero-muted: rgba(240, 232, 255, 0.5);
+    --sidebar-current-width: 260px;
 }
 
-/* ── layout ───────────────────────────────── */
+/* ── layout ── */
 .hero-root {
     position: relative;
-    width: 100%;
+    width: calc(100% - var(--sidebar-current-width));
+    margin-left: var(--sidebar-current-width);
     min-height: 100dvh;
     display: flex;
     align-items: center;
@@ -18,9 +20,11 @@
     background: var(--hero-bg);
     overflow: hidden;
     font-family: 'Lato', sans-serif;
+    transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+        margin-left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ── video bg ─────────────────────────────── */
+/* ── video bg ── */
 .hero-video-wrap {
     position: absolute;
     inset: 0;
@@ -41,7 +45,6 @@
     opacity: 1;
 }
 
-/* gradient overlays */
 .hero-overlay {
     position: absolute;
     inset: 0;
@@ -60,7 +63,6 @@
     pointer-events: none;
 }
 
-/* vignette */
 .hero-vignette {
     position: absolute;
     inset: 0;
@@ -69,7 +71,6 @@
     pointer-events: none;
 }
 
-/* fallback when no video */
 .hero-fallback-bg {
     position: absolute;
     inset: 0;
@@ -80,7 +81,7 @@
         var(--hero-bg);
 }
 
-/* ── stars ────────────────────────────────── */
+/* ── stars ── */
 .hero-stars {
     position: absolute;
     inset: 0;
@@ -109,7 +110,7 @@
     }
 }
 
-/* ── content ──────────────────────────────── */
+/* ── content ── */
 .hero-content {
     position: relative;
     z-index: 10;
@@ -286,11 +287,11 @@
     transform: translateY(-2px);
 }
 
-/* scroll cue */
+/* ── scroll cue ── */
 .hero-scroll-cue {
     position: absolute;
     bottom: clamp(20px, 5vw, 36px);
-    left: calc(50% - 20px);
+    left: calc(50% - px);
     transform: translateX(-50%);
     z-index: 10;
     display: flex;
@@ -377,7 +378,6 @@
     }
 }
 
-/* error state */
 .hero-error {
     color: rgba(255, 100, 100, 0.8);
     font-family: 'Cinzel', serif;
@@ -385,19 +385,20 @@
     letter-spacing: 0.1em;
 }
 
-/* ── responsive ───────────────────────────── */
+/* ── responsive ── */
+@media (max-width: 768px) {
+    .hero-root {
+        width: 100%;
+        margin-left: 0;
+    }
+}
+
 @media (max-width: 480px) {
     .hero-title {
         word-break: break-word;
     }
-
-    .hero-mute-btn {
-        bottom: 16px;
-        right: 16px;
-    }
 }
 
-/* respect reduced-motion */
 @media (prefers-reduced-motion: reduce) {
 
     .hero-star,
@@ -413,8 +414,7 @@
     .hero-tagline,
     .hero-meta,
     .hero-actions,
-    .hero-scroll-cue,
-    .hero-mute-btn {
+    .hero-scroll-cue {
         animation: none;
         opacity: 1;
         transform: none;

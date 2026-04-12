@@ -1,4 +1,4 @@
-import { Mail, ExternalLink } from "lucide-react";
+import { Mail, Github, ExternalLink } from "lucide-react";
 import "../styles/Footer.css";
 
 const QUICK_LINKS = [
@@ -9,11 +9,13 @@ const QUICK_LINKS = [
   { label: "Lore & World / Thế giới", href: "/wiki/lore" },
 ];
 
-export default function Footer() {
+export default function Footer({ sidebarCollapsed }) {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="cpk-footer">
+    <footer
+      className={`cpk-footer ${sidebarCollapsed ? "sidebar-collapsed" : ""}`}
+    >
       <div className="footer-main">
         {/* ── Col 1: Brand ── */}
         <div className="footer-col footer-col--brand">
@@ -65,32 +67,15 @@ export default function Footer() {
           </a>
           <div className="footer-socials">
             <a
-              href="https://github.com/duy123450/wiki_CPK"
+              href="https://github.com"
               className="footer-social-link"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="GitHub"
             >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                style={{ marginRight: "6px" }}
-              >
-                <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.28 1.15-.28 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4" />
-                <path d="M9 18c-4.51 2-5-2-7-2" />
-              </svg>
+              <Github size={16} strokeWidth={1.8} />
               GitHub
-              <ExternalLink
-                size={11}
-                strokeWidth={1.8}
-                style={{ marginLeft: "4px" }}
-              />
+              <ExternalLink size={11} strokeWidth={1.8} />
             </a>
           </div>
         </div>
@@ -114,7 +99,6 @@ export default function Footer() {
           {/* EN block */}
           <div className="footer-disclaimer-lang-block">
             <p className="footer-disclaimer-lang-label">🇬🇧 English</p>
-
             <p className="footer-disclaimer-text">
               This website is a{" "}
               <strong>non-commercial, non-profit fan project</strong> created
@@ -161,7 +145,6 @@ export default function Footer() {
           {/* VN block */}
           <div className="footer-disclaimer-lang-block">
             <p className="footer-disclaimer-lang-label">🇻🇳 Tiếng Việt</p>
-
             <p className="footer-disclaimer-text">
               Trang web này là một{" "}
               <strong>dự án phi thương mại, phi lợi nhuận</strong> được tạo ra
