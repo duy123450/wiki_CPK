@@ -16,17 +16,45 @@ const loadYouTubeAPI = () => {
   document.body.appendChild(tag);
 };
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
 const fmtTime = (s) => {
   s = Math.max(0, Math.floor(s));
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 };
 
+// ─── Tooltip button — hold 400ms to reveal label ─────────────────────────────
+function TipBtn({ label, onClick, className = "pl-icon-btn", children }) {
+  const [show, setShow] = useState(false);
+  const timer = useRef(null);
+
+  const startHold = () => {
+    timer.current = setTimeout(() => setShow(true), 400);
+  };
+  const endHold = () => {
+    clearTimeout(timer.current);
+    setShow(false);
+  };
+
+  return (
+    <button
+      className={`${className} pl-tip-wrap`}
+      onClick={onClick}
+      onMouseDown={startHold}
+      onMouseUp={endHold}
+      onMouseLeave={endHold}
+      onTouchStart={startHold}
+      onTouchEnd={endHold}
+    >
+      {children}
+      {show && <span className="pl-tooltip">{label}</span>}
+    </button>
+  );
+}
+
 // ─── Icons ────────────────────────────────────────────────────────────────────
 const IconShuffle = ({ active }) => (
   <svg
-    width="20"
-    height="20"
+    width="17"
+    height="17"
     viewBox="0 0 24 24"
     fill="none"
     strokeWidth="2"
@@ -57,8 +85,8 @@ const IconShuffle = ({ active }) => (
 
 const IconLoop = ({ active }) => (
   <svg
-    width="20"
-    height="20"
+    width="17"
+    height="17"
     viewBox="0 0 24 24"
     fill="none"
     strokeWidth="2"
@@ -79,7 +107,7 @@ const IconLoop = ({ active }) => (
 );
 
 const IconPrev = () => (
-  <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
     <polygon points="19 20 9 12 19 4 19 20" fill="#fff" />
     <line
       x1="5"
@@ -94,7 +122,7 @@ const IconPrev = () => (
 );
 
 const IconNext = () => (
-  <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
     <polygon points="5 4 15 12 5 20 5 4" fill="#fff" />
     <line
       x1="19"
@@ -108,55 +136,42 @@ const IconNext = () => (
   </svg>
 );
 
-const IconPlay = () => (
-  <svg width="26" height="26" viewBox="0 0 24 24" fill="#121212">
+const IconPlay = ({ size = 20 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="#121212">
     <polygon points="5 3 19 12 5 21 5 3" />
   </svg>
 );
 
-const IconPause = () => (
-  <svg width="26" height="26" viewBox="0 0 24 24" fill="#121212">
+const IconPause = ({ size = 20 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="#121212">
     <rect x="6" y="4" width="4" height="16" />
     <rect x="14" y="4" width="4" height="16" />
   </svg>
 );
 
-const IconHeart = ({ liked }) => (
-  <svg
-    width="22"
-    height="22"
-    viewBox="0 0 24 24"
-    fill={liked ? "#1DB954" : "none"}
-    stroke={liked ? "#1DB954" : "#b3b3b3"}
-    strokeWidth="2"
-  >
-    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-  </svg>
-);
-
-const IconChevronUp = () => (
-  <svg
-    width="20"
-    height="20"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-  >
-    <polyline points="18 15 12 9 6 15" />
-  </svg>
-);
-
 const IconChevronDown = () => (
   <svg
-    width="20"
-    height="20"
+    width="16"
+    height="16"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
     strokeWidth="2"
   >
     <polyline points="6 9 12 15 18 9" />
+  </svg>
+);
+
+const IconChevronUp = () => (
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+  >
+    <polyline points="18 15 12 9 6 15" />
   </svg>
 );
 
@@ -168,10 +183,10 @@ export default function Playlist() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isShuffle, setIsShuffle] = useState(false);
   const [isLoop, setIsLoop] = useState(false);
-  const [isLiked, setIsLiked] = useState(false);
-  const [progress, setProgress] = useState(0); // 0–100
-  const [currentTime, setCurrentTime] = useState(0); // elapsed seconds
+  const [progress, setProgress] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [showTrackList, setShowTrackList] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isSeeking, setIsSeeking] = useState(false);
@@ -181,19 +196,15 @@ export default function Playlist() {
   const progressInterval = useRef(null);
   const currentIdxRef = useRef(0);
 
-  // Keep ref in sync so interval callbacks always see latest value
   useEffect(() => {
     currentIdxRef.current = currentIdx;
   }, [currentIdx]);
 
-  // ── 1. Bootstrap: load movie + tracks ─────────────────────────────────────
   useEffect(() => {
     const init = async () => {
       try {
-        setLoading(true);
         const { movie: movieData } = await fetchMovieInfo();
         setMovie(movieData);
-
         const { tracks: trackData } = await fetchSoundtracks(movieData._id);
         setTracks(trackData);
       } catch (err) {
@@ -206,15 +217,12 @@ export default function Playlist() {
     loadYouTubeAPI();
   }, []);
 
-  // ── 2. Init YouTube player once tracks are ready ──────────────────────────
   useEffect(() => {
     if (!tracks.length) return;
-
     const initPlayer = () => {
       const div = document.createElement("div");
       div.id = "yt-player-node";
       document.getElementById("yt-hidden-mount")?.appendChild(div);
-
       ytPlayerRef.current = new window.YT.Player("yt-player-node", {
         width: "1",
         height: "1",
@@ -246,26 +254,19 @@ export default function Playlist() {
         },
       });
     };
-
-    if (window.YT && window.YT.Player) {
-      initPlayer();
-    } else {
-      window.onYouTubeIframeAPIReady = initPlayer;
-    }
-
+    if (window.YT && window.YT.Player) initPlayer();
+    else window.onYouTubeIframeAPIReady = initPlayer;
     return () => {
       clearInterval(progressInterval.current);
     };
   }, [tracks]);
 
-  // ── 3. Progress ticker ────────────────────────────────────────────────────
   const startProgressTick = useCallback(() => {
     clearInterval(progressInterval.current);
     progressInterval.current = setInterval(() => {
       const player = ytPlayerRef.current;
       const idx = currentIdxRef.current;
       if (!ytReadyRef.current || !player || isSeeking) return;
-
       const track = tracks[idx];
       if (!track) return;
       let cur;
@@ -274,14 +275,10 @@ export default function Playlist() {
       } catch {
         return;
       }
-
       const elapsed = cur - track.startTime;
       const duration = track.endTime - track.startTime;
-      const pct = Math.min(100, Math.max(0, (elapsed / duration) * 100));
-
-      setProgress(pct);
+      setProgress(Math.min(100, Math.max(0, (elapsed / duration) * 100)));
       setCurrentTime(elapsed);
-
       if (cur >= track.endTime - 0.5) {
         clearInterval(progressInterval.current);
         handleAutoAdvance();
@@ -289,43 +286,35 @@ export default function Playlist() {
     }, 500);
   }, [tracks, isSeeking]);
 
-  // ── 4. Auto-advance: calls backend for next track ─────────────────────────
   const handleAutoAdvance = useCallback(async () => {
     const idx = currentIdxRef.current;
     if (!tracks.length || !movie) return;
-
     const track = tracks[idx];
     const mode = isLoop ? "infinite" : isShuffle ? "shuffle" : "sequential";
-
     try {
       const data = await fetchNextTrack({
         currentTrackId: track._id,
         mode,
         movieId: movie._id,
       });
-
       const nextIdx = tracks.findIndex((t) => t._id === data.track._id);
-      if (nextIdx === -1) return;
-
-      playTrackAtIndex(nextIdx, data.restart || false);
+      if (nextIdx !== -1) playTrackAtIndex(nextIdx);
     } catch (err) {
       console.error("Auto-advance failed:", err);
     }
   }, [tracks, movie, isLoop, isShuffle]);
 
-  // ── 5. Core playback controls ─────────────────────────────────────────────
   const playTrackAtIndex = useCallback(
-    (idx, restart = false) => {
+    (idx) => {
       const track = tracks[idx];
       if (!track) return;
       setCurrentIdx(idx);
       setProgress(0);
       setCurrentTime(0);
-
       if (ytReadyRef.current && ytPlayerRef.current) {
         ytPlayerRef.current.loadVideoById({
           videoId: track.youtubeId,
-          startSeconds: restart ? track.startTime : track.startTime,
+          startSeconds: track.startTime,
           endSeconds: track.endTime,
         });
         setIsPlaying(true);
@@ -337,23 +326,19 @@ export default function Playlist() {
 
   const handlePlayPause = () => {
     if (!ytReadyRef.current) return;
-    const player = ytPlayerRef.current;
     if (isPlaying) {
-      player.pauseVideo();
+      ytPlayerRef.current.pauseVideo();
     } else {
-      if (currentTime === 0) {
-        player.loadVideoById({
+      if (currentTime === 0)
+        ytPlayerRef.current.loadVideoById({
           videoId: tracks[currentIdx].youtubeId,
           startSeconds: tracks[currentIdx].startTime,
         });
-      }
-      player.playVideo();
+      ytPlayerRef.current.playVideo();
     }
   };
 
-  const handleNext = () => {
-    playTrackAtIndex((currentIdx + 1) % tracks.length);
-  };
+  const handleNext = () => playTrackAtIndex((currentIdx + 1) % tracks.length);
   const handlePrev = () => {
     if (ytReadyRef.current && currentTime > 3) {
       ytPlayerRef.current.seekTo(tracks[currentIdx].startTime, true);
@@ -367,31 +352,20 @@ export default function Playlist() {
   const handleSeek = (e) => {
     const pct = parseFloat(e.target.value);
     setProgress(pct);
-    const track = tracks[currentIdx];
-    setCurrentTime((pct / 100) * (track.endTime - track.startTime));
+    setCurrentTime(
+      (pct / 100) * (tracks[currentIdx].endTime - tracks[currentIdx].startTime),
+    );
   };
 
   const handleSeekCommit = (e) => {
     const pct = parseFloat(e.target.value);
     const track = tracks[currentIdx];
-    const seekTo =
-      track.startTime + (pct / 100) * (track.endTime - track.startTime);
-    if (ytReadyRef.current) ytPlayerRef.current.seekTo(seekTo, true);
+    if (ytReadyRef.current)
+      ytPlayerRef.current.seekTo(
+        track.startTime + (pct / 100) * (track.endTime - track.startTime),
+        true,
+      );
     setIsSeeking(false);
-  };
-
-  const handleShuffleToggle = () => {
-    setIsShuffle((prev) => {
-      if (!prev) setIsLoop(false);
-      return !prev;
-    });
-  };
-
-  const handleLoopToggle = () => {
-    setIsLoop((prev) => {
-      if (!prev) setIsShuffle(false);
-      return !prev;
-    });
   };
 
   const currentTrack = tracks[currentIdx];
@@ -399,13 +373,10 @@ export default function Playlist() {
     ? currentTrack.endTime - currentTrack.startTime
     : 0;
 
-  // ── Render ─────────────────────────────────────────────────────────────────
-  if (error) return null; // Silent fail for error
-  if (loading || !currentTrack) return null;
+  if (error || loading || !currentTrack) return null;
 
   return (
     <>
-      {/* Hidden YT mount */}
       <div
         id="yt-hidden-mount"
         style={{
@@ -417,150 +388,180 @@ export default function Playlist() {
         }}
       />
 
-      {/* Sticky Control Center (Bottom-Right) */}
-      <div
-        className={`pl-container ${isExpanded ? "pl-container--expanded" : ""}`}
-      >
-        {/* Collapsed: Sticky Now Playing Bar */}
+      {isExpanded && (
+        <div
+          className="pl-backdrop-overlay"
+          onClick={() => setIsExpanded(false)}
+        />
+      )}
+
+      <div className="pl-container">
+        {/* ── Collapsed bar ── */}
         {!isExpanded && (
           <div className="pl-sticky-bar" onClick={() => setIsExpanded(true)}>
-            <div className="pl-sticky-content">
-              <div className="pl-sticky-cover">
-                <img
-                  src={currentTrack.coverImage?.url || ""}
-                  alt={currentTrack.title}
-                  onError={(e) => {
-                    e.target.style.background = "#282828";
-                  }}
-                />
-              </div>
-              <div className="pl-sticky-info">
-                <div className="pl-sticky-title">{currentTrack.title}</div>
-                <div className="pl-sticky-artist">{currentTrack.vocal}</div>
-              </div>
-              <button
-                className="pl-sticky-play"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handlePlayPause();
+            <div className="pl-sticky-cover">
+              <img
+                src={currentTrack.coverImage?.url || ""}
+                alt={currentTrack.title}
+                onError={(e) => {
+                  e.target.style.background = "#282828";
                 }}
-              >
-                {isPlaying ? <IconPause /> : <IconPlay />}
-              </button>
-              <button
-                className="pl-sticky-expand"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsExpanded(true);
-                }}
-              >
-                <IconChevronUp />
-              </button>
+              />
             </div>
+            <div className="pl-sticky-info">
+              <div className="pl-sticky-title">{currentTrack.title}</div>
+              <div className="pl-sticky-artist">{currentTrack.vocal}</div>
+            </div>
+            <button
+              className="pl-sticky-play"
+              onClick={(e) => {
+                e.stopPropagation();
+                handlePlayPause();
+              }}
+            >
+              {isPlaying ? <IconPause size={16} /> : <IconPlay size={16} />}
+            </button>
+            <button
+              className="pl-sticky-expand"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsExpanded(true);
+              }}
+            >
+              <IconChevronUp />
+            </button>
           </div>
         )}
 
-        {/* Expanded: Full Playlist Control Center */}
+        {/* ── Expanded panel ── */}
         {isExpanded && (
-          <div className="pl-expanded">
-            {/* Dismiss Backdrop */}
-            <div className="pl-backdrop" onClick={() => setIsExpanded(false)} />
+          <div className="pl-panel">
+            {/* Handle + close */}
+            <div className="pl-panel-header">
+              <div className="pl-panel-handle" />
+              <button
+                className="pl-panel-close"
+                onClick={() => setIsExpanded(false)}
+              >
+                <IconChevronDown />
+              </button>
+            </div>
 
-            {/* Panel */}
-            <div className="pl-panel">
-              {/* Handle & Close */}
-              <div className="pl-panel-header">
-                <div className="pl-panel-handle" />
-                <button
-                  className="pl-panel-close"
-                  onClick={() => setIsExpanded(false)}
-                >
-                  <IconChevronDown />
-                </button>
+            {/* Cover */}
+            <div className="pl-panel-cover-wrap">
+              <img
+                className="pl-panel-cover"
+                src={currentTrack.coverImage?.url || ""}
+                alt={currentTrack.title}
+                onError={(e) => {
+                  e.target.style.display = "none";
+                }}
+              />
+            </div>
+
+            {/* Meta */}
+            <div className="pl-panel-meta">
+              <div className="pl-panel-title">{currentTrack.title}</div>
+              <div className="pl-panel-vocal">{currentTrack.vocal}</div>
+              <div className="pl-panel-producer">
+                by {currentTrack.producer}
               </div>
+            </div>
 
-              {/* Cover Art */}
-              <div className="pl-panel-cover-wrap">
-                <img
-                  className="pl-panel-cover"
-                  src={currentTrack.coverImage?.url || ""}
-                  alt={currentTrack.title}
-                  onError={(e) => {
-                    e.target.style.display = "none";
-                  }}
-                />
+            {/* Progress */}
+            <div className="pl-panel-progress">
+              <input
+                type="range"
+                className="pl-slider"
+                min="0"
+                max="100"
+                value={progress}
+                step="0.1"
+                style={{
+                  background: `linear-gradient(to right, #1DB954 ${progress}%, #404040 ${progress}%)`,
+                }}
+                onMouseDown={() => setIsSeeking(true)}
+                onTouchStart={() => setIsSeeking(true)}
+                onChange={handleSeek}
+                onMouseUp={handleSeekCommit}
+                onTouchEnd={handleSeekCommit}
+              />
+              <div className="pl-time-row">
+                <span className="pl-time">{fmtTime(currentTime)}</span>
+                <span className="pl-time">{fmtTime(duration)}</span>
               </div>
+            </div>
 
-              {/* Metadata */}
-              <div className="pl-panel-meta">
-                <div className="pl-panel-title">{currentTrack.title}</div>
-                <div className="pl-panel-vocal">{currentTrack.vocal}</div>
-                <div className="pl-panel-producer">
-                  by {currentTrack.producer}
-                </div>
-              </div>
+            {/* Controls — hold any button to see its label */}
+            <div className="pl-controls-row">
+              <TipBtn
+                label="Shuffle"
+                onClick={() =>
+                  setIsShuffle((p) => {
+                    if (!p) setIsLoop(false);
+                    return !p;
+                  })
+                }
+              >
+                <IconShuffle active={isShuffle} />
+              </TipBtn>
+              <TipBtn label="Previous" onClick={handlePrev}>
+                <IconPrev />
+              </TipBtn>
+              <TipBtn
+                label={isPlaying ? "Pause" : "Play"}
+                onClick={handlePlayPause}
+                className="pl-play-btn pl-tip-wrap"
+              >
+                {isPlaying ? <IconPause /> : <IconPlay />}
+              </TipBtn>
+              <TipBtn label="Next" onClick={handleNext}>
+                <IconNext />
+              </TipBtn>
+              <TipBtn
+                label="Loop"
+                onClick={() =>
+                  setIsLoop((p) => {
+                    if (!p) setIsShuffle(false);
+                    return !p;
+                  })
+                }
+              >
+                <IconLoop active={isLoop} />
+              </TipBtn>
+            </div>
 
-              {/* Progress Bar */}
-              <div className="pl-panel-progress">
-                <input
-                  type="range"
-                  className="pl-slider"
-                  min="0"
-                  max="100"
-                  value={progress}
-                  step="0.1"
-                  style={{
-                    background: `linear-gradient(to right, #1DB954 ${progress}%, #404040 ${progress}%)`,
-                  }}
-                  onMouseDown={() => setIsSeeking(true)}
-                  onTouchStart={() => setIsSeeking(true)}
-                  onChange={handleSeek}
-                  onMouseUp={handleSeekCommit}
-                  onTouchEnd={handleSeekCommit}
-                />
-                <div className="pl-time-row">
-                  <span className="pl-time">{fmtTime(currentTime)}</span>
-                  <span className="pl-time">{fmtTime(duration)}</span>
-                </div>
-              </div>
+            {/* Track list toggle button */}
+            <button
+              className="pl-tracklist-toggle"
+              onClick={() => setShowTrackList((p) => !p)}
+            >
+              <svg
+                width="13"
+                height="13"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path d="M9 18V5l12-2v13" />
+                <circle cx="6" cy="18" r="3" />
+                <circle cx="18" cy="16" r="3" />
+              </svg>
+              <span>{tracks.length} tracks</span>
+              {showTrackList ? <IconChevronUp /> : <IconChevronDown />}
+            </button>
 
-              {/* Controls Row */}
-              <div className="pl-controls-row">
-                <button className="pl-icon-btn" onClick={handleShuffleToggle}>
-                  <IconShuffle active={isShuffle} />
-                </button>
-                <button className="pl-icon-btn" onClick={handlePrev}>
-                  <IconPrev />
-                </button>
-                <button className="pl-play-btn" onClick={handlePlayPause}>
-                  {isPlaying ? <IconPause /> : <IconPlay />}
-                </button>
-                <button className="pl-icon-btn" onClick={handleNext}>
-                  <IconNext />
-                </button>
-                <button className="pl-icon-btn" onClick={handleLoopToggle}>
-                  <IconLoop active={isLoop} />
-                </button>
-              </div>
-
-              {/* Playlist Title */}
-              <div className="pl-list-header">
-                <span>Vocal Collection ({tracks.length} tracks)</span>
-                <button
-                  className="pl-icon-btn"
-                  onClick={() => setIsLiked((p) => !p)}
-                >
-                  <IconHeart liked={isLiked} />
-                </button>
-              </div>
-
-              {/* Track List */}
+            {/* Collapsible track list */}
+            {showTrackList && (
               <div className="pl-track-list">
                 {tracks.map((t, i) => (
                   <div
                     key={t._id}
                     className={`pl-track-row ${i === currentIdx ? "pl-track-row--active" : ""}`}
-                    onClick={() => playTrackAtIndex(i)}
+                    onClick={() => {
+                      playTrackAtIndex(i);
+                    }}
                   >
                     <span
                       className={`pl-track-num ${i === currentIdx ? "pl-track-num--playing" : ""}`}
@@ -583,7 +584,7 @@ export default function Playlist() {
                   </div>
                 ))}
               </div>
-            </div>
+            )}
           </div>
         )}
       </div>
