@@ -118,4 +118,23 @@ const getNextTrack = asyncWrapper(async (req, res) => {
     }
 });
 
-module.exports = { getNextTrack };
+// GET /api/v1/wiki/soundtrack
+// Query params: movieId
+// Fetch all tracks for a given movie
+const getSoundtracks = asyncWrapper(async (req, res) => {
+    const { movieId } = req.query;
+
+    if (!movieId) {
+        return res.status(400).json({
+            msg: 'movieId query parameter is required.',
+        });
+    }
+
+    const tracks = await Soundtrack.find({ movie: movieId }).sort({ trackNumber: 1 });
+
+    res.status(200).json({
+        tracks: tracks.map(formatTrack),
+    });
+});
+
+module.exports = { getNextTrack, getSoundtracks };

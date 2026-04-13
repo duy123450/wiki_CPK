@@ -3,6 +3,7 @@ import DragonCursor from "./components/DragonCursor";
 import Sidebar from "./components/Sidebar";
 import HeroPage from "./pages/HeroPage";
 import Footer from "./components/Footer";
+import Playlist from "./components/Playlist";
 
 export default function App() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -13,6 +14,7 @@ export default function App() {
       <Sidebar onCollapseChange={setSidebarCollapsed} />
       <HeroPage sidebarCollapsed={sidebarCollapsed} />
       <Footer sidebarCollapsed={sidebarCollapsed} />
+      <Playlist />
     </>
   );
 }
