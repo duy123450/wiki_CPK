@@ -61,4 +61,8 @@ const SoundtrackSchema = new mongoose.Schema({
     }
 }, { timestamps: true });
 
+SoundtrackSchema.virtual('embedUrl').get(function() {
+    return `https://www.youtube.com/embed/${this.youtubeId}?start=${this.startTime}&end=${this.endTime}&autoplay=1`;
+});
+
 module.exports = mongoose.model('Soundtrack', SoundtrackSchema);
