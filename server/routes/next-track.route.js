@@ -1,0 +1,10 @@
+const express = require('express');
+const router  = express.Router();
+
+const { getNextTrack } = require('../controllers/next-track.controller');
+
+// GET /api/v1/wiki/soundtrack/next
+// ?currentTrackId=<id>&mode=sequential|shuffle|infinite&movieId=<id>
+router.get('/next', getNextTrack);
+
+module.exports = router;
