@@ -27,7 +27,8 @@ const CharacterSchema = new mongoose.Schema({
         family: {
             mother: String,
             father: String,
-            brother: String
+            brother: String,
+            sister: String
         },
         occupation: String
     },
