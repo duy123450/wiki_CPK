@@ -137,21 +137,80 @@
     background: #121212;
     border-radius: 18px 18px 0 0;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     box-shadow: 0 -6px 28px rgba(0, 0, 0, 0.75);
     animation: plSlideUp 0.35s cubic-bezier(0.4, 0, 0.2, 1);
     overflow: hidden;
-    /* no filter / backdrop-filter / opacity < 1 — keeps content crystal clear */
+    z-index: 2;
+    pointer-events: auto;
 }
 
-@media (min-width: 480px) {
+@media (max-width: 768px) {
     .pl-panel {
-        width: 360px;
-        /* smaller than before (was 480px) */
+        flex-direction: column;
+    }
+}
+
+@media (min-width: 769px) {
+    .pl-panel {
+        width: 700px;
         right: 20px;
         bottom: 20px;
         border-radius: 14px;
         max-height: calc(100vh - 40px);
+    }
+}
+
+/* ── Left: Track List ─────────────────────────────────────────────────────── */
+.pl-panel-tracks {
+    flex: 0 0 35%;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid #282828;
+    overflow: hidden;
+    min-height: 0;
+}
+
+.pl-tracks-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid #282828;
+    font-size: 12px;
+    font-weight: 700;
+    color: #b3b3b3;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+}
+
+.pl-track-list {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 0;
+    min-height: 0;
+}
+
+/* ── Right: Player ───────────────────────────────────────────────────────── */
+.pl-panel-player {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+@media (max-width: 768px) {
+    .pl-panel-tracks {
+        flex: 0 0 auto;
+        max-height: 30%;
+        border-right: none;
+        border-bottom: 1px solid #282828;
+    }
+
+    .pl-panel-player {
+        flex: 1;
     }
 }
 
@@ -173,8 +232,8 @@
 }
 
 .pl-panel-close {
-    position: absolute;
-    right: 12px;
+    position: static;
+    right: auto;
     background: none;
     border: none;
     cursor: pointer;
@@ -193,52 +252,49 @@
 .pl-panel-cover-wrap {
     display: flex;
     justify-content: center;
-    padding: 4px 16px 14px;
+    padding: 14px 12px 12px;
     flex-shrink: 0;
 }
 
 .pl-panel-cover {
     width: 100%;
-    max-width: 220px;
-    /* smaller cover */
+    max-width: 200px;
     aspect-ratio: 1;
     border-radius: 10px;
     object-fit: cover;
     background: #282828;
     box-shadow: 0 6px 24px rgba(0, 0, 0, 0.55);
-    filter: none;
-    opacity: 1;
 }
 
 /* ── Meta ───────────────────────────────────────────────────────────────────── */
 .pl-panel-meta {
-    padding: 0 16px 12px;
+    padding: 0 12px 8px;
     text-align: center;
     flex-shrink: 0;
 }
 
 .pl-panel-title {
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 700;
     color: #fff;
-    margin-bottom: 4px;
-}
-
-.pl-panel-vocal {
-    font-size: 12px;
-    color: #1DB954;
     margin-bottom: 2px;
 }
 
-.pl-panel-producer {
+.pl-panel-vocal {
     font-size: 11px;
+    color: #1DB954;
+    margin-bottom: 1px;
+}
+
+.pl-panel-producer {
+    font-size: 10px;
     color: #626262;
     font-style: italic;
 }
 
 /* ── Progress ───────────────────────────────────────────────────────────────── */
 .pl-panel-progress {
-    padding: 0 16px 10px;
+    padding: 0 12px 8px;
     flex-shrink: 0;
 }
 
@@ -288,8 +344,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
-    padding: 6px 16px 10px;
+    gap: 8px;
+    padding: 4px 12px 8px;
     flex-shrink: 0;
 }
 
@@ -373,46 +429,9 @@
     transform: scale(0.96);
 }
 
-/* ── Track list toggle button ───────────────────────────────────────────────── */
-.pl-tracklist-toggle {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    width: 100%;
-    padding: 9px 16px;
-    background: none;
-    border: none;
-    border-top: 1px solid #222;
-    color: #888;
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    cursor: pointer;
-    transition: color 0.2s, background 0.2s;
-    flex-shrink: 0;
-}
-
-.pl-tracklist-toggle:hover {
-    color: #fff;
-    background: rgba(255, 255, 255, 0.04);
-}
-
-.pl-tracklist-toggle span {
-    flex: 1;
-    text-align: left;
-}
-
-/* ── Track list ─────────────────────────────────────────────────────────────── */
-.pl-track-list {
-    overflow-y: auto;
-    max-height: 240px;
-    flex-shrink: 0;
-    padding: 4px 0 8px;
-}
-
+/* ── Track list scrollbar ───────────────────────────────────────────────────── */
 .pl-track-list::-webkit-scrollbar {
-    width: 4px;
+    width: 6px;
 }
 
 .pl-track-list::-webkit-scrollbar-track {
@@ -420,13 +439,15 @@
 }
 
 .pl-track-list::-webkit-scrollbar-thumb {
-    background: #333;
-    border-radius: 2px;
+    background: #404040;
+    border-radius: 3px;
 }
 
 .pl-track-list::-webkit-scrollbar-thumb:hover {
     background: #555;
 }
+
+/* ── Track row ──────────────────────────────────────────────────────────────── */
 
 .pl-track-row {
     display: flex;

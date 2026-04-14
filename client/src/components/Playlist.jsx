@@ -436,132 +436,23 @@ export default function Playlist() {
         {/* ── Expanded panel ── */}
         {isExpanded && (
           <div className="pl-panel">
-            {/* Handle + close */}
-            <div className="pl-panel-header">
-              <div className="pl-panel-handle" />
-              <button
-                className="pl-panel-close"
-                onClick={() => setIsExpanded(false)}
-              >
-                <IconChevronDown />
-              </button>
-            </div>
-
-            {/* Cover */}
-            <div className="pl-panel-cover-wrap">
-              <img
-                className="pl-panel-cover"
-                src={currentTrack.coverImage?.url || ""}
-                alt={currentTrack.title}
-                onError={(e) => {
-                  e.target.style.display = "none";
-                }}
-              />
-            </div>
-
-            {/* Meta */}
-            <div className="pl-panel-meta">
-              <div className="pl-panel-title">{currentTrack.title}</div>
-              <div className="pl-panel-vocal">{currentTrack.vocal}</div>
-              <div className="pl-panel-producer">
-                by {currentTrack.producer}
+            {/* ─── Left: Track List ─── */}
+            <div className="pl-panel-tracks">
+              <div className="pl-tracks-header">
+                <span>Tracks ({tracks.length})</span>
+                <button
+                  className="pl-panel-close"
+                  onClick={() => setIsExpanded(false)}
+                >
+                  <IconChevronDown />
+                </button>
               </div>
-            </div>
-
-            {/* Progress */}
-            <div className="pl-panel-progress">
-              <input
-                type="range"
-                className="pl-slider"
-                min="0"
-                max="100"
-                value={progress}
-                step="0.1"
-                style={{
-                  background: `linear-gradient(to right, #1DB954 ${progress}%, #404040 ${progress}%)`,
-                }}
-                onMouseDown={() => setIsSeeking(true)}
-                onTouchStart={() => setIsSeeking(true)}
-                onChange={handleSeek}
-                onMouseUp={handleSeekCommit}
-                onTouchEnd={handleSeekCommit}
-              />
-              <div className="pl-time-row">
-                <span className="pl-time">{fmtTime(currentTime)}</span>
-                <span className="pl-time">{fmtTime(duration)}</span>
-              </div>
-            </div>
-
-            {/* Controls — hold any button to see its label */}
-            <div className="pl-controls-row">
-              <TipBtn
-                label="Shuffle"
-                onClick={() =>
-                  setIsShuffle((p) => {
-                    if (!p) setIsLoop(false);
-                    return !p;
-                  })
-                }
-              >
-                <IconShuffle active={isShuffle} />
-              </TipBtn>
-              <TipBtn label="Previous" onClick={handlePrev}>
-                <IconPrev />
-              </TipBtn>
-              <TipBtn
-                label={isPlaying ? "Pause" : "Play"}
-                onClick={handlePlayPause}
-                className="pl-play-btn pl-tip-wrap"
-              >
-                {isPlaying ? <IconPause /> : <IconPlay />}
-              </TipBtn>
-              <TipBtn label="Next" onClick={handleNext}>
-                <IconNext />
-              </TipBtn>
-              <TipBtn
-                label="Loop"
-                onClick={() =>
-                  setIsLoop((p) => {
-                    if (!p) setIsShuffle(false);
-                    return !p;
-                  })
-                }
-              >
-                <IconLoop active={isLoop} />
-              </TipBtn>
-            </div>
-
-            {/* Track list toggle button */}
-            <button
-              className="pl-tracklist-toggle"
-              onClick={() => setShowTrackList((p) => !p)}
-            >
-              <svg
-                width="13"
-                height="13"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path d="M9 18V5l12-2v13" />
-                <circle cx="6" cy="18" r="3" />
-                <circle cx="18" cy="16" r="3" />
-              </svg>
-              <span>{tracks.length} tracks</span>
-              {showTrackList ? <IconChevronUp /> : <IconChevronDown />}
-            </button>
-
-            {/* Collapsible track list */}
-            {showTrackList && (
               <div className="pl-track-list">
                 {tracks.map((t, i) => (
                   <div
                     key={t._id}
                     className={`pl-track-row ${i === currentIdx ? "pl-track-row--active" : ""}`}
-                    onClick={() => {
-                      playTrackAtIndex(i);
-                    }}
+                    onClick={() => playTrackAtIndex(i)}
                   >
                     <span
                       className={`pl-track-num ${i === currentIdx ? "pl-track-num--playing" : ""}`}
@@ -584,7 +475,95 @@ export default function Playlist() {
                   </div>
                 ))}
               </div>
-            )}
+            </div>
+
+            {/* ─── Right: Player ─── */}
+            <div className="pl-panel-player">
+              {/* Handle */}
+              <div className="pl-panel-header">
+                <div className="pl-panel-handle" />
+              </div>
+
+              {/* Cover */}
+              <div className="pl-panel-cover-wrap">
+                <img
+                  className="pl-panel-cover"
+                  src={currentTrack.coverImage?.url || ""}
+                  alt={currentTrack.title}
+                  onError={(e) => {
+                    e.target.style.display = "none";
+                  }}
+                />
+              </div>
+
+              {/* Meta */}
+              <div className="pl-panel-meta">
+                <div className="pl-panel-title">{currentTrack.title}</div>
+                <div className="pl-panel-vocal">{currentTrack.vocal}</div>
+                <div className="pl-panel-producer">
+                  by {currentTrack.producer}
+                </div>
+              </div>
+
+              {/* Progress */}
+              <div className="pl-panel-progress">
+                <input
+                  type="range"
+                  className="pl-slider"
+                  min="0"
+                  max="100"
+                  value={progress}
+                  step="0.1"
+                  style={{
+                    background: `linear-gradient(to right, #1DB954 ${progress}%, #404040 ${progress}%)`,
+                  }}
+                  onMouseDown={() => setIsSeeking(true)}
+                  onTouchStart={() => setIsSeeking(true)}
+                  onChange={handleSeek}
+                  onMouseUp={handleSeekCommit}
+                  onTouchEnd={handleSeekCommit}
+                />
+                <div className="pl-time-row">
+                  <span className="pl-time">{fmtTime(currentTime)}</span>
+                  <span className="pl-time">{fmtTime(duration)}</span>
+                </div>
+              </div>
+
+              {/* Controls */}
+              <div className="pl-controls-row">
+                <button
+                  className="pl-icon-btn"
+                  onClick={() =>
+                    setIsShuffle((p) => {
+                      if (!p) setIsLoop(false);
+                      return !p;
+                    })
+                  }
+                >
+                  <IconShuffle active={isShuffle} />
+                </button>
+                <button className="pl-icon-btn" onClick={handlePrev}>
+                  <IconPrev />
+                </button>
+                <button className="pl-play-btn" onClick={handlePlayPause}>
+                  {isPlaying ? <IconPause /> : <IconPlay />}
+                </button>
+                <button className="pl-icon-btn" onClick={handleNext}>
+                  <IconNext />
+                </button>
+                <button
+                  className="pl-icon-btn"
+                  onClick={() =>
+                    setIsLoop((p) => {
+                      if (!p) setIsShuffle(false);
+                      return !p;
+                    })
+                  }
+                >
+                  <IconLoop active={isLoop} />
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>
