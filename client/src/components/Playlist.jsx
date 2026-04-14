@@ -186,20 +186,38 @@ export default function Playlist() {
   const [progress, setProgress] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [showTrackList, setShowTrackList] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isSeeking, setIsSeeking] = useState(false);
 
   const ytPlayerRef = useRef(null);
   const ytReadyRef = useRef(false);
   const progressInterval = useRef(null);
+
+  // ── Keep refs in sync so callbacks always see latest values ──────────────
   const currentIdxRef = useRef(0);
+  const tracksRef = useRef([]);
+  const movieRef = useRef(null);
+  const isLoopRef = useRef(false);
+  const isShuffleRef = useRef(false);
+  const isSeekingRef = useRef(false);
 
   useEffect(() => {
     currentIdxRef.current = currentIdx;
   }, [currentIdx]);
+  useEffect(() => {
+    tracksRef.current = tracks;
+  }, [tracks]);
+  useEffect(() => {
+    movieRef.current = movie;
+  }, [movie]);
+  useEffect(() => {
+    isLoopRef.current = isLoop;
+  }, [isLoop]);
+  useEffect(() => {
+    isShuffleRef.current = isShuffle;
+  }, [isShuffle]);
 
+  // ─── Data fetch ──────────────────────────────────────────────────────────
   useEffect(() => {
     const init = async () => {
       try {
@@ -217,12 +235,105 @@ export default function Playlist() {
     loadYouTubeAPI();
   }, []);
 
+  // ─── Progress tick (reads from refs — no stale closures) ─────────────────
+  const startProgressTick = useCallback(() => {
+    clearInterval(progressInterval.current);
+    progressInterval.current = setInterval(() => {
+      const player = ytPlayerRef.current;
+      if (!ytReadyRef.current || !player || isSeekingRef.current) return;
+
+      const tracks = tracksRef.current;
+      const idx = currentIdxRef.current;
+      const track = tracks[idx];
+      if (!track) return;
+
+      let cur;
+      try {
+        cur = player.getCurrentTime();
+      } catch {
+        return;
+      }
+
+      const elapsed = cur - track.startTime;
+      const duration = track.endTime - track.startTime;
+      setProgress(Math.min(100, Math.max(0, (elapsed / duration) * 100)));
+      setCurrentTime(Math.max(0, elapsed));
+
+      if (cur >= track.endTime - 0.5) {
+        clearInterval(progressInterval.current);
+        handleAutoAdvance();
+      }
+    }, 500);
+  }, []); // stable — reads everything from refs
+
+  // ─── Auto-advance (reads mode from refs) ─────────────────────────────────
+  const handleAutoAdvance = useCallback(async () => {
+    const tracks = tracksRef.current;
+    const movie = movieRef.current;
+    const idx = currentIdxRef.current;
+    if (!tracks.length || !movie) return;
+
+    const track = tracks[idx];
+    // Use refs so we always have current shuffle/loop state
+    const mode = isLoopRef.current
+      ? "infinite"
+      : isShuffleRef.current
+        ? "shuffle"
+        : "sequential";
+
+    try {
+      const data = await fetchNextTrack({
+        currentTrackId: track._id,
+        mode,
+        movieId: movie._id,
+      });
+      const nextIdx = tracks.findIndex((t) => t._id === data.track._id);
+      if (nextIdx !== -1) playTrackAtIndex(nextIdx);
+    } catch (err) {
+      console.error("Auto-advance failed:", err);
+    }
+  }, []); // stable — reads everything from refs
+
+  // ─── Play a track by index ────────────────────────────────────────────────
+  const playTrackAtIndex = useCallback(
+    (idx) => {
+      const tracks = tracksRef.current;
+      const track = tracks[idx];
+      if (!track) return;
+
+      setCurrentIdx(idx);
+      setProgress(0);
+      setCurrentTime(0);
+
+      if (ytReadyRef.current && ytPlayerRef.current) {
+        ytPlayerRef.current.loadVideoById({
+          videoId: track.youtubeId,
+          startSeconds: track.startTime,
+          endSeconds: track.endTime,
+        });
+        setIsPlaying(true);
+        startProgressTick();
+      }
+    },
+    [startProgressTick],
+  );
+
+  // ─── Init YouTube player once tracks are loaded ───────────────────────────
   useEffect(() => {
     if (!tracks.length) return;
+
     const initPlayer = () => {
+      const mountEl = document.getElementById("yt-hidden-mount");
+      if (!mountEl) return;
+
+      // Remove old player node if re-initialising
+      const old = document.getElementById("yt-player-node");
+      if (old) old.remove();
+
       const div = document.createElement("div");
       div.id = "yt-player-node";
-      document.getElementById("yt-hidden-mount")?.appendChild(div);
+      mountEl.appendChild(div);
+
       ytPlayerRef.current = new window.YT.Player("yt-player-node", {
         width: "1",
         height: "1",
@@ -248,126 +359,126 @@ export default function Playlist() {
               setIsPlaying(false);
               clearInterval(progressInterval.current);
             } else if (e.data === window.YT.PlayerState.ENDED) {
+              clearInterval(progressInterval.current);
               handleAutoAdvance();
             }
           },
         },
       });
     };
-    if (window.YT && window.YT.Player) initPlayer();
-    else window.onYouTubeIframeAPIReady = initPlayer;
+
+    if (window.YT && window.YT.Player) {
+      initPlayer();
+    } else {
+      window.onYouTubeIframeAPIReady = initPlayer;
+    }
+
     return () => {
       clearInterval(progressInterval.current);
     };
-  }, [tracks]);
+  }, [tracks, startProgressTick, handleAutoAdvance]);
 
-  const startProgressTick = useCallback(() => {
-    clearInterval(progressInterval.current);
-    progressInterval.current = setInterval(() => {
-      const player = ytPlayerRef.current;
-      const idx = currentIdxRef.current;
-      if (!ytReadyRef.current || !player || isSeeking) return;
-      const track = tracks[idx];
-      if (!track) return;
-      let cur;
-      try {
-        cur = player.getCurrentTime();
-      } catch {
-        return;
-      }
-      const elapsed = cur - track.startTime;
-      const duration = track.endTime - track.startTime;
-      setProgress(Math.min(100, Math.max(0, (elapsed / duration) * 100)));
-      setCurrentTime(elapsed);
-      if (cur >= track.endTime - 0.5) {
-        clearInterval(progressInterval.current);
-        handleAutoAdvance();
-      }
-    }, 500);
-  }, [tracks, isSeeking]);
+  // ─── Controls ─────────────────────────────────────────────────────────────
+  const handlePlayPause = useCallback(() => {
+    if (!ytReadyRef.current || !ytPlayerRef.current) return;
+    const player = ytPlayerRef.current;
 
-  const handleAutoAdvance = useCallback(async () => {
-    const idx = currentIdxRef.current;
-    if (!tracks.length || !movie) return;
-    const track = tracks[idx];
-    const mode = isLoop ? "infinite" : isShuffle ? "shuffle" : "sequential";
     try {
-      const data = await fetchNextTrack({
-        currentTrackId: track._id,
-        mode,
-        movieId: movie._id,
-      });
-      const nextIdx = tracks.findIndex((t) => t._id === data.track._id);
-      if (nextIdx !== -1) playTrackAtIndex(nextIdx);
-    } catch (err) {
-      console.error("Auto-advance failed:", err);
-    }
-  }, [tracks, movie, isLoop, isShuffle]);
-
-  const playTrackAtIndex = useCallback(
-    (idx) => {
-      const track = tracks[idx];
-      if (!track) return;
-      setCurrentIdx(idx);
-      setProgress(0);
-      setCurrentTime(0);
-      if (ytReadyRef.current && ytPlayerRef.current) {
-        ytPlayerRef.current.loadVideoById({
-          videoId: track.youtubeId,
-          startSeconds: track.startTime,
-          endSeconds: track.endTime,
-        });
-        setIsPlaying(true);
+      const state = player.getPlayerState();
+      if (state === window.YT.PlayerState.PLAYING) {
+        player.pauseVideo();
+      } else {
+        // If we haven't started yet (UNSTARTED / CUED), load the track first
+        if (state === window.YT.PlayerState.UNSTARTED || state === -1) {
+          const track = tracksRef.current[currentIdxRef.current];
+          if (track) {
+            player.loadVideoById({
+              videoId: track.youtubeId,
+              startSeconds: track.startTime,
+              endSeconds: track.endTime,
+            });
+          }
+        } else {
+          player.playVideo();
+        }
         startProgressTick();
       }
-    },
-    [tracks, startProgressTick],
-  );
-
-  const handlePlayPause = () => {
-    if (!ytReadyRef.current) return;
-    if (isPlaying) {
-      ytPlayerRef.current.pauseVideo();
-    } else {
-      if (currentTime === 0)
-        ytPlayerRef.current.loadVideoById({
-          videoId: tracks[currentIdx].youtubeId,
-          startSeconds: tracks[currentIdx].startTime,
-        });
-      ytPlayerRef.current.playVideo();
+    } catch (err) {
+      console.error("PlayPause error:", err);
     }
-  };
+  }, [startProgressTick]);
 
-  const handleNext = () => playTrackAtIndex((currentIdx + 1) % tracks.length);
-  const handlePrev = () => {
-    if (ytReadyRef.current && currentTime > 3) {
-      ytPlayerRef.current.seekTo(tracks[currentIdx].startTime, true);
-      setCurrentTime(0);
-      setProgress(0);
-      return;
+  const handleNext = useCallback(() => {
+    const tracks = tracksRef.current;
+    if (!tracks.length) return;
+    playTrackAtIndex((currentIdxRef.current + 1) % tracks.length);
+  }, [playTrackAtIndex]);
+
+  const handlePrev = useCallback(() => {
+    const tracks = tracksRef.current;
+    if (!tracks.length) return;
+
+    // If more than 3 seconds into the track, restart it
+    if (ytReadyRef.current && ytPlayerRef.current) {
+      let cur = 0;
+      try {
+        cur = ytPlayerRef.current.getCurrentTime();
+      } catch {
+        /* ignore */
+      }
+      const track = tracks[currentIdxRef.current];
+      if (track && cur - track.startTime > 3) {
+        ytPlayerRef.current.seekTo(track.startTime, true);
+        setCurrentTime(0);
+        setProgress(0);
+        return;
+      }
     }
-    playTrackAtIndex((currentIdx - 1 + tracks.length) % tracks.length);
-  };
-
-  const handleSeek = (e) => {
-    const pct = parseFloat(e.target.value);
-    setProgress(pct);
-    setCurrentTime(
-      (pct / 100) * (tracks[currentIdx].endTime - tracks[currentIdx].startTime),
+    playTrackAtIndex(
+      (currentIdxRef.current - 1 + tracks.length) % tracks.length,
     );
-  };
+  }, [playTrackAtIndex]);
 
-  const handleSeekCommit = (e) => {
+  const handleSeekChange = useCallback((e) => {
+    isSeekingRef.current = true;
     const pct = parseFloat(e.target.value);
-    const track = tracks[currentIdx];
-    if (ytReadyRef.current)
-      ytPlayerRef.current.seekTo(
-        track.startTime + (pct / 100) * (track.endTime - track.startTime),
-        true,
-      );
-    setIsSeeking(false);
-  };
+    const track = tracksRef.current[currentIdxRef.current];
+    if (!track) return;
+    const duration = track.endTime - track.startTime;
+    setProgress(pct);
+    setCurrentTime((pct / 100) * duration);
+  }, []);
 
+  const handleSeekCommit = useCallback((e) => {
+    const pct = parseFloat(e.target.value);
+    const track = tracksRef.current[currentIdxRef.current];
+    if (!track) return;
+
+    const seekTo =
+      track.startTime + (pct / 100) * (track.endTime - track.startTime);
+    if (ytReadyRef.current && ytPlayerRef.current) {
+      ytPlayerRef.current.seekTo(seekTo, true);
+    }
+    isSeekingRef.current = false;
+  }, []);
+
+  const handleShuffleToggle = useCallback(() => {
+    setIsShuffle((prev) => {
+      const next = !prev;
+      if (next) setIsLoop(false);
+      return next;
+    });
+  }, []);
+
+  const handleLoopToggle = useCallback(() => {
+    setIsLoop((prev) => {
+      const next = !prev;
+      if (next) setIsShuffle(false);
+      return next;
+    });
+  }, []);
+
+  // ─── Derived ──────────────────────────────────────────────────────────────
   const currentTrack = tracks[currentIdx];
   const duration = currentTrack
     ? currentTrack.endTime - currentTrack.startTime
@@ -479,12 +590,10 @@ export default function Playlist() {
 
             {/* ─── Right: Player ─── */}
             <div className="pl-panel-player">
-              {/* Handle */}
               <div className="pl-panel-header">
                 <div className="pl-panel-handle" />
               </div>
 
-              {/* Cover */}
               <div className="pl-panel-cover-wrap">
                 <img
                   className="pl-panel-cover"
@@ -496,7 +605,6 @@ export default function Playlist() {
                 />
               </div>
 
-              {/* Meta */}
               <div className="pl-panel-meta">
                 <div className="pl-panel-title">{currentTrack.title}</div>
                 <div className="pl-panel-vocal">{currentTrack.vocal}</div>
@@ -505,7 +613,6 @@ export default function Playlist() {
                 </div>
               </div>
 
-              {/* Progress */}
               <div className="pl-panel-progress">
                 <input
                   type="range"
@@ -517,9 +624,13 @@ export default function Playlist() {
                   style={{
                     background: `linear-gradient(to right, #1DB954 ${progress}%, #404040 ${progress}%)`,
                   }}
-                  onMouseDown={() => setIsSeeking(true)}
-                  onTouchStart={() => setIsSeeking(true)}
-                  onChange={handleSeek}
+                  onMouseDown={() => {
+                    isSeekingRef.current = true;
+                  }}
+                  onTouchStart={() => {
+                    isSeekingRef.current = true;
+                  }}
+                  onChange={handleSeekChange}
                   onMouseUp={handleSeekCommit}
                   onTouchEnd={handleSeekCommit}
                 />
@@ -529,19 +640,10 @@ export default function Playlist() {
                 </div>
               </div>
 
-              {/* Controls */}
               <div className="pl-controls-row">
-                <button
-                  className="pl-icon-btn"
-                  onClick={() =>
-                    setIsShuffle((p) => {
-                      if (!p) setIsLoop(false);
-                      return !p;
-                    })
-                  }
-                >
+                <TipBtn label="Shuffle" onClick={handleShuffleToggle}>
                   <IconShuffle active={isShuffle} />
-                </button>
+                </TipBtn>
                 <button className="pl-icon-btn" onClick={handlePrev}>
                   <IconPrev />
                 </button>
@@ -551,17 +653,9 @@ export default function Playlist() {
                 <button className="pl-icon-btn" onClick={handleNext}>
                   <IconNext />
                 </button>
-                <button
-                  className="pl-icon-btn"
-                  onClick={() =>
-                    setIsLoop((p) => {
-                      if (!p) setIsShuffle(false);
-                      return !p;
-                    })
-                  }
-                >
+                <TipBtn label="Loop" onClick={handleLoopToggle}>
                   <IconLoop active={isLoop} />
-                </button>
+                </TipBtn>
               </div>
             </div>
           </div>
