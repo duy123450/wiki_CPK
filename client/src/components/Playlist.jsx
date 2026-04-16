@@ -373,22 +373,40 @@ export default function Playlist() {
     }
   }, [startProgressTick]);
 
-  const handleNext = useCallback(() => {
+  const handleNext = useCallback(async () => {
     const tracks = tracksRef.current;
+    const movie = movieRef.current;
     if (!tracks.length) return;
+  
+    if (isShuffleRef.current && movie) {
+      try {
+        const track = tracks[currentIdxRef.current];
+        const data = await fetchNextTrack({
+          currentTrackId: track._id,
+          mode: 'shuffle',
+          movieId: movie._id,
+        });
+        const nextIdx = tracks.findIndex((t) => t._id === data.track._id);
+        if (nextIdx !== -1) playTrackAtIndex(nextIdx);
+      } catch (err) {
+        console.error('Shuffle next failed:', err);
+      }
+      return;
+    }
+  
     playTrackAtIndex((currentIdxRef.current + 1) % tracks.length);
   }, [playTrackAtIndex]);
+  
 
-  const handlePrev = useCallback(() => {
+  const handlePrev = useCallback(async () => {
     const tracks = tracksRef.current;
+    const movie = movieRef.current;
     if (!tracks.length) return;
+  
+    // If more than 3s into the track, restart it regardless of mode
     if (ytReadyRef.current && ytPlayerRef.current) {
       let cur = 0;
-      try {
-        cur = ytPlayerRef.current.getCurrentTime();
-      } catch {
-        /**/
-      }
+      try { cur = ytPlayerRef.current.getCurrentTime(); } catch { /**/ }
       const track = tracks[currentIdxRef.current];
       if (track && cur - track.startTime > 3) {
         ytPlayerRef.current.seekTo(track.startTime, true);
@@ -397,6 +415,23 @@ export default function Playlist() {
         return;
       }
     }
+  
+    if (isShuffleRef.current && movie) {
+      try {
+        const track = tracks[currentIdxRef.current];
+        const data = await fetchNextTrack({
+          currentTrackId: track._id,
+          mode: 'shuffle',
+          movieId: movie._id,
+        });
+        const nextIdx = tracks.findIndex((t) => t._id === data.track._id);
+        if (nextIdx !== -1) playTrackAtIndex(nextIdx);
+      } catch (err) {
+        console.error('Shuffle prev failed:', err);
+      }
+      return;
+    }
+  
     playTrackAtIndex(
       (currentIdxRef.current - 1 + tracks.length) % tracks.length,
     );
