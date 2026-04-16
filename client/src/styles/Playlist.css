@@ -1,4 +1,4 @@
-/* ── Backdrop — lives outside panel, no shared stacking context ────────────── */
+/* ── Backdrop ───────────────────────────────────────────────────────────────── */
 .pl-backdrop-overlay {
     position: fixed;
     inset: 0;
@@ -39,7 +39,7 @@
     }
 }
 
-/* ── Container — always above backdrop ─────────────────────────────────────── */
+/* ── Container ──────────────────────────────────────────────────────────────── */
 .pl-container {
     position: fixed;
     bottom: 20px;
@@ -133,44 +133,95 @@
     bottom: 0;
     right: 0;
     width: 100%;
-    max-height: 88vh;
+    height: 88vh;
     background: #121212;
     border-radius: 18px 18px 0 0;
-    display: flex;
-    flex-direction: row;
     box-shadow: 0 -6px 28px rgba(0, 0, 0, 0.75);
     animation: plSlideUp 0.35s cubic-bezier(0.4, 0, 0.2, 1);
     overflow: hidden;
     z-index: 2;
     pointer-events: auto;
+
+    /* MOBILE DEFAULT: column — player top, tracklist bottom */
+    display: flex;
+    flex-direction: column;
 }
 
-@media (max-width: 768px) {
-    .pl-panel {
-        flex-direction: column;
-    }
-}
-
+/* ── DESKTOP: side-by-side ──────────────────────────────────────────────────── */
 @media (min-width: 769px) {
     .pl-panel {
+        flex-direction: row;
         width: 700px;
+        height: auto;
+        max-height: calc(100vh - 40px);
         right: 20px;
         bottom: 20px;
         border-radius: 14px;
-        max-height: calc(100vh - 40px);
     }
 }
 
-/* ── Left: Track List ─────────────────────────────────────────────────────── */
-.pl-panel-tracks {
-    flex: 0 0 35%;
+/* ── Left/Top: Player ────────────────────────────────────────────────────────
+   On mobile  → top section, fixed height, scrollable internally
+   On desktop → right column, flex: 1
+   ─────────────────────────────────────────────────────────────────────────── */
+.pl-panel-player {
     display: flex;
     flex-direction: column;
-    border-right: 1px solid #282828;
+    overflow-y: auto;
+    flex-shrink: 0;
+    /* don't shrink below content */
+}
+
+/* Mobile: player gets roughly the top half */
+@media (max-width: 768px) {
+    .pl-panel-player {
+        flex: 0 0 auto;
+        max-height: 55vh;
+        /* cap so tracklist always visible */
+        border-bottom: 1px solid #282828;
+    }
+}
+
+/* Desktop: player on the right, fills remaining width */
+@media (min-width: 769px) {
+    .pl-panel-player {
+        flex: 1;
+        max-height: none;
+        border-bottom: none;
+    }
+}
+
+/* ── Right/Bottom: Track List ────────────────────────────────────────────────
+   On mobile  → bottom section, scrollable, fills remaining space
+   On desktop → left column, fixed width 35%
+   ─────────────────────────────────────────────────────────────────────────── */
+.pl-panel-tracks {
+    display: flex;
+    flex-direction: column;
     overflow: hidden;
     min-height: 0;
 }
 
+/* Mobile: track list is the bottom, scrollable, takes remaining height */
+@media (max-width: 768px) {
+    .pl-panel-tracks {
+        flex: 1 1 auto;
+        min-height: 0;
+        border-right: none;
+        border-top: none;
+        /* border already on player bottom */
+    }
+}
+
+/* Desktop: track list on the left, fixed 35% */
+@media (min-width: 769px) {
+    .pl-panel-tracks {
+        flex: 0 0 35%;
+        border-right: 1px solid #282828;
+    }
+}
+
+/* ── Tracks header ──────────────────────────────────────────────────────────── */
 .pl-tracks-header {
     display: flex;
     align-items: center;
@@ -193,28 +244,7 @@
     min-height: 0;
 }
 
-/* ── Right: Player ───────────────────────────────────────────────────────── */
-.pl-panel-player {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    overflow-y: auto;
-}
-
-@media (max-width: 768px) {
-    .pl-panel-tracks {
-        flex: 0 0 auto;
-        max-height: 30%;
-        border-right: none;
-        border-bottom: 1px solid #282828;
-    }
-
-    .pl-panel-player {
-        flex: 1;
-    }
-}
-
-/* ── Panel header ───────────────────────────────────────────────────────────── */
+/* ── Panel header (handle + close button) ───────────────────────────────────── */
 .pl-panel-header {
     display: flex;
     align-items: center;
@@ -233,7 +263,6 @@
 
 .pl-panel-close {
     position: static;
-    right: auto;
     background: none;
     border: none;
     cursor: pointer;
@@ -448,7 +477,6 @@
 }
 
 /* ── Track row ──────────────────────────────────────────────────────────────── */
-
 .pl-track-row {
     display: flex;
     align-items: center;
@@ -514,7 +542,7 @@
     font-variant-numeric: tabular-nums;
 }
 
-/* ── Responsive ─────────────────────────────────────────────────────────────── */
+/* ── Responsive fine-tuning ─────────────────────────────────────────────────── */
 @media (max-width: 480px) {
     .pl-container {
         bottom: 14px;
@@ -526,19 +554,23 @@
     }
 
     .pl-panel {
-        max-height: 90vh;
+        height: 92vh;
+    }
+
+    .pl-panel-player {
+        max-height: 52vh;
     }
 
     .pl-panel-cover {
-        max-width: 180px;
+        max-width: 160px;
     }
 
     .pl-panel-title {
-        font-size: 15px;
+        font-size: 13px;
     }
 
     .pl-controls-row {
-        gap: 8px;
+        gap: 6px;
     }
 
     .pl-play-btn {

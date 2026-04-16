@@ -6,7 +6,6 @@ import {
   fetchNextTrack,
 } from "../services/api";
 
-// ─── YouTube IFrame API loader ────────────────────────────────────────────────
 let ytApiLoaded = false;
 const loadYouTubeAPI = () => {
   if (ytApiLoaded || window.YT) return;
@@ -21,11 +20,9 @@ const fmtTime = (s) => {
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 };
 
-// ─── Tooltip button — hold 400ms to reveal label ─────────────────────────────
 function TipBtn({ label, onClick, className = "pl-icon-btn", children }) {
   const [show, setShow] = useState(false);
   const timer = useRef(null);
-
   const startHold = () => {
     timer.current = setTimeout(() => setShow(true), 400);
   };
@@ -33,7 +30,6 @@ function TipBtn({ label, onClick, className = "pl-icon-btn", children }) {
     clearTimeout(timer.current);
     setShow(false);
   };
-
   return (
     <button
       className={`${className} pl-tip-wrap`}
@@ -50,7 +46,6 @@ function TipBtn({ label, onClick, className = "pl-icon-btn", children }) {
   );
 }
 
-// ─── Icons ────────────────────────────────────────────────────────────────────
 const IconShuffle = ({ active }) => (
   <svg
     width="17"
@@ -175,7 +170,6 @@ const IconChevronUp = () => (
   </svg>
 );
 
-// ─── Component ────────────────────────────────────────────────────────────────
 export default function Playlist() {
   const [movie, setMovie] = useState(null);
   const [tracks, setTracks] = useState([]);
@@ -193,7 +187,6 @@ export default function Playlist() {
   const ytReadyRef = useRef(false);
   const progressInterval = useRef(null);
 
-  // ── Keep refs in sync so callbacks always see latest values ──────────────
   const currentIdxRef = useRef(0);
   const tracksRef = useRef([]);
   const movieRef = useRef(null);
@@ -217,7 +210,6 @@ export default function Playlist() {
     isShuffleRef.current = isShuffle;
   }, [isShuffle]);
 
-  // ─── Data fetch ──────────────────────────────────────────────────────────
   useEffect(() => {
     const init = async () => {
       try {
@@ -235,52 +227,43 @@ export default function Playlist() {
     loadYouTubeAPI();
   }, []);
 
-  // ─── Progress tick (reads from refs — no stale closures) ─────────────────
   const startProgressTick = useCallback(() => {
     clearInterval(progressInterval.current);
     progressInterval.current = setInterval(() => {
       const player = ytPlayerRef.current;
       if (!ytReadyRef.current || !player || isSeekingRef.current) return;
-
       const tracks = tracksRef.current;
       const idx = currentIdxRef.current;
       const track = tracks[idx];
       if (!track) return;
-
       let cur;
       try {
         cur = player.getCurrentTime();
       } catch {
         return;
       }
-
       const elapsed = cur - track.startTime;
       const duration = track.endTime - track.startTime;
       setProgress(Math.min(100, Math.max(0, (elapsed / duration) * 100)));
       setCurrentTime(Math.max(0, elapsed));
-
       if (cur >= track.endTime - 0.5) {
         clearInterval(progressInterval.current);
         handleAutoAdvance();
       }
     }, 500);
-  }, []); // stable — reads everything from refs
+  }, []);
 
-  // ─── Auto-advance (reads mode from refs) ─────────────────────────────────
   const handleAutoAdvance = useCallback(async () => {
     const tracks = tracksRef.current;
     const movie = movieRef.current;
     const idx = currentIdxRef.current;
     if (!tracks.length || !movie) return;
-
     const track = tracks[idx];
-    // Use refs so we always have current shuffle/loop state
     const mode = isLoopRef.current
       ? "infinite"
       : isShuffleRef.current
         ? "shuffle"
         : "sequential";
-
     try {
       const data = await fetchNextTrack({
         currentTrackId: track._id,
@@ -292,19 +275,16 @@ export default function Playlist() {
     } catch (err) {
       console.error("Auto-advance failed:", err);
     }
-  }, []); // stable — reads everything from refs
+  }, []);
 
-  // ─── Play a track by index ────────────────────────────────────────────────
   const playTrackAtIndex = useCallback(
     (idx) => {
       const tracks = tracksRef.current;
       const track = tracks[idx];
       if (!track) return;
-
       setCurrentIdx(idx);
       setProgress(0);
       setCurrentTime(0);
-
       if (ytReadyRef.current && ytPlayerRef.current) {
         ytPlayerRef.current.loadVideoById({
           videoId: track.youtubeId,
@@ -318,22 +298,16 @@ export default function Playlist() {
     [startProgressTick],
   );
 
-  // ─── Init YouTube player once tracks are loaded ───────────────────────────
   useEffect(() => {
     if (!tracks.length) return;
-
     const initPlayer = () => {
       const mountEl = document.getElementById("yt-hidden-mount");
       if (!mountEl) return;
-
-      // Remove old player node if re-initialising
       const old = document.getElementById("yt-player-node");
       if (old) old.remove();
-
       const div = document.createElement("div");
       div.id = "yt-player-node";
       mountEl.appendChild(div);
-
       ytPlayerRef.current = new window.YT.Player("yt-player-node", {
         width: "1",
         height: "1",
@@ -366,38 +340,29 @@ export default function Playlist() {
         },
       });
     };
-
-    if (window.YT && window.YT.Player) {
-      initPlayer();
-    } else {
-      window.onYouTubeIframeAPIReady = initPlayer;
-    }
-
+    if (window.YT && window.YT.Player) initPlayer();
+    else window.onYouTubeIframeAPIReady = initPlayer;
     return () => {
       clearInterval(progressInterval.current);
     };
   }, [tracks, startProgressTick, handleAutoAdvance]);
 
-  // ─── Controls ─────────────────────────────────────────────────────────────
   const handlePlayPause = useCallback(() => {
     if (!ytReadyRef.current || !ytPlayerRef.current) return;
     const player = ytPlayerRef.current;
-
     try {
       const state = player.getPlayerState();
       if (state === window.YT.PlayerState.PLAYING) {
         player.pauseVideo();
       } else {
-        // If we haven't started yet (UNSTARTED / CUED), load the track first
         if (state === window.YT.PlayerState.UNSTARTED || state === -1) {
           const track = tracksRef.current[currentIdxRef.current];
-          if (track) {
+          if (track)
             player.loadVideoById({
               videoId: track.youtubeId,
               startSeconds: track.startTime,
               endSeconds: track.endTime,
             });
-          }
         } else {
           player.playVideo();
         }
@@ -417,14 +382,12 @@ export default function Playlist() {
   const handlePrev = useCallback(() => {
     const tracks = tracksRef.current;
     if (!tracks.length) return;
-
-    // If more than 3 seconds into the track, restart it
     if (ytReadyRef.current && ytPlayerRef.current) {
       let cur = 0;
       try {
         cur = ytPlayerRef.current.getCurrentTime();
       } catch {
-        /* ignore */
+        /**/
       }
       const track = tracks[currentIdxRef.current];
       if (track && cur - track.startTime > 3) {
@@ -444,21 +407,18 @@ export default function Playlist() {
     const pct = parseFloat(e.target.value);
     const track = tracksRef.current[currentIdxRef.current];
     if (!track) return;
-    const duration = track.endTime - track.startTime;
     setProgress(pct);
-    setCurrentTime((pct / 100) * duration);
+    setCurrentTime((pct / 100) * (track.endTime - track.startTime));
   }, []);
 
   const handleSeekCommit = useCallback((e) => {
     const pct = parseFloat(e.target.value);
     const track = tracksRef.current[currentIdxRef.current];
     if (!track) return;
-
     const seekTo =
       track.startTime + (pct / 100) * (track.endTime - track.startTime);
-    if (ytReadyRef.current && ytPlayerRef.current) {
+    if (ytReadyRef.current && ytPlayerRef.current)
       ytPlayerRef.current.seekTo(seekTo, true);
-    }
     isSeekingRef.current = false;
   }, []);
 
@@ -478,7 +438,6 @@ export default function Playlist() {
     });
   }, []);
 
-  // ─── Derived ──────────────────────────────────────────────────────────────
   const currentTrack = tracks[currentIdx];
   const duration = currentTrack
     ? currentTrack.endTime - currentTrack.startTime
@@ -547,51 +506,17 @@ export default function Playlist() {
         {/* ── Expanded panel ── */}
         {isExpanded && (
           <div className="pl-panel">
-            {/* ─── Left: Track List ─── */}
-            <div className="pl-panel-tracks">
-              <div className="pl-tracks-header">
-                <span>Tracks ({tracks.length})</span>
-                <button
-                  className="pl-panel-close"
-                  onClick={() => setIsExpanded(false)}
-                >
-                  <IconChevronDown />
-                </button>
-              </div>
-              <div className="pl-track-list">
-                {tracks.map((t, i) => (
-                  <div
-                    key={t._id}
-                    className={`pl-track-row ${i === currentIdx ? "pl-track-row--active" : ""}`}
-                    onClick={() => playTrackAtIndex(i)}
-                  >
-                    <span
-                      className={`pl-track-num ${i === currentIdx ? "pl-track-num--playing" : ""}`}
-                    >
-                      {i === currentIdx
-                        ? "▶"
-                        : String(t.trackNumber).padStart(2, "0")}
-                    </span>
-                    <div className="pl-track-info">
-                      <div
-                        className={`pl-track-title ${i === currentIdx ? "pl-track-title--active" : ""}`}
-                      >
-                        {t.title}
-                      </div>
-                      <div className="pl-track-producer">{t.producer}</div>
-                    </div>
-                    <span className="pl-track-duration">
-                      {fmtTime(t.endTime - t.startTime)}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* ─── Right: Player ─── */}
+            {/* ─── PLAYER (top on mobile, right on desktop) ─── */}
             <div className="pl-panel-player">
               <div className="pl-panel-header">
                 <div className="pl-panel-handle" />
+                <button
+                  className="pl-panel-close"
+                  onClick={() => setIsExpanded(false)}
+                  style={{ position: "absolute", right: 12 }}
+                >
+                  <IconChevronDown />
+                </button>
               </div>
 
               <div className="pl-panel-cover-wrap">
@@ -656,6 +581,41 @@ export default function Playlist() {
                 <TipBtn label="Loop" onClick={handleLoopToggle}>
                   <IconLoop active={isLoop} />
                 </TipBtn>
+              </div>
+            </div>
+
+            {/* ─── TRACK LIST (bottom on mobile, left on desktop) ─── */}
+            <div className="pl-panel-tracks">
+              <div className="pl-tracks-header">
+                <span>Tracks ({tracks.length})</span>
+              </div>
+              <div className="pl-track-list">
+                {tracks.map((t, i) => (
+                  <div
+                    key={t._id}
+                    className={`pl-track-row ${i === currentIdx ? "pl-track-row--active" : ""}`}
+                    onClick={() => playTrackAtIndex(i)}
+                  >
+                    <span
+                      className={`pl-track-num ${i === currentIdx ? "pl-track-num--playing" : ""}`}
+                    >
+                      {i === currentIdx
+                        ? "▶"
+                        : String(t.trackNumber).padStart(2, "0")}
+                    </span>
+                    <div className="pl-track-info">
+                      <div
+                        className={`pl-track-title ${i === currentIdx ? "pl-track-title--active" : ""}`}
+                      >
+                        {t.title}
+                      </div>
+                      <div className="pl-track-producer">{t.producer}</div>
+                    </div>
+                    <span className="pl-track-duration">
+                      {fmtTime(t.endTime - t.startTime)}
+                    </span>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
