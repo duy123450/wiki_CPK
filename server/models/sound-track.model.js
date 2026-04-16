@@ -25,13 +25,11 @@ const SoundtrackSchema = new mongoose.Schema({
         enum: ['Opening', 'Ending', 'Insert Song', 'BGM', 'Full Album'],
         default: 'Insert Song'
     },
-    // The YouTube ID of the 39:53 movie/vocal collection video
     youtubeId: {
         type: String,
         required: [true, 'YouTube Video ID is required']
     },
     // START TIME: Where the song begins (in seconds)
-    // Example: If a song starts at 5:00, you store 300
     startTime: {
         type: Number,
         required: [true, 'Start time in seconds is required'],
@@ -54,7 +52,7 @@ const SoundtrackSchema = new mongoose.Schema({
         ref: 'Movie',
         required: true
     },
-    // Optional: High-quality cover art for the UI
+    // High-quality cover art for the UI
     coverImage: {
         url: String,
         public_id: String

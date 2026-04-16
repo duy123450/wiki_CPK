@@ -19,7 +19,7 @@ const CharacterSchema = new mongoose.Schema({
     abilities: [{
         skillName: String,
         type: { type: String, enum: ['Passive', 'Active', 'Ultimate'] },
-        effect: String
+        effect: [String]
     }],
 
     metadata: {
@@ -33,10 +33,10 @@ const CharacterSchema = new mongoose.Schema({
         occupation: String
     },
 
-    image: {
+    image: [{
         url: String,
         public_id: String
-    },
+    }],
     voiceActor: String,
 
 }, { timestamps: true });
