@@ -194,6 +194,11 @@ export default function Playlist() {
   const isShuffleRef = useRef(false);
   const isSeekingRef = useRef(false);
 
+  // ── Shuffle history stack ──────────────────────────────────────────────────
+  // Stores the index of every track played, so prev can walk it back.
+  const shuffleHistoryRef = useRef([]); // array of track indices
+  const shuffleHistoryCursorRef = useRef(-1); // pointer into that array
+
   useEffect(() => {
     currentIdxRef.current = currentIdx;
   }, [currentIdx]);
@@ -271,20 +276,35 @@ export default function Playlist() {
         movieId: movie._id,
       });
       const nextIdx = tracks.findIndex((t) => t._id === data.track._id);
-      if (nextIdx !== -1) playTrackAtIndex(nextIdx);
+      if (nextIdx !== -1) playTrackAtIndex(nextIdx, /* pushHistory */ true);
     } catch (err) {
       console.error("Auto-advance failed:", err);
     }
   }, []);
 
+  // pushHistory: whether to push this play onto the shuffle history stack.
+  // When navigating *back* through history we pass false so we don't corrupt it.
   const playTrackAtIndex = useCallback(
-    (idx) => {
+    (idx, pushHistory = true) => {
       const tracks = tracksRef.current;
       const track = tracks[idx];
       if (!track) return;
       setCurrentIdx(idx);
       setProgress(0);
       setCurrentTime(0);
+
+      // ── Update shuffle history ───────────────────────────────────────────
+      if (pushHistory) {
+        // Discard any "future" entries that were ahead of the cursor
+        // (happens when user pressed prev then next again).
+        shuffleHistoryRef.current = shuffleHistoryRef.current.slice(
+          0,
+          shuffleHistoryCursorRef.current + 1,
+        );
+        shuffleHistoryRef.current.push(idx);
+        shuffleHistoryCursorRef.current = shuffleHistoryRef.current.length - 1;
+      }
+
       if (ytReadyRef.current && ytPlayerRef.current) {
         ytPlayerRef.current.loadVideoById({
           videoId: track.youtubeId,
@@ -377,36 +397,50 @@ export default function Playlist() {
     const tracks = tracksRef.current;
     const movie = movieRef.current;
     if (!tracks.length) return;
-  
+
     if (isShuffleRef.current && movie) {
+      // If there are future entries in the history (user pressed prev earlier),
+      // walk forward through them instead of fetching a new random track.
+      const history = shuffleHistoryRef.current;
+      const cursor = shuffleHistoryCursorRef.current;
+      if (cursor < history.length - 1) {
+        const nextIdx = history[cursor + 1];
+        shuffleHistoryCursorRef.current = cursor + 1;
+        playTrackAtIndex(nextIdx, /* pushHistory */ false);
+        return;
+      }
+
+      // No cached future — fetch a fresh random track.
       try {
         const track = tracks[currentIdxRef.current];
         const data = await fetchNextTrack({
           currentTrackId: track._id,
-          mode: 'shuffle',
+          mode: "shuffle",
           movieId: movie._id,
         });
         const nextIdx = tracks.findIndex((t) => t._id === data.track._id);
-        if (nextIdx !== -1) playTrackAtIndex(nextIdx);
+        if (nextIdx !== -1) playTrackAtIndex(nextIdx, /* pushHistory */ true);
       } catch (err) {
-        console.error('Shuffle next failed:', err);
+        console.error("Shuffle next failed:", err);
       }
       return;
     }
-  
+
     playTrackAtIndex((currentIdxRef.current + 1) % tracks.length);
   }, [playTrackAtIndex]);
-  
 
   const handlePrev = useCallback(async () => {
     const tracks = tracksRef.current;
-    const movie = movieRef.current;
     if (!tracks.length) return;
-  
-    // If more than 3s into the track, restart it regardless of mode
+
+    // If more than 3s into the track, restart it regardless of mode.
     if (ytReadyRef.current && ytPlayerRef.current) {
       let cur = 0;
-      try { cur = ytPlayerRef.current.getCurrentTime(); } catch { /**/ }
+      try {
+        cur = ytPlayerRef.current.getCurrentTime();
+      } catch {
+        /**/
+      }
       const track = tracks[currentIdxRef.current];
       if (track && cur - track.startTime > 3) {
         ytPlayerRef.current.seekTo(track.startTime, true);
@@ -415,23 +449,30 @@ export default function Playlist() {
         return;
       }
     }
-  
-    if (isShuffleRef.current && movie) {
-      try {
+
+    // ── Shuffle mode: walk the history stack backwards ───────────────────────
+    if (isShuffleRef.current) {
+      const history = shuffleHistoryRef.current;
+      const cursor = shuffleHistoryCursorRef.current;
+
+      if (cursor > 0) {
+        // Go back one step in history.
+        const prevIdx = history[cursor - 1];
+        shuffleHistoryCursorRef.current = cursor - 1;
+        playTrackAtIndex(prevIdx, /* pushHistory */ false);
+      } else {
+        // Nothing further back — just restart the current track.
         const track = tracks[currentIdxRef.current];
-        const data = await fetchNextTrack({
-          currentTrackId: track._id,
-          mode: 'shuffle',
-          movieId: movie._id,
-        });
-        const nextIdx = tracks.findIndex((t) => t._id === data.track._id);
-        if (nextIdx !== -1) playTrackAtIndex(nextIdx);
-      } catch (err) {
-        console.error('Shuffle prev failed:', err);
+        if (track && ytReadyRef.current && ytPlayerRef.current) {
+          ytPlayerRef.current.seekTo(track.startTime, true);
+          setCurrentTime(0);
+          setProgress(0);
+        }
       }
       return;
     }
-  
+
+    // ── Sequential / loop mode ───────────────────────────────────────────────
     playTrackAtIndex(
       (currentIdxRef.current - 1 + tracks.length) % tracks.length,
     );
@@ -460,7 +501,13 @@ export default function Playlist() {
   const handleShuffleToggle = useCallback(() => {
     setIsShuffle((prev) => {
       const next = !prev;
-      if (next) setIsLoop(false);
+      if (next) {
+        setIsLoop(false);
+        // Seed the history with the currently playing track so prev works
+        // immediately after enabling shuffle.
+        shuffleHistoryRef.current = [currentIdxRef.current];
+        shuffleHistoryCursorRef.current = 0;
+      }
       return next;
     });
   }, []);
@@ -541,7 +588,7 @@ export default function Playlist() {
         {/* ── Expanded panel ── */}
         {isExpanded && (
           <div className="pl-panel">
-            {/* ─── PLAYER (top on mobile, right on desktop) ─── */}
+            {/* ─── PLAYER ─── */}
             <div className="pl-panel-player">
               <div className="pl-panel-header">
                 <div className="pl-panel-handle" />
@@ -619,7 +666,7 @@ export default function Playlist() {
               </div>
             </div>
 
-            {/* ─── TRACK LIST (bottom on mobile, left on desktop) ─── */}
+            {/* ─── TRACK LIST ─── */}
             <div className="pl-panel-tracks">
               <div className="pl-tracks-header">
                 <span>Tracks ({tracks.length})</span>
