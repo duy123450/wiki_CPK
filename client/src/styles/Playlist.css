@@ -142,7 +142,7 @@
     z-index: 2;
     pointer-events: auto;
 
-    /* MOBILE DEFAULT: column — player top, tracklist bottom */
+    /* MOBILE DEFAULT: column — player top 60%, tracklist bottom 40% */
     display: flex;
     flex-direction: column;
 }
@@ -161,23 +161,21 @@
 }
 
 /* ── Left/Top: Player ────────────────────────────────────────────────────────
-   On mobile  → top section, fixed height, scrollable internally
-   On desktop → right column, flex: 1
+   Mobile  → top 60% of panel, no internal scroll (content scales to fit)
+   Desktop → right column, flex: 1
    ─────────────────────────────────────────────────────────────────────────── */
 .pl-panel-player {
     display: flex;
     flex-direction: column;
-    overflow-y: auto;
-    flex-shrink: 0;
-    /* don't shrink below content */
+    min-height: 0;
 }
 
-/* Mobile: player gets roughly the top half */
+/* Mobile: player = exact 60% of panel height, content scales to fill */
 @media (max-width: 768px) {
     .pl-panel-player {
-        flex: 0 0 auto;
-        max-height: 55vh;
-        /* cap so tracklist always visible */
+        flex: 0 0 67%;
+        overflow: hidden;
+        /* no scroll — we scale content to fit */
         border-bottom: 1px solid #282828;
     }
 }
@@ -187,13 +185,14 @@
     .pl-panel-player {
         flex: 1;
         max-height: none;
+        overflow-y: auto;
         border-bottom: none;
     }
 }
 
 /* ── Right/Bottom: Track List ────────────────────────────────────────────────
-   On mobile  → bottom section, scrollable, fills remaining space
-   On desktop → left column, fixed width 35%
+   Mobile  → bottom 40%, scrollable
+   Desktop → left column, fixed width 35%
    ─────────────────────────────────────────────────────────────────────────── */
 .pl-panel-tracks {
     display: flex;
@@ -202,14 +201,12 @@
     min-height: 0;
 }
 
-/* Mobile: track list is the bottom, scrollable, takes remaining height */
+/* Mobile: tracklist is the bottom 40% */
 @media (max-width: 768px) {
     .pl-panel-tracks {
-        flex: 1 1 auto;
+        flex: 0 0 40%;
         min-height: 0;
         border-right: none;
-        border-top: none;
-        /* border already on player bottom */
     }
 }
 
@@ -249,7 +246,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 10px 12px 6px;
+    padding: 8px 12px 4px;
     flex-shrink: 0;
     position: relative;
 }
@@ -267,7 +264,7 @@
     border: none;
     cursor: pointer;
     color: #888;
-    padding: 6px;
+    padding: 4px;
     display: flex;
     align-items: center;
     transition: color 0.2s;
@@ -281,13 +278,17 @@
 .pl-panel-cover-wrap {
     display: flex;
     justify-content: center;
-    padding: 14px 12px 12px;
-    flex-shrink: 0;
+    /* flex: 1 lets the cover zone grow/shrink within the player column */
+    flex: 1 1 0;
+    min-height: 0;
+    padding: 4px 12px;
 }
 
 .pl-panel-cover {
-    width: 100%;
-    max-width: 200px;
+    /* fill the available height, cap by width so it stays square */
+    width: auto;
+    height: 100%;
+    max-width: 100%;
     aspect-ratio: 1;
     border-radius: 10px;
     object-fit: cover;
@@ -295,35 +296,74 @@
     box-shadow: 0 6px 24px rgba(0, 0, 0, 0.55);
 }
 
+/* On desktop keep the old fixed-width behaviour */
+@media (min-width: 769px) {
+    .pl-panel-cover-wrap {
+        flex: 0 0 auto;
+        padding: 14px 12px 12px;
+    }
+
+    .pl-panel-cover {
+        width: 100%;
+        height: auto;
+        max-width: 200px;
+    }
+}
+
 /* ── Meta ───────────────────────────────────────────────────────────────────── */
 .pl-panel-meta {
-    padding: 0 12px 8px;
+    padding: 4px 12px 4px;
     text-align: center;
     flex-shrink: 0;
 }
 
 .pl-panel-title {
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 700;
     color: #fff;
-    margin-bottom: 2px;
+    margin-bottom: 1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .pl-panel-vocal {
     font-size: 11px;
     color: #1DB954;
     margin-bottom: 1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .pl-panel-producer {
     font-size: 10px;
     color: #626262;
     font-style: italic;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Desktop meta padding */
+@media (min-width: 769px) {
+    .pl-panel-meta {
+        padding: 0 12px 8px;
+    }
+
+    .pl-panel-title {
+        font-size: 14px;
+        margin-bottom: 2px;
+    }
+
+    .pl-panel-vocal {
+        margin-bottom: 1px;
+    }
 }
 
 /* ── Progress ───────────────────────────────────────────────────────────────── */
 .pl-panel-progress {
-    padding: 0 12px 8px;
+    padding: 0 12px 6px;
     flex-shrink: 0;
 }
 
@@ -335,7 +375,7 @@
     -webkit-appearance: none;
     appearance: none;
     cursor: pointer;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
 }
 
 .pl-slider::-webkit-slider-thumb {
@@ -374,7 +414,7 @@
     align-items: center;
     justify-content: center;
     gap: 8px;
-    padding: 4px 12px 8px;
+    padding: 2px 12px 6px;
     flex-shrink: 0;
 }
 
@@ -557,24 +597,25 @@
         height: 92vh;
     }
 
-    .pl-panel-player {
-        max-height: 52vh;
-    }
-
-    .pl-panel-cover {
-        max-width: 160px;
-    }
-
-    .pl-panel-title {
-        font-size: 13px;
-    }
-
+    /* Tighten controls row on very small screens */
     .pl-controls-row {
-        gap: 6px;
+        gap: 4px;
     }
 
     .pl-play-btn {
-        width: 38px;
-        height: 38px;
+        width: 36px;
+        height: 36px;
+    }
+
+    .pl-panel-meta {
+        padding: 2px 10px 2px;
+    }
+
+    .pl-panel-progress {
+        padding: 0 10px 4px;
+    }
+
+    .pl-controls-row {
+        padding: 2px 10px 4px;
     }
 }

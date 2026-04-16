@@ -393,6 +393,20 @@ export default function Playlist() {
     }
   }, [startProgressTick]);
 
+  // ── Keyboard shortcut: Spacebar to play/pause ──────────────────────────────
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === " ") {
+        e.preventDefault();
+        handlePlayPause();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [handlePlayPause]);
+
   const handleNext = useCallback(async () => {
     const tracks = tracksRef.current;
     const movie = movieRef.current;
