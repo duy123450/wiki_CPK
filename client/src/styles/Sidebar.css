@@ -295,6 +295,35 @@
     flex-shrink: 0;
 }
 
+.dragon-toggle-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 1px solid var(--text-muted);
+    border-radius: 4px;
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.dragon-toggle-btn:hover {
+    border-color: var(--accent-purple);
+    color: var(--accent-purple);
+    background: rgba(192, 132, 252, 0.1);
+}
+
+.dragon-toggle-btn.active {
+    border-color: var(--accent-purple);
+    color: var(--accent-purple);
+    background: rgba(192, 132, 252, 0.15);
+    box-shadow: 0 0 8px rgba(192, 132, 252, 0.3);
+}
+
 .footer-orb {
     width: 8px;
     height: 8px;

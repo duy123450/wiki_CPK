@@ -7,11 +7,16 @@ import Playlist from "./components/Playlist";
 
 export default function App() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [dragonCursorEnabled, setDragonCursorEnabled] = useState(true);
 
   return (
     <>
-      <DragonCursor />
-      <Sidebar onCollapseChange={setSidebarCollapsed} />
+      {dragonCursorEnabled && <DragonCursor />}
+      <Sidebar
+        onCollapseChange={setSidebarCollapsed}
+        onDragonCursorToggle={() => setDragonCursorEnabled((v) => !v)}
+        dragonCursorEnabled={dragonCursorEnabled}
+      />
       <HeroPage sidebarCollapsed={sidebarCollapsed} />
       <Footer sidebarCollapsed={sidebarCollapsed} />
       <Playlist />

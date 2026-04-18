@@ -9,6 +9,7 @@ import {
   Star,
   Map,
   Sparkles,
+  Wand2,
 } from "lucide-react";
 import { getSidebar } from "../services/api";
 import "../styles/Sidebar.css";
@@ -68,7 +69,11 @@ function CategoryItem({ category, activePage, onPageSelect }) {
   );
 }
 
-export default function Sidebar({ onCollapseChange }) {
+export default function Sidebar({
+  onCollapseChange,
+  onDragonCursorToggle,
+  dragonCursorEnabled,
+}) {
   const [activePage, setActivePage] = useState("princess-kaguya");
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [categories, setCategories] = useState([]);
@@ -162,6 +167,18 @@ export default function Sidebar({ onCollapseChange }) {
         </nav>
 
         <div className="sidebar-footer">
+          <button
+            className={`dragon-toggle-btn ${dragonCursorEnabled ? "active" : ""}`}
+            onClick={onDragonCursorToggle}
+            title={
+              dragonCursorEnabled
+                ? "Disable dragon cursor"
+                : "Enable dragon cursor"
+            }
+            aria-pressed={dragonCursorEnabled}
+          >
+            <Wand2 size={16} strokeWidth={2} />
+          </button>
           <div className="footer-orb" />
           <span className="footer-text">超かぐや姫 · CPK Wiki</span>
         </div>
