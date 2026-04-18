@@ -29,8 +29,13 @@ const ICON_MAP = {
   "file-text": BookOpen,
 };
 
-function CategoryItem({ category, activePage, onPageSelect }) {
-  const [isOpen, setIsOpen] = useState(false);
+function CategoryItem({
+  category,
+  activePage,
+  onPageSelect,
+  isOpen,
+  onToggle,
+}) {
   const Icon = ICON_MAP[category.icon] || BookOpen;
   const hasActivePage = category.pages?.some((p) => p.slug === activePage);
 
@@ -38,7 +43,7 @@ function CategoryItem({ category, activePage, onPageSelect }) {
     <div className={`category-item ${hasActivePage ? "has-active" : ""}`}>
       <button
         className={`category-header ${isOpen ? "open" : ""}`}
-        onClick={() => setIsOpen((v) => !v)}
+        onClick={() => onToggle(category._id)}
         aria-expanded={isOpen}
       >
         <span className="category-icon-wrap">
@@ -78,6 +83,11 @@ export default function Sidebar({
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [openCategoryId, setOpenCategoryId] = useState(null);
+
+  const handleCategoryToggle = (categoryId) => {
+    setOpenCategoryId((prevId) => (prevId === categoryId ? null : categoryId));
+  };
 
   useEffect(() => {
     const fetchSidebarData = async () => {
@@ -157,6 +167,8 @@ export default function Sidebar({
                   category={category}
                   activePage={activePage}
                   onPageSelect={setActivePage}
+                  isOpen={openCategoryId === category._id}
+                  onToggle={handleCategoryToggle}
                 />
                 {i < categories.length - 1 && i % 2 === 1 && (
                   <div className="nav-divider" />
