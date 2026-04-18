@@ -1,13 +1,24 @@
 const mongoose = require('mongoose');
 
 const CharacterSchema = new mongoose.Schema({
-    name: { type: String, required: true },
-    role: { type: String, enum: ['Protagonist', 'Supporting', 'Antagonist', 'Cameo'] },
+    name: { 
+        type: String, 
+        required: true 
     
+    },
+
+    role: { 
+        type: String, 
+        enum: ['Protagonist', 'Supporting', 'Antagonist', 'Cameo'] 
+    },
+
     description: {
         summary: String,
         personality: String,
-        appearance: String
+        appearance: {
+            realWorld: String,
+            tsukuyomi: String
+        }
     },
 
     origin: {
@@ -18,7 +29,7 @@ const CharacterSchema = new mongoose.Schema({
 
     abilities: [{
         skillName: String,
-        type: { type: String, enum: ['Passive', 'Active', 'Ultimate'] },
+        type: { type: String, enum: ['Passive', 'Active', 'Ultimate', 'Debuff'] },
         effect: [String]
     }],
 
@@ -37,8 +48,19 @@ const CharacterSchema = new mongoose.Schema({
         url: String,
         public_id: String
     }],
+
     voiceActor: String,
 
+    movie: { 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'Movie', 
+        required: true 
+    }
 }, { timestamps: true });
+
+// Indexes
+CharacterSchema.index({ name: 'text', "description.summary": 'text' });
+CharacterSchema.index({ role: 1 });
+CharacterSchema.index({ movie: 1 });
 
 module.exports = mongoose.model('Character', CharacterSchema);

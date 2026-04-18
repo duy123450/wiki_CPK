@@ -59,6 +59,10 @@ const SoundtrackSchema = new mongoose.Schema({
     }
 }, { timestamps: true });
 
+// Indexes
+SoundtrackSchema.index({ movie: 1, trackNumber: 1 });
+SoundtrackSchema.index({ trackType: 1 });
+
 SoundtrackSchema.virtual('embedUrl').get(function() {
     return `https://www.youtube.com/embed/${this.youtubeId}?start=${this.startTime}&end=${this.endTime}&autoplay=1`;
 });

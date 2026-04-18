@@ -1,25 +1,55 @@
 const mongoose = require('mongoose');
 
 const WikiPageSchema = new mongoose.Schema({
-    title: { type: String, required: true, unique: true },
+    title: { 
+        type: String, 
+        required: true, 
+        unique: true 
+    },
+
     slug: {
         type: String,
         unique: true,
         lowercase: true
     },
-    content: { type: String, required: true }, // Rich text/Markdown
+
+    // Rich text/Markdown
+    content: { 
+        type: String, 
+        required: true 
+    }, 
+
     category: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Category',
         required: [true, 'WikiPage must belong to a Category']
     },
-    image: { url: String, public_id: String },
+
+    order: {
+        type: Number,
+        default: 0
+    },
+
+    relatedCharacter: { 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'Character' 
+    },
+
+    image: { 
+        url: String, 
+        public_id: String 
+    },
+
     heroVideo: {
         url: String,       // Cloudinary URL
         public_id: String, // For transformations
         isLooping: { type: Boolean, default: true }
     }
 }, { timestamps: true });
+
+// Indexes
+WikiPageSchema.index({ title: 'text', content: 'text' }); 
+WikiPageSchema.index({ category: 1 });
 
 // This "Middleware" runs before saving to turn "Princess Kaguya" into "princess-kaguya"
 WikiPageSchema.pre('validate', function () {

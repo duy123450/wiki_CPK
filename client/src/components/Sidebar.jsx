@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   ChevronDown,
   BookOpen,
@@ -10,6 +10,7 @@ import {
   Map,
   Sparkles,
 } from "lucide-react";
+import { getSidebar } from "../services/api";
 import "../styles/Sidebar.css";
 
 const LOGO_URL =
@@ -26,63 +27,6 @@ const ICON_MAP = {
   sparkles: Sparkles,
   "file-text": BookOpen,
 };
-
-const MOCK_CATEGORIES = [
-  {
-    _id: "1",
-    name: "Characters",
-    icon: "users",
-    slug: "characters",
-    pages: [
-      { title: "Princess Kaguya", slug: "princess-kaguya" },
-      { title: "Yacchiyo", slug: "yacchiyo" },
-      { title: "Iroha", slug: "iroha" },
-      { title: "Roka", slug: "roka" },
-    ],
-  },
-  {
-    _id: "2",
-    name: "Lore & World",
-    icon: "scroll",
-    slug: "lore",
-    pages: [
-      { title: "Lunar History", slug: "lunar-history" },
-      { title: "The Moon Kingdom", slug: "moon-kingdom" },
-      { title: "Earth Legends", slug: "earth-legends" },
-    ],
-  },
-  {
-    _id: "3",
-    name: "Soundtrack",
-    icon: "music",
-    slug: "soundtrack",
-    pages: [
-      { title: "Opening Theme", slug: "opening-theme" },
-      { title: "Ending Theme", slug: "ending-theme" },
-      { title: "Full OST", slug: "full-ost" },
-    ],
-  },
-  {
-    _id: "4",
-    name: "Film",
-    icon: "film",
-    slug: "film",
-    pages: [
-      { title: "Movie Overview", slug: "movie-overview" },
-      { title: "Production Notes", slug: "production-notes" },
-    ],
-  },
-  {
-    _id: "5",
-    name: "Locations",
-    icon: "map",
-    slug: "locations",
-    pages: [
-      { title: "The Lunar Palace", slug: "lunar-palace" },
-      { title: "Bamboo Forest", slug: "bamboo-forest" },
-    ],
-  },
-];
 
 function CategoryItem({ category, activePage, onPageSelect }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -127,6 +71,27 @@ function CategoryItem({ category, activePage, onPageSelect }) {
 export default function Sidebar({ onCollapseChange }) {
   const [activePage, setActivePage] = useState("princess-kaguya");
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchSidebarData = async () => {
+      try {
+        console.log("Fetching sidebar data...");
+        console.log("API Base URL:", import.meta.env.VITE_API_BASE_URL);
+        const data = await getSidebar();
+        console.log("Sidebar data received:", data);
+        setCategories(data || []);
+      } catch (error) {
+        console.error("Failed to fetch sidebar data:", error);
+        setCategories([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSidebarData();
+  }, []);
 
   const handleToggle = () => {
     const next = !isCollapsed;
@@ -172,18 +137,28 @@ export default function Sidebar({ onCollapseChange }) {
         </div>
 
         <nav className="sidebar-nav">
-          {MOCK_CATEGORIES.map((category, i) => (
-            <div key={category._id}>
-              <CategoryItem
-                category={category}
-                activePage={activePage}
-                onPageSelect={setActivePage}
-              />
-              {i < MOCK_CATEGORIES.length - 1 && i % 2 === 1 && (
-                <div className="nav-divider" />
-              )}
+          {loading ? (
+            <div style={{ padding: "16px", color: "#999", fontSize: "14px" }}>
+              Loading...
             </div>
-          ))}
+          ) : categories.length === 0 ? (
+            <div style={{ padding: "16px", color: "#999", fontSize: "14px" }}>
+              No categories found
+            </div>
+          ) : (
+            categories.map((category, i) => (
+              <div key={category._id}>
+                <CategoryItem
+                  category={category}
+                  activePage={activePage}
+                  onPageSelect={setActivePage}
+                />
+                {i < categories.length - 1 && i % 2 === 1 && (
+                  <div className="nav-divider" />
+                )}
+              </div>
+            ))
+          )}
         </nav>
 
         <div className="sidebar-footer">
