@@ -30,7 +30,7 @@ export default function App() {
             element={<HeroPage sidebarCollapsed={sidebarCollapsed} />}
           />
           <Route
-            path="/wiki/movie-overview"
+            path="/wiki/chou-kaguya-hime-overview"
             element={<MovieOverviewPage sidebarCollapsed={sidebarCollapsed} />}
           />
         </Routes>

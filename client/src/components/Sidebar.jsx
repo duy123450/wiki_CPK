@@ -141,7 +141,11 @@ export default function Sidebar({
       </button>
 
       <aside className={`cpk-sidebar ${isCollapsed ? "collapsed" : ""}`}>
-        <div className="sidebar-logo">
+        <button
+          className="sidebar-logo"
+          onClick={() => navigate("/")}
+          title="Go to home"
+        >
           <div className="logo-image-wrap">
             <img
               src={LOGO_URL}
@@ -152,8 +156,8 @@ export default function Sidebar({
               }}
             />
           </div>
-          <span className="logo-subtitle">Official Wiki</span>
-        </div>
+          <span className="logo-subtitle">Fan Wiki</span>
+        </button>
 
         <div className="wiki-label">
           <span>Navigation</span>

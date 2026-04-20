@@ -68,6 +68,17 @@
     align-items: center;
     gap: 10px;
     flex-shrink: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: inherit;
+    color: inherit;
+    transition: opacity 0.2s ease;
+}
+
+.sidebar-logo:hover {
+    opacity: 0.85;
 }
 
 .logo-image-wrap {
