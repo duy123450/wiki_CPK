@@ -1,0 +1,744 @@
+/* ── Theme tokens ──────────────────────────────────────────────────────────── */
+:root {
+    --mov-bg: #05040f;
+    --mov-surface: rgba(255, 255, 255, 0.035);
+    --mov-surface-hover: rgba(255, 255, 255, 0.06);
+    --mov-border: rgba(180, 140, 255, 0.12);
+    --mov-border-bright: rgba(192, 132, 252, 0.3);
+
+    --mov-gold: #e8c97a;
+    --mov-purple: #c084fc;
+    --mov-teal: #67e8f9;
+    --mov-rose: #f9a8d4;
+
+    --mov-text: #f0e8ff;
+    --mov-muted: rgba(240, 232, 255, 0.45);
+    --mov-subtle: rgba(240, 232, 255, 0.2);
+}
+
+/* ── Root layout ───────────────────────────────────────────────────────────── */
+.mov-root {
+    min-height: 100dvh;
+    background: var(--mov-bg);
+    font-family: 'Lato', sans-serif;
+    color: var(--mov-text);
+    position: relative;
+    overflow-x: hidden;
+    width: calc(100% - var(--sidebar-current-width, 260px));
+    margin-left: var(--sidebar-current-width, 260px);
+    transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+        margin-left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (max-width: 768px) {
+    .mov-root {
+        width: 100%;
+        margin-left: 0;
+    }
+}
+
+/* ── Floating particles ────────────────────────────────────────────────────── */
+.mov-particles {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+}
+
+.mov-particle {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(192, 132, 252, 0.6);
+    animation: particleDrift var(--dur, 6s) ease-in-out infinite;
+}
+
+@keyframes particleDrift {
+
+    0%,
+    100% {
+        opacity: 0.1;
+        transform: translate(0, 0) scale(1);
+    }
+
+    50% {
+        opacity: 0.5;
+        transform: translate(var(--drift, 20px), -30px) scale(1.4);
+    }
+}
+
+/* ── Reveal animation ──────────────────────────────────────────────────────── */
+.mov-reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1),
+        transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.mov-reveal--visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ── Hero section ──────────────────────────────────────────────────────────── */
+.mov-hero {
+    position: relative;
+    min-height: 60vh;
+    display: flex;
+    align-items: flex-end;
+    padding: 0;
+    overflow: hidden;
+}
+
+.mov-hero-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+}
+
+.mov-hero-bg-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+    opacity: 0;
+    transition: opacity 1.2s ease;
+    filter: blur(2px) saturate(0.7);
+    transform: scale(1.05);
+}
+
+.mov-hero-bg-img.loaded {
+    opacity: 1;
+}
+
+.mov-hero-scrim {
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(to bottom, rgba(5, 4, 15, 0.3) 0%, rgba(5, 4, 15, 0.5) 50%, rgba(5, 4, 15, 0.97) 100%),
+        linear-gradient(to right, rgba(5, 4, 15, 0.6) 0%, transparent 40%);
+}
+
+.mov-hero-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: flex-end;
+    gap: clamp(24px, 5vw, 56px);
+    padding: clamp(80px, 14vw, 160px) clamp(20px, 6vw, 72px) clamp(36px, 6vw, 60px);
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    animation: heroFade 1.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes heroFade {
+    from {
+        opacity: 0;
+        transform: translateY(32px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ── Poster ────────────────────────────────────────────────────────────────── */
+.mov-poster-wrap {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.mov-poster {
+    width: clamp(120px, 18vw, 200px);
+    aspect-ratio: 2/3;
+    object-fit: cover;
+    border-radius: 10px;
+    display: block;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+    border: 1px solid rgba(192, 132, 252, 0.2);
+}
+
+.mov-poster-placeholder {
+    width: clamp(120px, 18vw, 200px);
+    aspect-ratio: 2/3;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #1a1030, #0d0820);
+    border: 1px solid var(--mov-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 13px;
+    color: var(--mov-muted);
+    text-align: center;
+    padding: 16px;
+}
+
+.mov-poster-glow {
+    position: absolute;
+    inset: -20px;
+    border-radius: 16px;
+    background: radial-gradient(ellipse at center, rgba(192, 132, 252, 0.2) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* ── Hero text ─────────────────────────────────────────────────────────────── */
+.mov-hero-text {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex: 1;
+    min-width: 0;
+}
+
+.mov-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-family: 'Cinzel', serif;
+    font-size: clamp(9px, 1.8vw, 11px);
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--mov-gold);
+    opacity: 0.85;
+    margin: 0;
+}
+
+.mov-eyebrow-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--mov-gold);
+    box-shadow: 0 0 8px var(--mov-gold);
+    animation: dotPulse 2.5s ease-in-out infinite;
+    flex-shrink: 0;
+}
+
+@keyframes dotPulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.3;
+    }
+}
+
+.mov-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(26px, 5.5vw, 58px);
+    font-weight: 700;
+    line-height: 1.1;
+    color: #fff;
+    margin: 0;
+    text-shadow: 0 0 60px rgba(192, 132, 252, 0.35), 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.mov-tagline {
+    font-size: clamp(12px, 2.5vw, 16px);
+    font-style: italic;
+    font-weight: 300;
+    color: var(--mov-muted);
+    letter-spacing: 0.04em;
+    margin: 0;
+}
+
+.mov-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.mov-chip {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--mov-teal);
+    border: 1px solid rgba(103, 232, 249, 0.25);
+    border-radius: 4px;
+    padding: 4px 10px;
+    opacity: 0.85;
+}
+
+.mov-hero-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+}
+
+/* ── Buttons ───────────────────────────────────────────────────────────────── */
+.mov-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 24px;
+    border-radius: 6px;
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.22s ease;
+}
+
+.mov-btn--primary {
+    background: linear-gradient(135deg, #c084fc, #818cf8);
+    color: #fff;
+    border: none;
+    box-shadow: 0 4px 20px rgba(192, 132, 252, 0.4);
+}
+
+.mov-btn--primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(192, 132, 252, 0.55);
+}
+
+.mov-btn--ghost {
+    background: transparent;
+    border: 1px solid rgba(232, 201, 122, 0.35);
+    color: var(--mov-gold);
+}
+
+.mov-btn--ghost:hover {
+    background: rgba(232, 201, 122, 0.08);
+    border-color: var(--mov-gold);
+    transform: translateY(-2px);
+}
+
+/* ── Body wrapper ──────────────────────────────────────────────────────────── */
+.mov-body {
+    position: relative;
+    z-index: 1;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: clamp(32px, 5vw, 60px) clamp(20px, 5vw, 60px) 80px;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(24px, 4vw, 40px);
+}
+
+/* ── Stats row ─────────────────────────────────────────────────────────────── */
+.mov-stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+}
+
+@media (max-width: 900px) {
+    .mov-stats-row {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 520px) {
+    .mov-stats-row {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.mov-stat {
+    background: var(--mov-surface);
+    border: 1px solid var(--mov-border);
+    border-radius: 10px;
+    padding: 20px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s, background 0.2s;
+}
+
+.mov-stat::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--accent, var(--mov-purple));
+    border-radius: 2px;
+}
+
+.mov-stat:hover {
+    background: var(--mov-surface-hover);
+    border-color: var(--mov-border-bright);
+}
+
+.mov-stat-value {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(11px, 2vw, 14px);
+    font-weight: 600;
+    color: var(--mov-text);
+    line-height: 1.3;
+}
+
+.mov-stat-label {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--mov-subtle);
+    font-family: 'Cinzel', serif;
+}
+
+/* ── Two-col grid ──────────────────────────────────────────────────────────── */
+.mov-grid-two {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 20px;
+    align-items: start;
+}
+
+@media (max-width: 768px) {
+    .mov-grid-two {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ── Section card ──────────────────────────────────────────────────────────── */
+.mov-section-card {
+    background: var(--mov-surface);
+    border: 1px solid var(--mov-border);
+    border-radius: 12px;
+    padding: clamp(20px, 4vw, 32px);
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.25s;
+}
+
+.mov-section-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    background: radial-gradient(ellipse at 0% 0%, rgba(192, 132, 252, 0.04) 0%, transparent 60%);
+    pointer-events: none;
+}
+
+.mov-section-card:hover {
+    border-color: var(--mov-border-bright);
+}
+
+.mov-section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.mov-section-ornament {
+    width: 3px;
+    height: 18px;
+    border-radius: 2px;
+    background: linear-gradient(to bottom, var(--mov-purple), var(--mov-teal));
+    flex-shrink: 0;
+}
+
+.mov-section-title {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--mov-purple);
+    margin: 0;
+    font-weight: 600;
+}
+
+/* ── Synopsis ──────────────────────────────────────────────────────────────── */
+.mov-synopsis {
+    font-size: 14px;
+    line-height: 1.85;
+    color: rgba(240, 232, 255, 0.75);
+    margin: 0;
+    font-weight: 300;
+}
+
+.mov-syn-shimmer {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* ── Rating card ───────────────────────────────────────────────────────────── */
+.mov-rating-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 16px;
+}
+
+.mov-rating-ring {
+    position: relative;
+    width: 110px;
+    height: 110px;
+}
+
+.mov-ring-bg {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.06);
+    stroke-width: 8;
+}
+
+.mov-ring-fill {
+    fill: none;
+    stroke: url(#ringGrad);
+    stroke-width: 8;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+    /* Inline gradient via CSS fallback */
+    stroke: var(--mov-purple);
+}
+
+.mov-rating-inner {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+}
+
+.mov-rating-num {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 26px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1;
+}
+
+.mov-rating-denom {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--mov-muted);
+    font-family: 'Cinzel', serif;
+}
+
+.mov-rating-sub {
+    font-size: 11px;
+    color: var(--mov-subtle);
+    letter-spacing: 0.08em;
+    margin: 0;
+    font-style: italic;
+}
+
+/* ── Production details table ──────────────────────────────────────────────── */
+.mov-details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    margin: 0;
+}
+
+@media (max-width: 600px) {
+    .mov-details-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.mov-detail-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 14px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.mov-detail-row:nth-child(odd) {
+    padding-right: 32px;
+}
+
+.mov-detail-label {
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--mov-purple);
+    opacity: 0.75;
+}
+
+.mov-detail-value {
+    font-size: 13.5px;
+    color: rgba(240, 232, 255, 0.8);
+    line-height: 1.5;
+    margin: 0;
+}
+
+.mov-detail-link {
+    color: var(--mov-teal);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.mov-detail-link:hover {
+    color: var(--mov-purple);
+}
+
+/* ── Explore section ───────────────────────────────────────────────────────── */
+.mov-explore {
+    text-align: center;
+    padding: 40px 0 0;
+}
+
+.mov-explore-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(18px, 3.5vw, 28px);
+    color: #fff;
+    margin: 0 0 8px;
+    text-shadow: 0 0 40px rgba(192, 132, 252, 0.3);
+}
+
+.mov-explore-sub {
+    font-size: 13px;
+    color: var(--mov-muted);
+    font-style: italic;
+    letter-spacing: 0.04em;
+    margin: 0 0 32px;
+}
+
+.mov-explore-cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+}
+
+@media (max-width: 768px) {
+    .mov-explore-cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 440px) {
+    .mov-explore-cards {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.mov-explore-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 24px 16px;
+    background: var(--mov-surface);
+    border: 1px solid var(--mov-border);
+    border-radius: 10px;
+    text-decoration: none;
+    color: inherit;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.25s ease;
+    group: true;
+}
+
+.mov-explore-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(192, 132, 252, 0.06), rgba(103, 232, 249, 0.04));
+    opacity: 0;
+    transition: opacity 0.25s;
+}
+
+.mov-explore-card:hover {
+    border-color: rgba(192, 132, 252, 0.4);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(192, 132, 252, 0.15);
+}
+
+.mov-explore-card:hover::before {
+    opacity: 1;
+}
+
+.mov-explore-icon {
+    font-size: 22px;
+    color: var(--mov-gold);
+    line-height: 1;
+    position: relative;
+    z-index: 1;
+}
+
+.mov-explore-kana {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--mov-muted);
+    position: relative;
+    z-index: 1;
+}
+
+.mov-explore-card-label {
+    font-family: 'Cinzel', serif;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    color: var(--mov-text);
+    text-transform: uppercase;
+    position: relative;
+    z-index: 1;
+}
+
+.mov-explore-arrow {
+    font-size: 14px;
+    color: var(--mov-purple);
+    opacity: 0;
+    transform: translateX(-4px);
+    transition: opacity 0.2s, transform 0.2s;
+    position: relative;
+    z-index: 1;
+}
+
+.mov-explore-card:hover .mov-explore-arrow {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* ── Shimmer ───────────────────────────────────────────────────────────────── */
+.mov-shimmer {
+    border-radius: 6px;
+    background: linear-gradient(90deg,
+            rgba(255, 255, 255, 0.03) 0%,
+            rgba(255, 255, 255, 0.09) 50%,
+            rgba(255, 255, 255, 0.03) 100%);
+    background-size: 200% 100%;
+    animation: shimmerSlide 1.6s infinite;
+}
+
+@keyframes shimmerSlide {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* ── Error ─────────────────────────────────────────────────────────────────── */
+.mov-error {
+    color: rgba(255, 100, 100, 0.8);
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+}
+
+/* ── Responsive hero layout ────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+    .mov-hero-content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 20px;
+    }
+
+    .mov-poster {
+        width: 110px;
+    }
+}

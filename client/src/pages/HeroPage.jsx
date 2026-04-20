@@ -1,5 +1,6 @@
 /* eslint-disable react-hooks/purity */
 import { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import { getMovieInfo } from "../services/api";
 import "../styles/HeroPage.css";
 
@@ -142,18 +143,18 @@ export default function HeroPage() {
             )}
 
             <div className="hero-actions">
-              <a
-                href="/wiki/princess-kaguya"
+              <Link
+                to="/wiki/princess-kaguya"
                 className="hero-btn hero-btn-primary"
               >
                 Explore Wiki
-              </a>
-              <a
-                href="/wiki/movie-overview"
+              </Link>
+              <Link
+                to="/wiki/movie-overview"
                 className="hero-btn hero-btn-secondary"
               >
                 Movie Info
-              </a>
+              </Link>
             </div>
           </>
         )}

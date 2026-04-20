@@ -21,10 +21,10 @@ const MovieSchema = new mongoose.Schema({
         public_id: String,
         isLooping: { type: Boolean, default: true }
     }],
-    poster: {
+    poster: [{
         url: String,       // The main movie poster (Cloudinary)
         public_id: String
-    },
+    }],
     // --- PRODUCTION DATA ---
     details: {
         releaseDate: Date,

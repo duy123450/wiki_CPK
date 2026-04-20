@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   ChevronDown,
   BookOpen,
@@ -84,9 +85,16 @@ export default function Sidebar({
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [openCategoryId, setOpenCategoryId] = useState(null);
+  const navigate = useNavigate();
 
   const handleCategoryToggle = (categoryId) => {
     setOpenCategoryId((prevId) => (prevId === categoryId ? null : categoryId));
+  };
+
+  const handlePageSelect = (pageSlug) => {
+    setActivePage(pageSlug);
+    // Navigate to the wiki page
+    navigate(`/wiki/${pageSlug}`);
   };
 
   useEffect(() => {
@@ -166,7 +174,7 @@ export default function Sidebar({
                 <CategoryItem
                   category={category}
                   activePage={activePage}
-                  onPageSelect={setActivePage}
+                  onPageSelect={handlePageSelect}
                   isOpen={openCategoryId === category._id}
                   onToggle={handleCategoryToggle}
                 />
