@@ -56,11 +56,37 @@ export default function DragonCursor() {
   const sparkTimer = useRef(0);
 
   useEffect(() => {
+    // Mouse support
     const onMove = (e) => {
       targetRef.current = { x: e.clientX, y: e.clientY };
     };
+
+    // Touch support — theo dõi ngón tay đầu tiên
+    const onTouchMove = (e) => {
+      // preventDefault để tránh scroll khi dragon đang active
+      // Không gọi preventDefault ở đây để không chặn scroll trang
+      const touch = e.touches[0];
+      if (touch) {
+        targetRef.current = { x: touch.clientX, y: touch.clientY };
+      }
+    };
+
+    const onTouchStart = (e) => {
+      const touch = e.touches[0];
+      if (touch) {
+        targetRef.current = { x: touch.clientX, y: touch.clientY };
+      }
+    };
+
     window.addEventListener("mousemove", onMove);
-    return () => window.removeEventListener("mousemove", onMove);
+    window.addEventListener("touchmove", onTouchMove, { passive: true });
+    window.addEventListener("touchstart", onTouchStart, { passive: true });
+
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("touchmove", onTouchMove);
+      window.removeEventListener("touchstart", onTouchStart);
+    };
   }, []);
 
   useEffect(() => {
