@@ -44,6 +44,12 @@ const CharacterSchema = new mongoose.Schema({
         occupation: String
     },
 
+    relationships: [{
+        targetId: { type: mongoose.Schema.Types.ObjectId, ref: 'Character' },
+        relationType: String,
+        description: String
+    }],
+
     image: [{
         url: String,
         public_id: String
