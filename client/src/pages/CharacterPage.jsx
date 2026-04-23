@@ -7,10 +7,10 @@ const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
 // ─── Helper: name → slug (matches server-side logic) ────────────────────────
 const nameToSlug = (name) =>
-    name
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/(^-|-$)/g, '');
+  name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
 
 // ─── API ──────────────────────────────────────────────────────────────────────
 async function fetchCharacter(slug) {
