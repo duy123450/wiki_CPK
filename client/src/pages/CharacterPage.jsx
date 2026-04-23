@@ -2,8 +2,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import "../styles/CharacterPage.css";
-
-const API_BASE = import.meta.env.VITE_API_BASE_URL;
+import { getCharacterBySlug } from "../services/api";
 
 // ─── Helper: name → slug (matches server-side logic) ────────────────────────
 const nameToSlug = (name) =>
@@ -11,14 +10,6 @@ const nameToSlug = (name) =>
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
-
-// ─── API ──────────────────────────────────────────────────────────────────────
-async function fetchCharacter(slug) {
-  const res = await fetch(`${API_BASE}/characters/${slug}`);
-  if (!res.ok) throw new Error(`Character not found (${res.status})`);
-  const data = await res.json();
-  return data.character;
-}
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 // Normalize ability effects: seed has BOTH "effect" and "effects" as field names
@@ -284,7 +275,7 @@ export default function CharacterPage({ sidebarCollapsed }) {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetchCharacter(slug)
+    getCharacterBySlug(slug)
       .then(setCharacter)
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));

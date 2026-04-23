@@ -144,7 +144,7 @@ export default function HeroPage() {
 
             <div className="hero-actions">
               <Link
-                to="/wiki/princess-kaguya"
+                to="/wiki/characters"
                 className="hero-btn hero-btn-primary"
               >
                 Explore Wiki

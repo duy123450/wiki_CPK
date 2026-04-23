@@ -28,6 +28,8 @@
     transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1),
         margin-left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
     padding: clamp(24px, 5vw, 56px) clamp(16px, 5vw, 56px) 80px;
+    max-width: 100vw;
+    box-sizing: border-box;
 }
 
 @media (max-width: 768px) {

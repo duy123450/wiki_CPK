@@ -63,7 +63,7 @@ function CategoryItem({
             <button
               key={page.slug}
               className={`page-link ${activePage === page.slug ? "active" : ""}`}
-              onClick={() => onPageSelect(page.slug)}
+              onClick={() => onPageSelect(page.slug, category.slug)}
             >
               <span className="page-dot" />
               {page.title}
@@ -91,10 +91,13 @@ export default function Sidebar({
     setOpenCategoryId((prevId) => (prevId === categoryId ? null : categoryId));
   };
 
-  const handlePageSelect = (pageSlug) => {
+  const handlePageSelect = (pageSlug, categorySlug) => {
     setActivePage(pageSlug);
-    // Navigate to the wiki page
-    navigate(`/wiki/characters/${pageSlug}`);
+    if (categorySlug === 'characters') {
+      navigate(`/wiki/characters/${pageSlug}`);
+    } else {
+      navigate(`/wiki/${pageSlug}`);
+    }
   };
 
   useEffect(() => {
