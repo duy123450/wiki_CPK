@@ -381,12 +381,6 @@ export default function MovieOverviewPage({ sidebarCollapsed }) {
                   icon: "♪",
                 },
                 {
-                  href: "/wiki/locations",
-                  label: "Locations",
-                  kana: "場所",
-                  icon: "◈",
-                },
-                {
                   href: "/wiki/lore",
                   label: "Lore & World",
                   kana: "世界観",
