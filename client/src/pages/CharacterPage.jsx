@@ -15,8 +15,7 @@ async function fetchCharacter(slug) {
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 // Normalize ability effects: seed has BOTH "effect" and "effects" as field names
-const getEffects = (ability) =>
-  ability.effect ?? ability.effects ?? [];
+const getEffects = (ability) => ability.effect ?? ability.effects ?? [];
 
 // Normalize appearance: seed uses real_world / tsukuyomi_avatar
 // model schema uses realWorld / tsukuyomi — handle both
@@ -46,7 +45,7 @@ function ImageSwitcher({ images }) {
         setFading(false);
       }, 260);
     },
-    [active, fading]
+    [active, fading],
   );
 
   useEffect(() => () => clearTimeout(timerRef.current), []);
@@ -101,9 +100,9 @@ function ImageSwitcher({ images }) {
 // ─── Role badge ───────────────────────────────────────────────────────────────
 const ROLE_COLORS = {
   Protagonist: "var(--chr-gold)",
-  Supporting:  "var(--chr-teal)",
-  Antagonist:  "var(--chr-rose)",
-  Cameo:       "var(--chr-muted)",
+  Supporting: "var(--chr-teal)",
+  Antagonist: "var(--chr-rose)",
+  Cameo: "var(--chr-muted)",
 };
 
 function RoleBadge({ role }) {
@@ -146,10 +145,10 @@ function SectionCard({ title, ornamentColor, children }) {
 
 // ─── Ability card ─────────────────────────────────────────────────────────────
 const ABILITY_TYPE_COLORS = {
-  Passive:  "var(--chr-teal)",
-  Active:   "var(--chr-purple)",
+  Passive: "var(--chr-teal)",
+  Active: "var(--chr-purple)",
   Ultimate: "var(--chr-gold)",
-  Debuff:   "var(--chr-rose)",
+  Debuff: "var(--chr-rose)",
 };
 
 function AbilityCard({ ability }) {
@@ -183,10 +182,13 @@ function AbilityCard({ ability }) {
 
 // ─── Relationship chip ────────────────────────────────────────────────────────
 function RelChip({ rel }) {
-  // targetId is either a populated object OR a raw ObjectId string
-  const target = rel.targetId && typeof rel.targetId === "object"
-    ? rel.targetId
-    : null;
+  // A populated targetId is an object with a "name" field.
+  // A raw (un-populated) ObjectId comes back as a string or an object without
+  // "name" — in both cases we fall back to null so the UI shows "Unknown".
+  const target =
+    rel.targetId && typeof rel.targetId === "object" && rel.targetId.name
+      ? rel.targetId
+      : null;
 
   return (
     <div className="chr-rel-chip">
@@ -203,9 +205,7 @@ function RelChip({ rel }) {
 
       {/* Info */}
       <div className="chr-rel-info">
-        <span className="chr-rel-name">
-          {target?.name ?? "Unknown"}
-        </span>
+        <span className="chr-rel-name">{target?.name ?? "Unknown"}</span>
         {rel.relationType && (
           <span className="chr-rel-type">{rel.relationType}</span>
         )}
@@ -269,8 +269,6 @@ export default function CharacterPage({ sidebarCollapsed }) {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    setLoading(true);
-    setError(null);
     fetchCharacter(slug)
       .then(setCharacter)
       .catch((e) => setError(e.message))
@@ -302,7 +300,6 @@ export default function CharacterPage({ sidebarCollapsed }) {
         </div>
       ) : (
         <div className="chr-layout">
-
           {/* ── LEFT: image + quick stats ── */}
           <aside className="chr-aside">
             <ImageSwitcher images={c.image} />
@@ -319,15 +316,15 @@ export default function CharacterPage({ sidebarCollapsed }) {
 
               {c.origin && (
                 <dl className="chr-stat-list">
-                  <StatRow label="Location"  value={c.origin.location} />
-                  <StatRow label="Birthday"  value={c.origin.birthday} />
-                  <StatRow label="Race"      value={c.origin.race} />
+                  <StatRow label="Location" value={c.origin.location} />
+                  <StatRow label="Birthday" value={c.origin.birthday} />
+                  <StatRow label="Race" value={c.origin.race} />
                 </dl>
               )}
 
               {c.metadata && (
                 <dl className="chr-stat-list">
-                  <StatRow label="Alias"      value={c.metadata.alias} />
+                  <StatRow label="Alias" value={c.metadata.alias} />
                   <StatRow label="Occupation" value={c.metadata.occupation} />
                   {c.metadata.family &&
                     Object.entries(c.metadata.family).map(([k, v]) =>
@@ -337,7 +334,7 @@ export default function CharacterPage({ sidebarCollapsed }) {
                           label={k.charAt(0).toUpperCase() + k.slice(1)}
                           value={v}
                         />
-                      ) : null
+                      ) : null,
                     )}
                 </dl>
               )}
@@ -400,9 +397,12 @@ export default function CharacterPage({ sidebarCollapsed }) {
               </SectionCard>
             )}
 
-            {/* Relationships — renders even if targetId is not populated */}
+            {/* Relationships */}
             {c.relationships?.length > 0 && (
-              <SectionCard title="Relationships" ornamentColor="var(--chr-teal)">
+              <SectionCard
+                title="Relationships"
+                ornamentColor="var(--chr-teal)"
+              >
                 <div className="chr-rels-grid">
                   {c.relationships.map((rel, i) => (
                     <RelChip key={i} rel={rel} />

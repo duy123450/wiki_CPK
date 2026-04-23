@@ -19,7 +19,11 @@ const formatCharacter = (char) => ({
     origin: char.origin ?? null,
     abilities: char.abilities ?? [],
     metadata: char.metadata ?? null,
-    relationships: char.relationships ?? [],
+    // Explicitly spread each rel so the populated targetId object is preserved
+    relationships: (char.relationships ?? []).map((rel) => ({
+        ...rel,
+        targetId: rel.targetId ?? null,
+    })),
     image: char.image ?? [],
     voiceActor: char.voiceActor ?? null,
     movie: char.movie,
@@ -70,6 +74,10 @@ const getAllCharacters = asyncWrapper(async (req, res) => {
             .skip(skip)
             .limit(parsedLimit)
             .populate('movie', 'title slug')
+            .populate({
+                path: 'relationships.targetId',
+                select: 'name image role'
+            })
             .lean(),
         Character.countDocuments(filter),
     ]);
@@ -90,26 +98,39 @@ const getAllCharacters = asyncWrapper(async (req, res) => {
 });
 
 // ─── GET /api/v1/wiki/characters/:slug ───────────────────────────────────────
-// :slug is the character name converted to kebab-case
-// e.g. "Kaguya" → "kaguya"
+// Tries to match the stored slug field first (set by mongoose-slug-updater),
+// then falls back to a name-based regex for legacy / manually seeded docs.
 const getCharacterBySlug = asyncWrapper(async (req, res) => {
     const { slug } = req.params;
 
-    // Reverse slug back to a name pattern for regex matching
-    const namePattern = slug.replace(/-/g, ' ');
-
-    const character = await Character.findOne({
-        name: { $regex: new RegExp(`^${namePattern}$`, 'i') },
-    })
+    // 1. Match the stored slug field directly
+    let character = await Character.findOne({ slug })
         .populate('movie', 'title slug poster')
-        .populate('relationships.targetId', 'name image role')
-        .lean();
+        .populate({
+            path: 'relationships.targetId',
+            select: 'name image role'
+        });
+
+    // 2. Fallback: reverse slug → flexible name regex
+    //    Handles names like "Kaguya" stored with slug "kaguya", or names with
+    //    hyphens/spaces where the sidebar WikiPage slug may differ slightly.
+    if (!character) {
+        const namePattern = slug.replace(/-/g, '[\\s\\-]');
+        character = await Character.findOne({
+            name: { $regex: new RegExp(`^${namePattern}$`, 'i') },
+        })
+            .populate('movie', 'title slug poster')
+            .populate({
+                path: 'relationships.targetId',
+                select: 'name image role'
+            });
+    }
 
     if (!character) {
         throw createCustomError(`No character found with slug: ${slug}`, 404);
     }
 
-    res.status(200).json({ character: formatCharacter(character) });
+    res.status(200).json({ character: formatCharacter(character.toJSON ? character.toJSON() : character) });
 });
 
 module.exports = { getAllCharacters, getCharacterBySlug };
