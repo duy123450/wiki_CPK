@@ -5,6 +5,13 @@ import "../styles/CharacterPage.css";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
+// ─── Helper: name → slug (matches server-side logic) ────────────────────────
+const nameToSlug = (name) =>
+    name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '');
+
 // ─── API ──────────────────────────────────────────────────────────────────────
 async function fetchCharacter(slug) {
   const res = await fetch(`${API_BASE}/characters/${slug}`);
@@ -190,30 +197,38 @@ function RelChip({ rel }) {
       ? rel.targetId
       : null;
 
-  return (
-    <div className="chr-rel-chip">
-      {/* Avatar */}
-      {target?.image?.[0]?.url ? (
-        <img
-          src={target.image[0].url}
-          alt={target.name}
-          className="chr-rel-avatar"
-        />
-      ) : (
-        <div className="chr-rel-avatar chr-rel-avatar--placeholder">✦</div>
-      )}
+  const targetSlug = target ? nameToSlug(target.name) : null;
 
-      {/* Info */}
-      <div className="chr-rel-info">
-        <span className="chr-rel-name">{target?.name ?? "Unknown"}</span>
-        {rel.relationType && (
-          <span className="chr-rel-type">{rel.relationType}</span>
+  return (
+    <Link
+      to={targetSlug ? `/wiki/characters/${targetSlug}` : "#"}
+      style={{ textDecoration: "none", color: "inherit" }}
+      className={target ? "chr-rel-chip-link" : ""}
+    >
+      <div className="chr-rel-chip">
+        {/* Avatar */}
+        {target?.image?.[0]?.url ? (
+          <img
+            src={target.image[0].url}
+            alt={target.name}
+            className="chr-rel-avatar"
+          />
+        ) : (
+          <div className="chr-rel-avatar chr-rel-avatar--placeholder">✦</div>
         )}
-        {rel.description && (
-          <span className="chr-rel-desc">{rel.description}</span>
-        )}
+
+        {/* Info */}
+        <div className="chr-rel-info">
+          <span className="chr-rel-name">{target?.name ?? "Unknown"}</span>
+          {rel.relationType && (
+            <span className="chr-rel-type">{rel.relationType}</span>
+          )}
+          {rel.description && (
+            <span className="chr-rel-desc">{rel.description}</span>
+          )}
+        </div>
       </div>
-    </div>
+    </Link>
   );
 }
 

@@ -646,8 +646,14 @@
     transition: border-color 0.2s;
 }
 
+.chr-rel-chip-link .chr-rel-chip {
+    cursor: pointer;
+}
+
 .chr-rel-chip:hover {
     border-color: rgba(103, 232, 249, 0.25);
+    background: rgba(103, 232, 249, 0.05);
+    transform: translateY(-2px);
 }
 
 .chr-rel-avatar {
