@@ -26,3 +26,11 @@ export const fetchMovieInfo = async () => {
     const res = await api.get("/movie-info");
     return res.data; // { movie: { _id, title, ... } }
 };
+
+// ─── Characters ───────────────────────────────────────────────────────────────
+
+export const getCharacters = (params = {}) =>
+    api.get("/characters", { params }).then((res) => res.data);
+
+export const getCharacterBySlug = (slug) =>
+    api.get(`/characters/${slug}`).then((res) => res.data.character);

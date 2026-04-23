@@ -94,7 +94,7 @@ export default function Sidebar({
   const handlePageSelect = (pageSlug) => {
     setActivePage(pageSlug);
     // Navigate to the wiki page
-    navigate(`/wiki/${pageSlug}`);
+    navigate(`/wiki/characters/${pageSlug}`);
   };
 
   useEffect(() => {
