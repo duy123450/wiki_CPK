@@ -7,6 +7,7 @@ import HeroPage from "./pages/HeroPage";
 import MovieOverviewPage from "./pages/MovieOverviewPage";
 import CharactersPage from "./pages/CharactersPage";
 import CharacterPage from "./pages/CharacterPage";
+import NotFoundPage from "./pages/NotFoundPage";
 import Footer from "./components/Footer";
 import Playlist from "./components/Playlist";
 
@@ -40,6 +41,10 @@ export default function App() {
           <Route
             path="/wiki/characters/:slug"
             element={<CharacterPage sidebarCollapsed={sidebarCollapsed} />}
+          />
+          <Route
+            path="*"
+            element={<NotFoundPage sidebarCollapsed={sidebarCollapsed} />}
           />
         </Routes>
         <Footer sidebarCollapsed={sidebarCollapsed} />

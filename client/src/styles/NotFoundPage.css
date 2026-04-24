@@ -1,0 +1,198 @@
+.nf-root {
+  --nf-bg-1: #090814;
+  --nf-bg-2: #14132a;
+  --nf-gold: #e9c87b;
+  --nf-rose: #dd8fb0;
+  --nf-cyan: #79d5e6;
+  --nf-text: #f6f0ff;
+  --nf-muted: rgba(246, 240, 255, 0.72);
+  position: relative;
+  min-height: 100vh;
+  margin-left: var(--sidebar-current-width, 260px);
+  display: grid;
+  place-items: center;
+  padding: 48px 28px 120px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(121, 213, 230, 0.18), transparent 30%),
+    radial-gradient(circle at 80% 30%, rgba(221, 143, 176, 0.16), transparent 28%),
+    radial-gradient(circle at 50% 80%, rgba(233, 200, 123, 0.12), transparent 34%),
+    linear-gradient(180deg, var(--nf-bg-2), var(--nf-bg-1));
+  transition: margin-left 220ms ease;
+}
+
+.nf-root.sidebar-collapsed {
+  margin-left: 0;
+}
+
+.nf-vignette {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at center, transparent 35%, rgba(0, 0, 0, 0.34) 100%);
+  pointer-events: none;
+}
+
+.nf-orb-field {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.nf-orb {
+  position: absolute;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.22), transparent 70%);
+  filter: blur(8px);
+  animation: nf-float linear infinite;
+  opacity: 0.85;
+}
+
+.nf-card {
+  position: relative;
+  z-index: 1;
+  width: min(760px, 100%);
+  padding: 48px 40px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 32px;
+  text-align: center;
+  color: var(--nf-text);
+  background: linear-gradient(180deg, rgba(18, 16, 39, 0.84), rgba(8, 8, 20, 0.9));
+  box-shadow:
+    0 24px 80px rgba(0, 0, 0, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(18px);
+}
+
+.nf-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 18px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  font-size: 0.78rem;
+  color: var(--nf-muted);
+}
+
+.nf-eyebrow-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--nf-cyan), var(--nf-gold));
+  box-shadow: 0 0 14px rgba(121, 213, 230, 0.75);
+}
+
+.nf-code-wrap {
+  position: relative;
+  margin: 0 auto 8px;
+}
+
+.nf-code,
+.nf-code-shadow {
+  margin: 0;
+  font-size: clamp(5rem, 18vw, 10rem);
+  line-height: 0.9;
+  letter-spacing: 0.08em;
+  font-weight: 800;
+}
+
+.nf-code {
+  position: relative;
+  z-index: 1;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.72);
+  text-shadow: 0 0 30px rgba(121, 213, 230, 0.16);
+}
+
+.nf-code-shadow {
+  position: absolute;
+  inset: 0;
+  transform: translate(10px, 10px);
+  color: rgba(233, 200, 123, 0.14);
+}
+
+.nf-title {
+  margin: 0 0 14px;
+  font-size: clamp(1.8rem, 5vw, 3rem);
+  line-height: 1.05;
+}
+
+.nf-copy {
+  width: min(560px, 100%);
+  margin: 0 auto;
+  font-size: 1rem;
+  line-height: 1.8;
+  color: var(--nf-muted);
+}
+
+.nf-actions {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 30px;
+}
+
+.nf-btn {
+  min-width: 180px;
+  padding: 14px 20px;
+  border-radius: 999px;
+  text-decoration: none;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    border-color 180ms ease,
+    background 180ms ease;
+}
+
+.nf-btn:hover {
+  transform: translateY(-2px);
+}
+
+.nf-btn-primary {
+  color: #15121f;
+  background: linear-gradient(135deg, var(--nf-gold), #f6e3b1);
+  box-shadow: 0 12px 36px rgba(233, 200, 123, 0.26);
+}
+
+.nf-btn-secondary {
+  color: var(--nf-text);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+@keyframes nf-float {
+  0% {
+    transform: translate3d(0, 0, 0) scale(0.95);
+  }
+  50% {
+    transform: translate3d(0, -24px, 0) scale(1.05);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) scale(0.95);
+  }
+}
+
+@media (max-width: 900px) {
+  .nf-root {
+    margin-left: 0;
+    padding-inline: 18px;
+  }
+
+  .nf-card {
+    padding: 36px 22px;
+    border-radius: 24px;
+  }
+
+  .nf-copy {
+    line-height: 1.65;
+  }
+
+  .nf-btn {
+    width: 100%;
+  }
+}
