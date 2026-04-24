@@ -19,7 +19,7 @@
 .chrs-root {
     min-height: 100dvh;
     background: var(--chrs-bg);
-    font-family: 'Lato', sans-serif;
+    font-family: 'Source Sans 3', sans-serif;
     color: var(--chrs-text);
     position: relative;
     overflow-x: hidden;
@@ -98,7 +98,7 @@
     display: inline-flex;
     align-items: center;
     gap: 7px;
-    font-family: 'Cinzel', serif;
+    font-family: 'Inter', sans-serif;
     font-size: 10px;
     letter-spacing: 0.28em;
     text-transform: uppercase;
@@ -129,7 +129,7 @@
 }
 
 .chrs-header-title {
-    font-family: 'Cinzel Decorative', serif;
+    font-family: 'Inter', sans-serif;
     font-size: clamp(30px, 5vw, 56px);
     font-weight: 700;
     color: #fff;
@@ -193,7 +193,7 @@
     border: 1px solid var(--chrs-border);
     border-radius: 8px;
     padding: 9px 36px 9px 36px;
-    font-family: 'Lato', sans-serif;
+    font-family: 'Source Sans 3', sans-serif;
     font-size: 13px;
     color: var(--chrs-text);
     outline: none;
@@ -236,7 +236,7 @@
 }
 
 .chrs-role-pill {
-    font-family: 'Cinzel', serif;
+    font-family: 'Inter', sans-serif;
     font-size: 9.5px;
     letter-spacing: 0.16em;
     text-transform: uppercase;
@@ -436,7 +436,7 @@
     border-radius: 999px;
     border: 1px solid var(--badge-color, var(--chrs-purple));
     background: color-mix(in srgb, var(--badge-color, var(--chrs-purple)) 10%, transparent);
-    font-family: 'Cinzel', serif;
+    font-family: 'Inter', sans-serif;
     font-size: 8.5px;
     letter-spacing: 0.2em;
     text-transform: uppercase;
@@ -445,7 +445,7 @@
 }
 
 .chrs-card-name {
-    font-family: 'Cinzel', serif;
+    font-family: 'Inter', sans-serif;
     font-size: clamp(14px, 2vw, 17px);
     font-weight: 600;
     color: var(--chrs-text);
@@ -464,7 +464,7 @@
 }
 
 .chrs-card-voice-label {
-    font-family: 'Cinzel', serif;
+    font-family: 'Inter', sans-serif;
     font-size: 8px;
     letter-spacing: 0.2em;
     color: var(--chrs-teal);
@@ -488,7 +488,7 @@
     display: flex;
     align-items: center;
     gap: 5px;
-    font-family: 'Cinzel', serif;
+    font-family: 'Inter', sans-serif;
     font-size: 9.5px;
     letter-spacing: 0.18em;
     text-transform: uppercase;
@@ -593,7 +593,7 @@
 }
 
 .chrs-retry-btn {
-    font-family: 'Cinzel', serif;
+    font-family: 'Inter', sans-serif;
     font-size: 10px;
     letter-spacing: 0.18em;
     text-transform: uppercase;
@@ -625,7 +625,7 @@
 }
 
 .chrs-page-btn {
-    font-family: 'Cinzel', serif;
+    font-family: 'Inter', sans-serif;
     font-size: 11px;
     letter-spacing: 0.1em;
     color: var(--chrs-muted);

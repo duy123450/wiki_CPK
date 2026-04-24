@@ -2,7 +2,7 @@
     background: #070b14;
     border-top: 1px solid rgba(148, 163, 184, 0.1);
     padding: 60px 0 0;
-    font-family: 'Lato', 'Segoe UI', sans-serif;
+    font-family: 'Source Sans 3', 'Segoe UI', sans-serif;
     color: #94a3b8;
     position: relative;
     overflow: hidden;
@@ -47,7 +47,7 @@
 }
 
 .footer-logo-title {
-    font-family: 'Cinzel Decorative', 'Cinzel', serif;
+    font-family: 'Inter', sans-serif;
     font-size: 20px;
     font-weight: 700;
     color: #e2d9f3;
@@ -57,7 +57,7 @@
 }
 
 .footer-logo-sub {
-    font-family: 'Cinzel', serif;
+    font-family: 'Inter', sans-serif;
     font-size: 10px;
     letter-spacing: 0.25em;
     color: #c084fc;
@@ -91,7 +91,7 @@
 
 /* ── Column headings ── */
 .footer-col-title {
-    font-family: 'Cinzel', serif;
+    font-family: 'Inter', sans-serif;
     font-size: 9.5px;
     letter-spacing: 0.25em;
     text-transform: uppercase;
@@ -231,7 +231,7 @@
     border-radius: 999px;
     border: 1px solid rgba(251, 191, 36, 0.25);
     background: rgba(251, 191, 36, 0.06);
-    font-family: 'Cinzel', serif;
+    font-family: 'Inter', sans-serif;
     font-size: 9px;
     letter-spacing: 0.15em;
     text-transform: uppercase;
@@ -309,7 +309,7 @@
 }
 
 .footer-disclaimer-lang-label {
-    font-family: 'Cinzel', serif;
+    font-family: 'Inter', sans-serif;
     font-size: 9px;
     letter-spacing: 0.25em;
     text-transform: uppercase;

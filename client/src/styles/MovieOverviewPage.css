@@ -20,7 +20,7 @@
 .mov-root {
     min-height: 100dvh;
     background: var(--mov-bg);
-    font-family: 'Lato', sans-serif;
+    font-family: 'Source Sans 3', sans-serif;
     color: var(--mov-text);
     position: relative;
     overflow-x: hidden;
@@ -171,7 +171,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-family: 'Cinzel Decorative', serif;
+    font-family: 'Inter', sans-serif;
     font-size: 13px;
     color: var(--mov-muted);
     text-align: center;
@@ -200,7 +200,7 @@
     display: inline-flex;
     align-items: center;
     gap: 7px;
-    font-family: 'Cinzel', serif;
+    font-family: 'Inter', sans-serif;
     font-size: clamp(9px, 1.8vw, 11px);
     letter-spacing: 0.25em;
     text-transform: uppercase;
@@ -232,7 +232,7 @@
 }
 
 .mov-title {
-    font-family: 'Cinzel Decorative', serif;
+    font-family: 'Inter', sans-serif;
     font-size: clamp(26px, 5.5vw, 58px);
     font-weight: 700;
     line-height: 1.1;
@@ -257,7 +257,7 @@
 }
 
 .mov-chip {
-    font-family: 'Cinzel', serif;
+    font-family: 'Inter', sans-serif;
     font-size: 10px;
     letter-spacing: 0.15em;
     text-transform: uppercase;
@@ -282,7 +282,7 @@
     gap: 6px;
     padding: 10px 24px;
     border-radius: 6px;
-    font-family: 'Cinzel', serif;
+    font-family: 'Inter', sans-serif;
     font-size: 11px;
     letter-spacing: 0.15em;
     text-transform: uppercase;
@@ -376,7 +376,7 @@
 }
 
 .mov-stat-value {
-    font-family: 'Cinzel', serif;
+    font-family: 'Inter', sans-serif;
     font-size: clamp(11px, 2vw, 14px);
     font-weight: 600;
     color: var(--mov-text);
@@ -388,7 +388,7 @@
     letter-spacing: 0.2em;
     text-transform: uppercase;
     color: var(--mov-subtle);
-    font-family: 'Cinzel', serif;
+    font-family: 'Inter', sans-serif;
 }
 
 /* ── Two-col grid ──────────────────────────────────────────────────────────── */
@@ -445,7 +445,7 @@
 }
 
 .mov-section-title {
-    font-family: 'Cinzel', serif;
+    font-family: 'Inter', sans-serif;
     font-size: 13px;
     letter-spacing: 0.2em;
     text-transform: uppercase;
@@ -511,7 +511,7 @@
 }
 
 .mov-rating-num {
-    font-family: 'Cinzel Decorative', serif;
+    font-family: 'Inter', sans-serif;
     font-size: 26px;
     font-weight: 700;
     color: #fff;
@@ -522,7 +522,7 @@
     font-size: 10px;
     letter-spacing: 0.1em;
     color: var(--mov-muted);
-    font-family: 'Cinzel', serif;
+    font-family: 'Inter', sans-serif;
 }
 
 .mov-rating-sub {
@@ -560,7 +560,7 @@
 }
 
 .mov-detail-label {
-    font-family: 'Cinzel', serif;
+    font-family: 'Inter', sans-serif;
     font-size: 9px;
     letter-spacing: 0.25em;
     text-transform: uppercase;
@@ -592,7 +592,7 @@
 }
 
 .mov-explore-title {
-    font-family: 'Cinzel Decorative', serif;
+    font-family: 'Inter', sans-serif;
     font-size: clamp(18px, 3.5vw, 28px);
     color: #fff;
     margin: 0 0 8px;
@@ -670,7 +670,7 @@
 }
 
 .mov-explore-kana {
-    font-family: 'Cinzel', serif;
+    font-family: 'Inter', sans-serif;
     font-size: 10px;
     letter-spacing: 0.1em;
     color: var(--mov-muted);
@@ -679,7 +679,7 @@
 }
 
 .mov-explore-card-label {
-    font-family: 'Cinzel', serif;
+    font-family: 'Inter', sans-serif;
     font-size: 12px;
     letter-spacing: 0.12em;
     color: var(--mov-text);
@@ -727,7 +727,7 @@
 /* ── Error ─────────────────────────────────────────────────────────────────── */
 .mov-error {
     color: rgba(255, 100, 100, 0.8);
-    font-family: 'Cinzel', serif;
+    font-family: 'Inter', sans-serif;
     font-size: 13px;
     letter-spacing: 0.1em;
 }

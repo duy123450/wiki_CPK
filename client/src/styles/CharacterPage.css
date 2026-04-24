@@ -19,7 +19,7 @@
 .chr-root {
     min-height: 100dvh;
     background: var(--chr-bg);
-    font-family: 'Lato', sans-serif;
+    font-family: 'Source Sans 3', sans-serif;
     color: var(--chr-text);
     position: relative;
     overflow-x: hidden;
@@ -76,7 +76,7 @@
 }
 
 .chr-back-link {
-    font-family: 'Cinzel', serif;
+    font-family: 'Inter', sans-serif;
     font-size: 10px;
     letter-spacing: 0.22em;
     text-transform: uppercase;
@@ -276,7 +276,7 @@
     position: relative;
     z-index: 1;
     display: block;
-    font-family: 'Cinzel', serif;
+    font-family: 'Inter', sans-serif;
     font-size: 9px;
     letter-spacing: 0.18em;
     text-transform: uppercase;
@@ -367,7 +367,7 @@
     border-radius: 999px;
     border: 1px solid var(--badge-color, var(--chr-purple));
     background: color-mix(in srgb, var(--badge-color, var(--chr-purple)) 10%, transparent);
-    font-family: 'Cinzel', serif;
+    font-family: 'Inter', sans-serif;
     font-size: 9px;
     letter-spacing: 0.22em;
     text-transform: uppercase;
@@ -387,7 +387,7 @@
 
 .chr-voice-label {
     display: block;
-    font-family: 'Cinzel', serif;
+    font-family: 'Inter', sans-serif;
     font-size: 8.5px;
     letter-spacing: 0.22em;
     text-transform: uppercase;
@@ -413,7 +413,7 @@
 }
 
 .chr-stat-label {
-    font-family: 'Cinzel', serif;
+    font-family: 'Inter', sans-serif;
     font-size: 8.5px;
     letter-spacing: 0.2em;
     text-transform: uppercase;
@@ -449,7 +449,7 @@
     display: inline-flex;
     align-items: center;
     gap: 7px;
-    font-family: 'Cinzel', serif;
+    font-family: 'Inter', sans-serif;
     font-size: 10px;
     letter-spacing: 0.25em;
     text-transform: uppercase;
@@ -480,7 +480,7 @@
 }
 
 .chr-name {
-    font-family: 'Cinzel Decorative', serif;
+    font-family: 'Inter', sans-serif;
     font-size: clamp(26px, 4.5vw, 52px);
     font-weight: 700;
     line-height: 1.1;
@@ -526,7 +526,7 @@
 }
 
 .chr-section-title {
-    font-family: 'Cinzel', serif;
+    font-family: 'Inter', sans-serif;
     font-size: 11px;
     letter-spacing: 0.22em;
     text-transform: uppercase;
@@ -558,7 +558,7 @@
 }
 
 .chr-appear-heading {
-    font-family: 'Cinzel', serif;
+    font-family: 'Inter', sans-serif;
     font-size: 9px;
     letter-spacing: 0.2em;
     text-transform: uppercase;
@@ -595,7 +595,7 @@
 }
 
 .chr-ability-name {
-    font-family: 'Cinzel', serif;
+    font-family: 'Inter', sans-serif;
     font-size: 11.5px;
     letter-spacing: 0.08em;
     color: var(--chr-text);
@@ -603,7 +603,7 @@
 }
 
 .chr-ability-type {
-    font-family: 'Cinzel', serif;
+    font-family: 'Inter', sans-serif;
     font-size: 8.5px;
     letter-spacing: 0.18em;
     text-transform: uppercase;
@@ -684,7 +684,7 @@
 }
 
 .chr-rel-name {
-    font-family: 'Cinzel', serif;
+    font-family: 'Inter', sans-serif;
     font-size: 11px;
     letter-spacing: 0.06em;
     color: var(--chr-text);
