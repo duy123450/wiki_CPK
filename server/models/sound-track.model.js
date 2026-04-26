@@ -56,6 +56,19 @@ const SoundtrackSchema = new mongoose.Schema({
     coverImage: {
         url: String,
         public_id: String
+    },
+    lyrics: {
+        // Static blocks for full reading
+        original: { type: String, default: "" },    // Native text
+        romaji: { type: String, default: "" },      // Latin alphabet version
+        translation: { type: String, default: "" }, // English or Vietnamese
+
+        // Synced lines for a "Karaoke" style UI
+        synced: [{
+            time: { type: Number },        // Time in seconds from start of track
+            line: { type: String },        // The lyric line
+            lineRomaji: { type: String }   // Romaji for that specific line
+        }]
     }
 }, { timestamps: true });
 

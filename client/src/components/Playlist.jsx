@@ -170,6 +170,23 @@ const IconChevronUp = () => (
   </svg>
 );
 
+const IconVolume = () => (
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+    <path d="M15.5 8.5a5 5 0 0 1 0 7" />
+    <path d="M18.5 5.5a9 9 0 0 1 0 13" />
+  </svg>
+);
+
 export default function Playlist() {
   const [movie, setMovie] = useState(null);
   const [tracks, setTracks] = useState([]);
@@ -179,6 +196,7 @@ export default function Playlist() {
   const [isLoop, setIsLoop] = useState(false);
   const [progress, setProgress] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
+  const [volume, setVolume] = useState(70);
   const [isExpanded, setIsExpanded] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -193,6 +211,8 @@ export default function Playlist() {
   const isLoopRef = useRef(false);
   const isShuffleRef = useRef(false);
   const isSeekingRef = useRef(false);
+  const advanceInFlightRef = useRef(false);
+  const volumeRef = useRef(70);
 
   // ── Shuffle history stack ──────────────────────────────────────────────────
   // Stores the index of every track played, so prev can walk it back.
@@ -214,6 +234,9 @@ export default function Playlist() {
   useEffect(() => {
     isShuffleRef.current = isShuffle;
   }, [isShuffle]);
+  useEffect(() => {
+    volumeRef.current = volume;
+  }, [volume]);
 
   useEffect(() => {
     const init = async () => {
@@ -259,26 +282,34 @@ export default function Playlist() {
   }, []);
 
   const handleAutoAdvance = useCallback(async () => {
+    if (advanceInFlightRef.current) return;
     const tracks = tracksRef.current;
     const movie = movieRef.current;
     const idx = currentIdxRef.current;
     if (!tracks.length || !movie) return;
     const track = tracks[idx];
+    if (!track) return;
     const mode = isLoopRef.current
       ? "infinite"
       : isShuffleRef.current
         ? "shuffle"
         : "sequential";
+
+    advanceInFlightRef.current = true;
     try {
       const data = await fetchNextTrack({
         currentTrackId: track._id,
         mode,
         movieId: movie._id,
       });
-      const nextIdx = tracks.findIndex((t) => t._id === data.track._id);
+      const nextIdx = tracks.findIndex(
+        (t) => String(t._id) === String(data.track._id),
+      );
       if (nextIdx !== -1) playTrackAtIndex(nextIdx, /* pushHistory */ true);
     } catch (err) {
       console.error("Auto-advance failed:", err);
+    } finally {
+      advanceInFlightRef.current = false;
     }
   }, []);
 
@@ -289,6 +320,7 @@ export default function Playlist() {
       const tracks = tracksRef.current;
       const track = tracks[idx];
       if (!track) return;
+      currentIdxRef.current = idx;
       setCurrentIdx(idx);
       setProgress(0);
       setCurrentTime(0);
@@ -344,6 +376,7 @@ export default function Playlist() {
         events: {
           onReady: () => {
             ytReadyRef.current = true;
+            ytPlayerRef.current?.setVolume(volumeRef.current);
           },
           onStateChange: (e) => {
             if (e.data === window.YT.PlayerState.PLAYING) {
@@ -534,6 +567,14 @@ export default function Playlist() {
     });
   }, []);
 
+  const handleVolumeChange = useCallback((e) => {
+    const nextVolume = parseFloat(e.target.value);
+    setVolume(nextVolume);
+    if (ytReadyRef.current && ytPlayerRef.current) {
+      ytPlayerRef.current.setVolume(nextVolume);
+    }
+  }, []);
+
   const currentTrack = tracks[currentIdx];
   const duration = currentTrack
     ? currentTrack.endTime - currentTrack.startTime
@@ -677,6 +718,26 @@ export default function Playlist() {
                 <TipBtn label="Loop" onClick={handleLoopToggle}>
                   <IconLoop active={isLoop} />
                 </TipBtn>
+              </div>
+
+              <div className="pl-volume-row">
+                <span className="pl-volume-icon" aria-hidden="true">
+                  <IconVolume />
+                </span>
+                <input
+                  type="range"
+                  className="pl-slider pl-volume-slider"
+                  min="0"
+                  max="100"
+                  value={volume}
+                  step="1"
+                  aria-label="Volume"
+                  style={{
+                    background: `linear-gradient(to right, #1DB954 ${volume}%, #404040 ${volume}%)`,
+                  }}
+                  onChange={handleVolumeChange}
+                />
+                <span className="pl-volume-value">{volume}</span>
               </div>
             </div>
 

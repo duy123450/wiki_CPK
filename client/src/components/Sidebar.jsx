@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect, useRef } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   ChevronDown,
   BookOpen,
@@ -85,7 +85,18 @@ export default function Sidebar({
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [openCategoryId, setOpenCategoryId] = useState(null);
+  const hasMountedRef = useRef(false);
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+
+  const applyCollapsedState = (collapsed) => {
+    setIsCollapsed(collapsed);
+    document.documentElement.style.setProperty(
+      "--sidebar-current-width",
+      collapsed ? "0px" : "260px",
+    );
+    onCollapseChange?.(collapsed);
+  };
 
   const handleCategoryToggle = (categoryId) => {
     setOpenCategoryId((prevId) => (prevId === categoryId ? null : categoryId));
@@ -119,14 +130,16 @@ export default function Sidebar({
     fetchSidebarData();
   }, []);
 
+  useEffect(() => {
+    if (!hasMountedRef.current) {
+      hasMountedRef.current = true;
+      return;
+    }
+    applyCollapsedState(true);
+  }, [pathname]);
+
   const handleToggle = () => {
-    const next = !isCollapsed;
-    setIsCollapsed(next);
-    document.documentElement.style.setProperty(
-      "--sidebar-current-width",
-      next ? "0px" : "260px",
-    );
-    onCollapseChange?.(next);
+    applyCollapsedState(!isCollapsed);
   };
 
   return (
