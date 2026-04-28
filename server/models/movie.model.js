@@ -31,7 +31,15 @@ const MovieSchema = new mongoose.Schema({
         runtime: String,    // e.g., "120 min"
         studio: String,     // e.g., "A-1 Pictures"
         director: String,
-        officialWebsite: String
+        officialWebsite: String,
+        watchUrl: {
+            type: String,
+            trim: true
+        },
+        lightNovelUrl: {
+            type: String,
+            trim: true
+        }
     },
     // --- STATS ---
     rating: {
