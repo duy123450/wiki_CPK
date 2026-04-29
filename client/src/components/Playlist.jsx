@@ -238,6 +238,12 @@ export default function Playlist() {
     volumeRef.current = volume;
   }, [volume]);
 
+  function resolveTrackIndex(trackId) {
+    return tracksRef.current.findIndex(
+      (track) => String(track._id) === String(trackId),
+    );
+  }
+
   useEffect(() => {
     const init = async () => {
       try {
@@ -302,9 +308,7 @@ export default function Playlist() {
         mode,
         movieId: movie._id,
       });
-      const nextIdx = tracks.findIndex(
-        (t) => String(t._id) === String(data.track._id),
-      );
+      const nextIdx = resolveTrackIndex(data.track._id);
       if (nextIdx !== -1) playTrackAtIndex(nextIdx, /* pushHistory */ true);
     } catch (err) {
       console.error("Auto-advance failed:", err);
@@ -320,6 +324,8 @@ export default function Playlist() {
       const tracks = tracksRef.current;
       const track = tracks[idx];
       if (!track) return;
+      clearInterval(progressInterval.current);
+      advanceInFlightRef.current = false;
       currentIdxRef.current = idx;
       setCurrentIdx(idx);
       setProgress(0);
@@ -465,7 +471,7 @@ export default function Playlist() {
           mode: "shuffle",
           movieId: movie._id,
         });
-        const nextIdx = tracks.findIndex((t) => t._id === data.track._id);
+        const nextIdx = resolveTrackIndex(data.track._id);
         if (nextIdx !== -1) playTrackAtIndex(nextIdx, /* pushHistory */ true);
       } catch (err) {
         console.error("Shuffle next failed:", err);

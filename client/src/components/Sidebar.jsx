@@ -11,12 +11,35 @@ import {
   Map,
   Sparkles,
   Wand2,
+  LogIn,
+  LogOut,
 } from "lucide-react";
 import { getSidebar } from "../services/api";
 import "../styles/Sidebar.css";
 
 const LOGO_URL =
   "https://res.cloudinary.com/dvlaoxjzi/image/upload/q_auto/f_auto/v1775613442/661386943_1497013225103051_5810917340196605647_n_ta4cju.jpg";
+const MOVIE_EXTERNAL_LINKS = [
+  {
+    title: "Xem Phim",
+    url: "https://animevietsub.bz/phim/kaguya-cong-chua-vu-tru-a5875/xem-phim-111317.html",
+  },
+  {
+    title: "Đọc Light Novel",
+    url: "https://ln.hako.vn/truyen/24840-kaguya-cong-chua-vu-tru",
+  },
+];
+const OPEN_CATEGORY_COOKIE = "cpkSidebarOpenCategory";
+
+function getCookie(name) {
+  const cookies = document.cookie ? document.cookie.split("; ") : [];
+  const target = cookies.find((entry) => entry.startsWith(`${name}=`));
+  return target ? decodeURIComponent(target.split("=").slice(1).join("=")) : null;
+}
+
+function setCookie(name, value, maxAgeSeconds = 60 * 60 * 24 * 30) {
+  document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=${maxAgeSeconds}; samesite=lax`;
+}
 
 const ICON_MAP = {
   users: Users,
@@ -34,17 +57,19 @@ function CategoryItem({
   category,
   activePage,
   onPageSelect,
+  onExternalLinkClick,
   isOpen,
   onToggle,
 }) {
   const Icon = ICON_MAP[category.icon] || BookOpen;
   const hasActivePage = category.pages?.some((p) => p.slug === activePage);
+  const hasMovieLinks = category.slug === "movie";
 
   return (
     <div className={`category-item ${hasActivePage ? "has-active" : ""}`}>
       <button
         className={`category-header ${isOpen ? "open" : ""}`}
-        onClick={() => onToggle(category._id)}
+        onClick={() => onToggle(category.slug)}
         aria-expanded={isOpen}
       >
         <span className="category-icon-wrap">
@@ -69,6 +94,20 @@ function CategoryItem({
               {page.title}
             </button>
           ))}
+          {hasMovieLinks &&
+            MOVIE_EXTERNAL_LINKS.map((link) => (
+              <a
+                key={link.url}
+                className="page-link external-page-link"
+                href={link.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => onExternalLinkClick(category.slug)}
+              >
+                <span className="page-dot" />
+                {link.title}
+              </a>
+            ))}
         </div>
       </div>
     </div>
@@ -79,12 +118,16 @@ export default function Sidebar({
   onCollapseChange,
   onDragonCursorToggle,
   dragonCursorEnabled,
+  currentUser,
+  onLogout,
 }) {
   const [activePage, setActivePage] = useState("princess-kaguya");
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [openCategoryId, setOpenCategoryId] = useState(null);
+  const [openCategorySlug, setOpenCategorySlug] = useState(() =>
+    getCookie(OPEN_CATEGORY_COOKIE),
+  );
   const hasMountedRef = useRef(false);
   const navigate = useNavigate();
   const { pathname } = useLocation();
@@ -98,26 +141,41 @@ export default function Sidebar({
     onCollapseChange?.(collapsed);
   };
 
-  const handleCategoryToggle = (categoryId) => {
-    setOpenCategoryId((prevId) => (prevId === categoryId ? null : categoryId));
+  const handleCategoryToggle = (categorySlug) => {
+    setOpenCategorySlug((prevSlug) => {
+      const nextSlug = prevSlug === categorySlug ? null : categorySlug;
+
+      if (nextSlug) {
+        setCookie(OPEN_CATEGORY_COOKIE, nextSlug);
+      } else {
+        setCookie(OPEN_CATEGORY_COOKIE, "");
+      }
+
+      return nextSlug;
+    });
   };
 
   const handlePageSelect = (pageSlug, categorySlug) => {
     setActivePage(pageSlug);
-    if (categorySlug === 'characters') {
+    if (categorySlug === "characters") {
       navigate(`/wiki/characters/${pageSlug}`);
     } else {
       navigate(`/wiki/${pageSlug}`);
     }
   };
 
+  const handleExternalLinkClick = (categorySlug) => {
+    if (categorySlug) {
+      setCookie(OPEN_CATEGORY_COOKIE, categorySlug);
+      setOpenCategorySlug(categorySlug);
+    }
+    applyCollapsedState(true);
+  };
+
   useEffect(() => {
     const fetchSidebarData = async () => {
       try {
-        console.log("Fetching sidebar data...");
-        console.log("API Base URL:", import.meta.env.VITE_API_BASE_URL);
         const data = await getSidebar();
-        console.log("Sidebar data received:", data);
         setCategories(data || []);
       } catch (error) {
         console.error("Failed to fetch sidebar data:", error);
@@ -140,6 +198,17 @@ export default function Sidebar({
 
   const handleToggle = () => {
     applyCollapsedState(!isCollapsed);
+  };
+
+  const handleAuthNavigate = () => {
+    navigate("/auth");
+    applyCollapsedState(true);
+  };
+
+  const handleLogoutClick = () => {
+    onLogout?.();
+    navigate("/auth");
+    applyCollapsedState(true);
   };
 
   return (
@@ -195,7 +264,8 @@ export default function Sidebar({
                   category={category}
                   activePage={activePage}
                   onPageSelect={handlePageSelect}
-                  isOpen={openCategoryId === category._id}
+                  onExternalLinkClick={handleExternalLinkClick}
+                  isOpen={openCategorySlug === category.slug}
                   onToggle={handleCategoryToggle}
                 />
                 {i < categories.length - 1 && i % 2 === 1 && (
@@ -207,20 +277,45 @@ export default function Sidebar({
         </nav>
 
         <div className="sidebar-footer">
-          <button
-            className={`dragon-toggle-btn ${dragonCursorEnabled ? "active" : ""}`}
-            onClick={onDragonCursorToggle}
-            title={
-              dragonCursorEnabled
-                ? "Disable dragon cursor"
-                : "Enable dragon cursor"
-            }
-            aria-pressed={dragonCursorEnabled}
-          >
-            <Wand2 size={16} strokeWidth={2} />
-          </button>
-          <div className="footer-orb" />
-          <span className="footer-text">超かぐや姫 · CPK Wiki</span>
+          <div className="sidebar-auth-panel">
+            <button
+              className="sidebar-auth-btn"
+              onClick={handleAuthNavigate}
+              title={currentUser ? "Open account" : "Open login and register"}
+            >
+              <LogIn size={15} strokeWidth={1.8} />
+              <span className="sidebar-auth-copy">
+                {currentUser ? currentUser.username : "Login / Register"}
+              </span>
+            </button>
+            {currentUser && (
+              <button
+                className="sidebar-auth-btn sidebar-auth-btn--ghost"
+                onClick={handleLogoutClick}
+                title="Log out"
+              >
+                <LogOut size={15} strokeWidth={1.8} />
+                <span className="sidebar-auth-copy">Log Out</span>
+              </button>
+            )}
+          </div>
+
+          <div className="sidebar-footer-row">
+            <button
+              className={`dragon-toggle-btn ${dragonCursorEnabled ? "active" : ""}`}
+              onClick={onDragonCursorToggle}
+              title={
+                dragonCursorEnabled
+                  ? "Disable dragon cursor"
+                  : "Enable dragon cursor"
+              }
+              aria-pressed={dragonCursorEnabled}
+            >
+              <Wand2 size={16} strokeWidth={2} />
+            </button>
+            <div className="footer-orb" />
+            <span className="footer-text">CPK Wiki</span>
+          </div>
         </div>
       </aside>
     </>

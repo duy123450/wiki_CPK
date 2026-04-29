@@ -1,7 +1,20 @@
 import axios from "axios";
 
+export const AUTH_TOKEN_KEY = "cpkAuthToken";
+
 const api = axios.create({
     baseURL: import.meta.env.VITE_API_BASE_URL,
+});
+
+api.interceptors.request.use((config) => {
+    const token = window.localStorage.getItem(AUTH_TOKEN_KEY);
+
+    if (token) {
+        config.headers = config.headers ?? {};
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    return config;
 });
 
 export const getMovieInfo = () => api.get("/movie-info").then((res) => res.data.movie);
@@ -34,3 +47,12 @@ export const getCharacters = (params = {}) =>
 
 export const getCharacterBySlug = (slug) =>
     api.get(`/characters/${slug}`).then((res) => res.data.character);
+
+export const registerUser = (payload) =>
+    api.post("/auth/register", payload).then((res) => res.data);
+
+export const loginUser = (payload) =>
+    api.post("/auth/login", payload).then((res) => res.data);
+
+export const getCurrentUser = () =>
+    api.get("/auth/me").then((res) => res.data.user);

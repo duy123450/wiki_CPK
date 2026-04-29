@@ -1,6 +1,7 @@
 require('dotenv').config()
 const express = require('express')
 const app = express()
+const passport = require('./config/passport')
 
 // Import Security Packages
 const helmet = require('helmet')
@@ -18,6 +19,7 @@ const errorHandlerMiddleware = require('./middleware/error-handler')
 const wikiRouter = require('./routes/wiki.route')
 const nextTrackRouter = require('./routes/next-track.route')
 const characterRouter = require('./routes/character.route')
+const authRouter = require('./routes/auth.route')
 
 // Allowed Origins & Options
 const allowedOrigins = [
@@ -50,11 +52,13 @@ app.use(rateLimit({
 app.use(express.json({ limit: '10kb' }))
 app.use(cors(corsOptions))
 app.use(helmet())
+app.use(passport.initialize())
 
 // 2. Routes
 app.use('/api/v1/wiki', wikiRouter)
 app.use('/api/v1/wiki/soundtrack', nextTrackRouter)
 app.use('/api/v1/wiki/characters', characterRouter)
+app.use('/api/v1/wiki/auth', authRouter)
 
 // 3. Error Handling
 app.use(notFoundMiddleware)
