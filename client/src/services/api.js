@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export const AUTH_TOKEN_KEY = "cpkAuthToken";
+export const AUTH_TOKEN_KEY = import.meta.env.VITE_AUTH_TOKEN_KEY || "sukaBlyatToken";
 
 const api = axios.create({
     baseURL: import.meta.env.VITE_API_BASE_URL,
@@ -48,6 +48,8 @@ export const getCharacters = (params = {}) =>
 export const getCharacterBySlug = (slug) =>
     api.get(`/characters/${slug}`).then((res) => res.data.character);
 
+// ─── Authentication ─────────────────────────────────────────────────────────
+
 export const registerUser = (payload) =>
     api.post("/auth/register", payload).then((res) => res.data);
 
@@ -56,3 +58,12 @@ export const loginUser = (payload) =>
 
 export const getCurrentUser = () =>
     api.get("/auth/me").then((res) => res.data.user);
+
+export const uploadAvatar = async (file) => {
+    const formData = new FormData();
+    formData.append("avatar", file);
+    const res = await api.put("/auth/avatar", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+    });
+    return res.data; // { avatar: { url, public_id } }
+};

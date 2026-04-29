@@ -37,12 +37,17 @@ const registerUser = async (userData) => {
     };
 };
 
-const loginUser = async (email, password) => {
-    if (!email || !password) {
-        throw createCustomError("Email and password are required", 400);
+const loginUser = async (identifier, password) => {
+    if (!identifier || !password) {
+        throw createCustomError("Email/username and password are required", 400);
     }
 
-    const user = await User.findOne({ email: email.toLowerCase().trim() });
+    const isEmail = identifier.includes("@");
+    const query = isEmail
+        ? { email: identifier.toLowerCase().trim() }
+        : { username: identifier.trim() };
+
+    const user = await User.findOne(query);
     if (!user || !(await user.comparePassword(password))) {
         throw createCustomError("Invalid credentials", 401);
     }
@@ -60,4 +65,27 @@ const getUserById = async (userId) => {
     return { user: buildAuthResponse(user) };
 };
 
-module.exports = { registerUser, loginUser, getUserById };
+const DEFAULT_PUBLIC_ID = "default-avatar-photo-placeholder-profile-icon-vector_c0iz1k";
+
+const updateUserAvatar = async (userId, file) => {
+    if (!file) throw createCustomError("No file uploaded", 400);
+
+    const user = await User.findById(userId);
+    if (!user) throw createCustomError("User not found", 404);
+
+    // Delete old Cloudinary image only if it's not the default
+    if (user.avatar?.public_id && user.avatar.public_id !== DEFAULT_PUBLIC_ID) {
+        const { cloudinary } = require("../config/cloudinary");
+        await cloudinary.uploader.destroy(user.avatar.public_id);
+    }
+
+    user.avatar = {
+        url: file.path,           // Cloudinary URL from multer-storage-cloudinary
+        public_id: file.filename, // Cloudinary public_id
+    };
+
+    await user.save();
+    return { avatar: user.avatar };
+};
+
+module.exports = { registerUser, loginUser, getUserById, updateUserAvatar };

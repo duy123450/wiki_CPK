@@ -6,8 +6,8 @@ const register = async (req, res) => {
 };
 
 const login = async (req, res) => {
-  const { email, password } = req.body;
-  const result = await authService.loginUser(email, password);
+  const { identifier, password } = req.body;
+  const result = await authService.loginUser(identifier, password);
   res.status(200).json(result);
 };
 
@@ -17,4 +17,9 @@ const getCurrentUser = async (req, res) => {
   res.status(200).json(result);
 };
 
-module.exports = { register, login, getCurrentUser };
+const updateAvatar = async (req, res) => {
+  const result = await authService.updateUserAvatar(req.user.userId, req.file);
+  res.status(200).json(result);
+};
+
+module.exports = { register, login, getCurrentUser, updateAvatar };

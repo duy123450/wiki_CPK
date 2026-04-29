@@ -614,7 +614,7 @@ export default function Playlist() {
           <div className="pl-sticky-bar" onClick={() => setIsExpanded(true)}>
             <div className="pl-sticky-cover">
               <img
-                src={currentTrack.coverImage?.url || ""}
+                src={currentTrack.coverImage || null}
                 alt={currentTrack.title}
                 onError={(e) => {
                   e.target.style.background = "#282828";
@@ -665,7 +665,7 @@ export default function Playlist() {
               <div className="pl-panel-cover-wrap">
                 <img
                   className="pl-panel-cover"
-                  src={currentTrack.coverImage?.url || ""}
+                  src={currentTrack.coverImage || null}
                   alt={currentTrack.title}
                   onError={(e) => {
                     e.target.style.display = "none";
