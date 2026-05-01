@@ -22,4 +22,9 @@ const updateAvatar = async (req, res) => {
   res.status(200).json(result);
 };
 
-module.exports = { register, login, getCurrentUser, updateAvatar };
+const updateProfile = async (req, res) => {
+  const result = await authService.updateUserProfile(req.user.userId, req.body);
+  res.status(200).json(result);
+};
+
+module.exports = { register, login, getCurrentUser, updateAvatar, updateProfile };

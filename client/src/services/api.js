@@ -29,9 +29,11 @@ export const fetchSoundtracks = async (movieId) => {
 };
 
 export const fetchNextTrack = async ({ currentTrackId, mode, movieId }) => {
-    const res = await api.get("/soundtrack/next", {
-        params: { currentTrackId, mode, movieId }
-    });
+    const params = { currentTrackId, mode, movieId };
+    if (mode === "shuffle") {
+        params._t = Date.now(); // cache buster to ensure true randomness
+    }
+    const res = await api.get("/soundtrack/next", { params });
     return res.data;
 };
 
@@ -66,4 +68,9 @@ export const uploadAvatar = async (file) => {
         headers: { "Content-Type": "multipart/form-data" },
     });
     return res.data; // { avatar: { url, public_id } }
+};
+
+export const updateProfile = async (payload) => {
+    const res = await api.put("/auth/profile", payload);
+    return res.data; // { user, token }
 };

@@ -9,6 +9,7 @@ import CharactersPage from "./pages/CharactersPage";
 import CharacterPage from "./pages/CharacterPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import AuthPage from "./pages/AuthPage";
+import ProfilePage from "./pages/ProfilePage";
 import Footer from "./components/Footer";
 import Playlist from "./components/Playlist";
 import { AUTH_TOKEN_KEY, getCurrentUser } from "./services/api";
@@ -21,28 +22,37 @@ export default function App() {
   useEffect(() => {
     const restoreUser = async () => {
       const token = window.localStorage.getItem(AUTH_TOKEN_KEY);
-
       if (!token) return;
-
       try {
         const user = await getCurrentUser();
         setAuthUser(user);
-      } catch (error) {
+      } catch {
         window.localStorage.removeItem(AUTH_TOKEN_KEY);
       }
     };
-
     restoreUser();
   }, []);
 
+  // Called on login / register — response is { user, token }
   const handleAuthSuccess = ({ user, token }) => {
     window.localStorage.setItem(AUTH_TOKEN_KEY, token);
     setAuthUser(user);
   };
 
+  // Called when only the avatar changes — no token resave needed
+  const handleAvatarUpdate = (avatar) => {
+    setAuthUser((prev) => (prev ? { ...prev, avatar } : prev));
+  };
+
   const handleLogout = () => {
     window.localStorage.removeItem(AUTH_TOKEN_KEY);
     setAuthUser(null);
+  };
+
+  // Called when profile fields (username, email) are updated
+  const handleProfileUpdate = (user, token) => {
+    if (token) window.localStorage.setItem(AUTH_TOKEN_KEY, token);
+    setAuthUser(user);
   };
 
   return (
@@ -81,6 +91,19 @@ export default function App() {
                 sidebarCollapsed={sidebarCollapsed}
                 currentUser={authUser}
                 onAuthSuccess={handleAuthSuccess}
+                onAvatarUpdate={handleAvatarUpdate}
+                onLogout={handleLogout}
+              />
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProfilePage
+                sidebarCollapsed={sidebarCollapsed}
+                currentUser={authUser}
+                onProfileUpdate={handleProfileUpdate}
+                onAvatarUpdate={handleAvatarUpdate}
                 onLogout={handleLogout}
               />
             }

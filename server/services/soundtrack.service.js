@@ -70,6 +70,10 @@ const getNextTrackLogic = async (params) => {
             { $match: { movie: currentTrack.movie, _id: { $ne: currentTrack._id } } },
             { $sample: { size: 1 } }
         ]);
+        if (!randomDoc) {
+            // fallback if aggregate fails for some reason
+            return { mode, track: formatTrack(currentTrack), restart: true };
+        }
         const randomTrack = await Soundtrack.findById(randomDoc._id);
         return { mode, track: formatTrack(randomTrack) };
     }

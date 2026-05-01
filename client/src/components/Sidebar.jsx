@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   ChevronDown,
@@ -13,6 +14,9 @@ import {
   Wand2,
   LogIn,
   LogOut,
+  User,
+  Bookmark,
+  Shield,
 } from "lucide-react";
 import { getSidebar } from "../services/api";
 import "../styles/Sidebar.css";
@@ -114,6 +118,9 @@ function CategoryItem({
   );
 }
 
+const DEFAULT_AVATAR =
+  "https://res.cloudinary.com/dvlaoxjzi/image/upload/v1775612971/default-avatar-photo-placeholder-profile-icon-vector_c0iz1k.webp";
+
 export default function Sidebar({
   onCollapseChange,
   onDragonCursorToggle,
@@ -128,6 +135,10 @@ export default function Sidebar({
   const [openCategorySlug, setOpenCategorySlug] = useState(() =>
     getCookie(OPEN_CATEGORY_COOKIE),
   );
+  const [avatarMenuOpen, setAvatarMenuOpen] = useState(false);
+  const [flyoutPos, setFlyoutPos] = useState({ top: 0, left: 0 });
+  const avatarMenuRef = useRef(null);
+  const avatarBtnRef = useRef(null);
   const hasMountedRef = useRef(false);
   const navigate = useNavigate();
   const { pathname } = useLocation();
@@ -207,9 +218,48 @@ export default function Sidebar({
 
   const handleLogoutClick = () => {
     onLogout?.();
+    setAvatarMenuOpen(false);
     navigate("/auth");
     applyCollapsedState(true);
   };
+
+  const handleAvatarMenuNavigate = (path) => {
+    setAvatarMenuOpen(false);
+    navigate(path);
+    applyCollapsedState(true);
+  };
+
+  // Compute flyout position when menu opens
+  const toggleAvatarMenu = useCallback(() => {
+    setAvatarMenuOpen((prev) => {
+      const next = !prev;
+      if (next && avatarBtnRef.current) {
+        const rect = avatarBtnRef.current.getBoundingClientRect();
+        setFlyoutPos({
+          top: rect.top,
+          left: rect.right + 10,
+        });
+      }
+      return next;
+    });
+  }, []);
+
+  // Close avatar menu on click outside
+  useEffect(() => {
+    if (!avatarMenuOpen) return;
+    const handleClickOutside = (e) => {
+      if (
+        avatarMenuRef.current &&
+        !avatarMenuRef.current.contains(e.target) &&
+        avatarBtnRef.current &&
+        !avatarBtnRef.current.contains(e.target)
+      ) {
+        setAvatarMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [avatarMenuOpen]);
 
   return (
     <>
@@ -277,25 +327,80 @@ export default function Sidebar({
         </nav>
 
         <div className="sidebar-footer">
-          <div className="sidebar-auth-panel">
-            <button
-              className="sidebar-auth-btn"
-              onClick={handleAuthNavigate}
-              title={currentUser ? "Open account" : "Open login and register"}
-            >
-              <LogIn size={15} strokeWidth={1.8} />
-              <span className="sidebar-auth-copy">
-                {currentUser ? currentUser.username : "Login / Register"}
-              </span>
-            </button>
-            {currentUser && (
+          <div className="sidebar-avatar-area">
+            {currentUser ? (
+              <>
+                <button
+                  ref={avatarBtnRef}
+                  className={`sidebar-avatar-btn ${avatarMenuOpen ? "active" : ""}`}
+                  onClick={toggleAvatarMenu}
+                  title={currentUser.username}
+                >
+                  <img
+                    src={currentUser.avatar?.url || DEFAULT_AVATAR}
+                    alt={currentUser.username}
+                    className="sidebar-avatar-img"
+                    onError={(e) => {
+                      e.target.src = DEFAULT_AVATAR;
+                    }}
+                  />
+                  <span className="sidebar-avatar-status" />
+                </button>
+
+                {createPortal(
+                  <div
+                    ref={avatarMenuRef}
+                    className={`sidebar-avatar-flyout ${
+                      avatarMenuOpen ? "open" : ""
+                    }`}
+                    style={{
+                      top: `${flyoutPos.top}px`,
+                      left: `${flyoutPos.left}px`,
+                    }}
+                  >
+                    <button
+                      className="flyout-item"
+                      onClick={() => handleAvatarMenuNavigate("/profile")}
+                    >
+                      <User size={14} strokeWidth={1.8} />
+                      <span>Profile</span>
+                    </button>
+                    <button
+                      className="flyout-item"
+                      onClick={() => handleAvatarMenuNavigate("/bookmarks")}
+                    >
+                      <Bookmark size={14} strokeWidth={1.8} />
+                      <span>Bookmarks</span>
+                    </button>
+                    {(currentUser.role === "admin" ||
+                      currentUser.role === "editor") && (
+                      <button
+                        className="flyout-item"
+                        onClick={() => handleAvatarMenuNavigate("/admin")}
+                      >
+                        <Shield size={14} strokeWidth={1.8} />
+                        <span>Admin</span>
+                      </button>
+                    )}
+                    <div className="flyout-divider" />
+                    <button
+                      className="flyout-item flyout-item--danger"
+                      onClick={handleLogoutClick}
+                    >
+                      <LogOut size={14} strokeWidth={1.8} />
+                      <span>Log Out</span>
+                    </button>
+                  </div>,
+                  document.body,
+                )}
+              </>
+            ) : (
               <button
-                className="sidebar-auth-btn sidebar-auth-btn--ghost"
-                onClick={handleLogoutClick}
-                title="Log out"
+                className="sidebar-login-btn"
+                onClick={handleAuthNavigate}
+                title="Login / Register"
               >
-                <LogOut size={15} strokeWidth={1.8} />
-                <span className="sidebar-auth-copy">Log Out</span>
+                <LogIn size={15} strokeWidth={1.8} />
               </button>
             )}
           </div>

@@ -8,6 +8,7 @@ const buildAuthResponse = (user) => ({
     email: user.email,
     role: user.role,
     avatar: user.avatar,
+    createdAt: user.createdAt,
 });
 
 const registerUser = async (userData) => {
@@ -59,7 +60,7 @@ const loginUser = async (identifier, password) => {
 };
 
 const getUserById = async (userId) => {
-    const user = await User.findById(userId).select("_id username email role avatar");
+    const user = await User.findById(userId).select("_id username email role avatar createdAt");
     if (!user) throw createCustomError("User not found", 404);
 
     return { user: buildAuthResponse(user) };
@@ -88,4 +89,50 @@ const updateUserAvatar = async (userId, file) => {
     return { avatar: user.avatar };
 };
 
-module.exports = { registerUser, loginUser, getUserById, updateUserAvatar };
+const updateUserProfile = async (userId, updates) => {
+    const user = await User.findById(userId);
+    if (!user) throw createCustomError("User not found", 404);
+
+    const { username, email, currentPassword, newPassword } = updates;
+
+    // ── Username ────────────────────────────────────────────────────────────
+    if (username && username.trim() !== user.username) {
+        const trimmed = username.trim();
+        if (trimmed.length < 3 || trimmed.length > 20) {
+            throw createCustomError("Username must be 3–20 characters", 400);
+        }
+        const taken = await User.findOne({ username: trimmed, _id: { $ne: userId } });
+        if (taken) throw createCustomError("Username already taken", 400);
+        user.username = trimmed;
+    }
+
+    // ── Email ───────────────────────────────────────────────────────────────
+    if (email && email.toLowerCase().trim() !== user.email) {
+        const normalized = email.toLowerCase().trim();
+        const taken = await User.findOne({ email: normalized, _id: { $ne: userId } });
+        if (taken) throw createCustomError("Email already in use", 400);
+        user.email = normalized;
+    }
+
+    // ── Password ────────────────────────────────────────────────────────────
+    if (newPassword) {
+        if (!currentPassword) {
+            throw createCustomError("Current password is required to set a new one", 400);
+        }
+        const isMatch = await user.comparePassword(currentPassword);
+        if (!isMatch) throw createCustomError("Current password is incorrect", 401);
+        if (newPassword.length < 6) {
+            throw createCustomError("New password must be at least 6 characters", 400);
+        }
+        user.password = newPassword; // hashed by pre-save hook
+    }
+
+    await user.save();
+
+    return {
+        user: buildAuthResponse(user),
+        token: user.createJWT(), // re-issue token in case username changed (embedded in JWT)
+    };
+};
+
+module.exports = { registerUser, loginUser, getUserById, updateUserAvatar, updateUserProfile };
