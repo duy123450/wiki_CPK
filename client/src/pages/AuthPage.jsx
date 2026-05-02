@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 import { loginUser, registerUser, uploadAvatar } from "../services/api";
+import GoogleLoginButton from "../components/GoogleLoginButton";
 import "../styles/AuthPage.css";
 
 const INITIAL_FORM = {
@@ -358,6 +359,17 @@ export default function AuthPage({
                 ? "Create Account"
                 : "Login"}
           </button>
+
+          <div className="auth-divider">
+            <span>or</span>
+          </div>
+
+          <div className="auth-google-wrap">
+            <GoogleLoginButton
+              onSuccess={onAuthSuccess}
+              onError={(msg) => setError(msg)}
+            />
+          </div>
         </form>
       </div>
     </section>

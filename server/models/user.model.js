@@ -23,8 +23,16 @@ const UserSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        required: [true, 'Please provide a password'],
+        required: function () {
+            // Password is only required when there is no Google ID
+            return !this.googleId;
+        },
         minlength: 6,
+    },
+    googleId: {
+        type: String,
+        unique: true,
+        sparse: true, // allows multiple docs to have null/undefined
     },
     role: {
         type: String,

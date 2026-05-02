@@ -11,6 +11,12 @@ const login = async (req, res) => {
   res.status(200).json(result);
 };
 
+const googleLogin = async (req, res) => {
+  const { credential } = req.body;
+  const result = await authService.googleLoginUser(credential);
+  res.status(200).json(result);
+};
+
 const getCurrentUser = async (req, res) => {
   // req.user is populated by your authentication middleware
   const result = await authService.getUserById(req.user.userId);
@@ -27,4 +33,4 @@ const updateProfile = async (req, res) => {
   res.status(200).json(result);
 };
 
-module.exports = { register, login, getCurrentUser, updateAvatar, updateProfile };
+module.exports = { register, login, googleLogin, getCurrentUser, updateAvatar, updateProfile };

@@ -357,6 +357,37 @@
     white-space: nowrap;
 }
 
+/* ── OR divider ──────────────────────────────────────────────────────────────── */
+.auth-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 4px 0;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.auth-divider span {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--auth-muted);
+    opacity: 0.6;
+}
+
+/* ── Google login button ─────────────────────────────────────────────────────── */
+.auth-google-wrap {
+    display: flex;
+    justify-content: center;
+}
+
 @media (max-width: 768px) {
     .auth-root {
         width: 100%;

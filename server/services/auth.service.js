@@ -1,5 +1,7 @@
 const User = require("../models/user.model");
 const { createCustomError } = require("../errors/custom-error");
+const { OAuth2Client } = require("google-auth-library");
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // Helper to format the user object for the client
 const buildAuthResponse = (user) => ({
@@ -135,4 +137,55 @@ const updateUserProfile = async (userId, updates) => {
     };
 };
 
-module.exports = { registerUser, loginUser, getUserById, updateUserAvatar, updateUserProfile };
+/**
+ * Verify a Google ID token, then find-or-create the user.
+ * Returns { user, token } — same shape as registerUser / loginUser.
+ */
+const googleLoginUser = async (credential) => {
+    if (!credential) {
+        throw createCustomError("Google credential is required", 400);
+    }
+
+    // 1. Verify the ID token with Google's servers
+    const ticket = await googleClient.verifyIdToken({
+        idToken: credential,
+        audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+    const { sub: googleId, email, name, picture } = payload;
+
+    console.log("✅ Google user verified:", { googleId, email, name, picture });
+
+    // 2. Find existing user by googleId or email
+    let user = await User.findOne({
+        $or: [{ googleId }, { email: email.toLowerCase() }],
+    });
+
+    if (user) {
+        // Link Google ID if user existed by email but hadn't linked Google yet
+        if (!user.googleId) {
+            user.googleId = googleId;
+            await user.save();
+        }
+    } else {
+        const suffix = "_" + googleId.slice(-4);
+        const baseName = name.replace(/\s+/g, "_").slice(0, 20 - suffix.length);
+        user = await User.create({
+            username: baseName + suffix,
+            email: email.toLowerCase(),
+            googleId,
+            avatar: {
+                url: picture || undefined,
+                public_id: "google-avatar",
+            },
+        });
+    }
+
+    return {
+        user: buildAuthResponse(user),
+        token: user.createJWT(),
+    };
+};
+
+module.exports = { registerUser, loginUser, getUserById, updateUserAvatar, updateUserProfile, googleLoginUser };

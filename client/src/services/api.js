@@ -74,3 +74,10 @@ export const updateProfile = async (payload) => {
     const res = await api.put("/auth/profile", payload);
     return res.data; // { user, token }
 };
+
+// ─── Google OAuth ───────────────────────────────────────────────────────────
+
+export const googleLogin = async (credential) => {
+    const res = await api.post("/auth/google", { credential });
+    return res.data; // { user, token }
+};
