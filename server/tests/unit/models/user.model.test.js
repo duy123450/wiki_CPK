@@ -1,8 +1,10 @@
 const mongoose = require('mongoose');
 const { connect, clearDatabase, disconnect } = require('../../setup');
 
-process.env.JWT_SECRET = 'test-secret-key-for-jest';
-process.env.JWT_LIFETIME = '1h';
+process.env.JWT_ACCESS_SECRET = 'test-access-secret-key-for-jest';
+process.env.JWT_REFRESH_SECRET = 'test-refresh-secret-key-for-jest';
+process.env.JWT_ACCESS_LIFETIME = '15m';
+process.env.JWT_REFRESH_LIFETIME = '30d';
 
 const User = require('../../../models/user.model');
 
@@ -158,10 +160,10 @@ describe('User Model', () => {
     });
 
     // ── createJWT ─────────────────────────────────────────────────────────────
-    describe('createJWT()', () => {
+    describe('createAccessToken()', () => {
         it('should return a JWT string', async () => {
             const user = await User.create(validUser);
-            const token = user.createJWT();
+            const token = user.createAccessToken();
 
             expect(typeof token).toBe('string');
             // JWT format: header.payload.signature
@@ -170,7 +172,7 @@ describe('User Model', () => {
 
         it('should contain userId, name, and role in the payload', async () => {
             const user = await User.create(validUser);
-            const token = user.createJWT();
+            const token = user.createAccessToken();
 
             // Decode the payload (base64)
             const payload = JSON.parse(
@@ -184,7 +186,7 @@ describe('User Model', () => {
 
         it('should include an expiration claim', async () => {
             const user = await User.create(validUser);
-            const token = user.createJWT();
+            const token = user.createAccessToken();
 
             const payload = JSON.parse(
                 Buffer.from(token.split('.')[1], 'base64').toString()

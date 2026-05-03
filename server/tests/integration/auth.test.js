@@ -3,8 +3,10 @@ const { connect, clearDatabase, disconnect } = require('../setup');
 
 // Must set env before requiring app
 process.env.NODE_ENV = 'test';
-process.env.JWT_SECRET = 'test-secret-key-for-jest';
-process.env.JWT_LIFETIME = '1h';
+process.env.JWT_ACCESS_SECRET = 'test-access-secret-key-for-jest';
+process.env.JWT_REFRESH_SECRET = 'test-refresh-secret-key-for-jest';
+process.env.JWT_ACCESS_LIFETIME = '15m';
+process.env.JWT_REFRESH_LIFETIME = '30d';
 
 let app;
 
@@ -38,14 +40,17 @@ const registerAndGetToken = async (user = validUser) => {
 describe('Auth API Integration Tests', () => {
     // ── REGISTER ──────────────────────────────────────────────────────────────
     describe('POST /register', () => {
-        it('should register a new user and return user + token', async () => {
+        it('should register a new user, return an access token, and set refresh cookie', async () => {
             const res = await request(app)
                 .post(`${BASE}/register`)
                 .send(validUser);
 
             expect(res.status).toBe(201);
             expect(res.body).toHaveProperty('user');
-            expect(res.body).toHaveProperty('token');
+            expect(res.body).toHaveProperty('accessToken');
+            expect(res.body).toHaveProperty('token', res.body.accessToken);
+            expect(res.body).not.toHaveProperty('refreshToken');
+            expect(res.headers['set-cookie']?.join(';')).toContain('refreshToken=');
             expect(res.body.user.username).toBe('testuser');
             expect(res.body.user.email).toBe('test@example.com');
             expect(res.body.user.role).toBe('user');
@@ -110,7 +115,10 @@ describe('Auth API Integration Tests', () => {
 
             expect(res.status).toBe(200);
             expect(res.body).toHaveProperty('user');
-            expect(res.body).toHaveProperty('token');
+            expect(res.body).toHaveProperty('accessToken');
+            expect(res.body).toHaveProperty('token', res.body.accessToken);
+            expect(res.body).not.toHaveProperty('refreshToken');
+            expect(res.headers['set-cookie']?.join(';')).toContain('refreshToken=');
             expect(res.body.user.email).toBe(validUser.email);
         });
 
@@ -149,6 +157,33 @@ describe('Auth API Integration Tests', () => {
     });
 
     // ── GET /me ───────────────────────────────────────────────────────────────
+    describe('POST /refresh', () => {
+        it('should issue a new access token from a valid refresh cookie', async () => {
+            const registerRes = await request(app)
+                .post(`${BASE}/register`)
+                .send(validUser);
+            const refreshCookie = registerRes.headers['set-cookie'].find((cookie) =>
+                cookie.startsWith('refreshToken=')
+            );
+
+            const res = await request(app)
+                .post(`${BASE}/refresh`)
+                .set('Cookie', refreshCookie);
+
+            expect(res.status).toBe(200);
+            expect(res.body).toHaveProperty('accessToken');
+            expect(res.body).toHaveProperty('token', res.body.accessToken);
+            expect(res.body).not.toHaveProperty('refreshToken');
+            expect(res.body.user.email).toBe(validUser.email);
+        });
+
+        it('should reject when refresh cookie is missing', async () => {
+            const res = await request(app).post(`${BASE}/refresh`);
+
+            expect(res.status).toBe(401);
+        });
+    });
+
     describe('GET /me', () => {
         it('should return the current user when authenticated', async () => {
             const token = await registerAndGetToken();
@@ -194,7 +229,8 @@ describe('Auth API Integration Tests', () => {
 
             expect(res.status).toBe(200);
             expect(res.body.user.username).toBe('newusername');
-            expect(res.body).toHaveProperty('token'); // re-issued token
+            expect(res.body).toHaveProperty('accessToken');
+            expect(res.body).not.toHaveProperty('refreshToken');
         });
 
         it('should update email', async () => {

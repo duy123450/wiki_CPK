@@ -3,8 +3,10 @@ const mongoose = require('mongoose');
 const { connect, clearDatabase, disconnect } = require('../setup');
 
 process.env.NODE_ENV = 'test';
-process.env.JWT_SECRET = 'test-secret-key-for-jest';
-process.env.JWT_LIFETIME = '1h';
+process.env.JWT_ACCESS_SECRET = 'test-access-secret-key-for-jest';
+process.env.JWT_REFRESH_SECRET = 'test-refresh-secret-key-for-jest';
+process.env.JWT_ACCESS_LIFETIME = '15m';
+process.env.JWT_REFRESH_LIFETIME = '30d';
 
 const Movie = require('../../models/movie.model');
 const Soundtrack = require('../../models/sound-track.model');

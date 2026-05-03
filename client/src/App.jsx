@@ -34,8 +34,8 @@ export default function App() {
   }, []);
 
   // Called on login / register — response is { user, token }
-  const handleAuthSuccess = useCallback(({ user, token }) => {
-    window.localStorage.setItem(AUTH_TOKEN_KEY, token);
+  const handleAuthSuccess = useCallback(({ user, token, accessToken }) => {
+    window.localStorage.setItem(AUTH_TOKEN_KEY, accessToken || token);
     setAuthUser(user);
   }, []);
 

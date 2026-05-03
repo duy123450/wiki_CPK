@@ -35,13 +35,18 @@ export default function AuthPage({
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const googleAuth = searchParams.get("googleAuth");
+  const accessToken = searchParams.get("accessToken");
+  const googleUser = searchParams.get("user");
   const googleError = searchParams.get("googleError");
 
   useEffect(() => {
-    if (googleAuth) {
+    if (accessToken && googleUser) {
       try {
-        onAuthSuccess(JSON.parse(googleAuth));
+        onAuthSuccess({
+          user: JSON.parse(googleUser),
+          accessToken,
+          token: accessToken,
+        });
         navigate("/auth", { replace: true });
       } catch {
         setError("Google sign-in failed. Please try again.");
@@ -53,7 +58,7 @@ export default function AuthPage({
       setError("Google sign-in was cancelled or failed.");
       navigate("/auth", { replace: true });
     }
-  }, [googleAuth, googleError, navigate, onAuthSuccess]);
+  }, [accessToken, googleError, googleUser, navigate, onAuthSuccess]);
 
   const updateField = (field) => (e) =>
     setForm((prev) => ({ ...prev, [field]: e.target.value }));

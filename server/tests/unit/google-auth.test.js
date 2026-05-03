@@ -1,8 +1,10 @@
 const { connect, clearDatabase, disconnect } = require('../setup');
 const User = require('../../models/user.model');
 
-process.env.JWT_SECRET = 'test-secret-key-for-jest';
-process.env.JWT_LIFETIME = '1h';
+process.env.JWT_ACCESS_SECRET = 'test-access-secret-key-for-jest';
+process.env.JWT_REFRESH_SECRET = 'test-refresh-secret-key-for-jest';
+process.env.JWT_ACCESS_LIFETIME = '15m';
+process.env.JWT_REFRESH_LIFETIME = '30d';
 process.env.NODE_ENV = 'test';
 
 const { googleLoginUser } = require('../../services/auth.service');
@@ -43,11 +45,13 @@ describe('googleLoginUser()', () => {
     });
 
     describe('new user (no existing account)', () => {
-        it('should create a new user and return { user, token }', async () => {
+        it('should create a new user and return auth tokens', async () => {
             const result = await googleLoginUser(buildMockProfile());
 
             expect(result).toHaveProperty('user');
+            expect(result).toHaveProperty('accessToken');
             expect(result).toHaveProperty('token');
+            expect(result).toHaveProperty('refreshToken');
             expect(result.user.email).toBe('googleuser@gmail.com');
             expect(result.user).toHaveProperty('id');
             expect(result.user.role).toBe('user');

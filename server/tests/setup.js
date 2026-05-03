@@ -10,8 +10,10 @@ let mongoServer;
  */
 const connect = async () => {
     // Set env vars that the app needs
-    process.env.JWT_SECRET = 'test-secret-key-for-jest';
-    process.env.JWT_LIFETIME = '1h';
+    process.env.JWT_ACCESS_SECRET = 'test-access-secret-key-for-jest';
+    process.env.JWT_REFRESH_SECRET = 'test-refresh-secret-key-for-jest';
+    process.env.JWT_ACCESS_LIFETIME = '15m';
+    process.env.JWT_REFRESH_LIFETIME = '30d';
     process.env.NODE_ENV = 'test';
 
     // If already connected, just return

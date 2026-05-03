@@ -7,6 +7,7 @@ const passport = require('./config/passport')
 const helmet = require('helmet')
 const cors = require('cors')
 const rateLimit = require('express-rate-limit')
+const cookieParser = require('cookie-parser')
 
 // Import Database Connection
 const connectDB = require('./config/db')
@@ -50,6 +51,7 @@ app.use(rateLimit({
     max: 300
 }))
 app.use(express.json({ limit: '10kb' }))
+app.use(cookieParser())
 app.use(cors(corsOptions))
 app.use(helmet())
 app.use(passport.initialize())

@@ -7,6 +7,7 @@ const {
   register,
   login,
   googleLoginCallback,
+  refresh,
   getCurrentUser,
   updateAvatar,
   updateProfile,
@@ -25,6 +26,7 @@ const requireGoogleOAuthConfig = (req, res, next) => {
 
 router.post("/register", register);
 router.post("/login", login);
+router.post("/refresh", refresh);
 router.get(
   "/google",
   requireGoogleOAuthConfig,

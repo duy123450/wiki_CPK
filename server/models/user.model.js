@@ -34,6 +34,10 @@ const UserSchema = new mongoose.Schema({
         unique: true,
         sparse: true, // allows multiple docs to have null/undefined
     },
+    refreshToken: {
+        type: String,
+        default: null,
+    },
     role: {
         type: String,
         enum: ['admin', 'editor', 'user'],
@@ -67,13 +71,22 @@ UserSchema.methods.comparePassword = async function (candidatePassword) {
     return await argon2.verify(this.password, candidatePassword);
 };
 
-// Create JWT
-UserSchema.methods.createJWT = function () {
+UserSchema.methods.createAccessToken = function () {
     return jwt.sign(
         { userId: this._id, name: this.username, role: this.role },
-        process.env.JWT_SECRET,
-        { expiresIn: process.env.JWT_LIFETIME }
+        process.env.JWT_ACCESS_SECRET,
+        { expiresIn: process.env.JWT_ACCESS_LIFETIME || '15m' }
     );
 };
+
+UserSchema.methods.createRefreshToken = function () {
+    return jwt.sign(
+        { userId: this._id },
+        process.env.JWT_REFRESH_SECRET,
+        { expiresIn: process.env.JWT_REFRESH_LIFETIME || '30d' }
+    );
+};
+
+UserSchema.methods.createJWT = UserSchema.methods.createAccessToken;
 
 module.exports = mongoose.model('User', UserSchema);

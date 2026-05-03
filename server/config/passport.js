@@ -6,7 +6,7 @@ const { googleLoginUser } = require("../services/auth.service");
 
 const jwtOptions = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-  secretOrKey: process.env.JWT_SECRET,
+  secretOrKey: process.env.JWT_ACCESS_SECRET,
 };
 
 passport.use(
@@ -39,9 +39,11 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
       {
         clientID: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        proxy: true,
         callbackURL:
           process.env.GOOGLE_CALLBACK_URL ||
           "/api/v1/wiki/auth/google/callback",
+        proxy: true,
       },
       async (accessToken, refreshToken, profile, done) => {
         try {

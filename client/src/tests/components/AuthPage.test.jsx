@@ -178,20 +178,25 @@ describe('AuthPage — Register Mode', () => {
 })
 
 describe('AuthPage — Google OAuth Callback', () => {
-    it('calls onAuthSuccess when Google callback data is present', async () => {
-        const response = {
-            user: { id: 'user-1', username: 'googleuser', email: 'google@test.com' },
-            token: 'google-jwt',
-        }
+    it('calls onAuthSuccess when Google callback access token is present', async () => {
+        const user = { id: 'user-1', username: 'googleuser', email: 'google@test.com' }
         const onAuthSuccess = vi.fn()
 
         renderAuth(
             { onAuthSuccess },
-            { initialEntries: [`/auth?googleAuth=${encodeURIComponent(JSON.stringify(response))}`] }
+            {
+                initialEntries: [
+                    `/auth?accessToken=google-access-token&user=${encodeURIComponent(JSON.stringify(user))}`,
+                ],
+            }
         )
 
         await waitFor(() => {
-            expect(onAuthSuccess).toHaveBeenCalledWith(response)
+            expect(onAuthSuccess).toHaveBeenCalledWith({
+                user,
+                accessToken: 'google-access-token',
+                token: 'google-access-token',
+            })
         })
     })
 

@@ -10,6 +10,21 @@ const buildAuthResponse = (user) => ({
     createdAt: user.createdAt,
 });
 
+const buildTokenResponse = async (user) => {
+    const accessToken = user.createAccessToken();
+    const refreshToken = user.createRefreshToken();
+
+    user.refreshToken = refreshToken;
+    await user.save();
+
+    return {
+        user: buildAuthResponse(user),
+        accessToken,
+        token: accessToken,
+        refreshToken,
+    };
+};
+
 const registerUser = async (userData) => {
     const { username, email, password } = userData;
 
@@ -31,10 +46,7 @@ const registerUser = async (userData) => {
         password,
     });
 
-    return {
-        user: buildAuthResponse(user),
-        token: user.createJWT(),
-    };
+    return buildTokenResponse(user);
 };
 
 const loginUser = async (identifier, password) => {
@@ -52,10 +64,7 @@ const loginUser = async (identifier, password) => {
         throw createCustomError("Invalid credentials", 401);
     }
 
-    return {
-        user: buildAuthResponse(user),
-        token: user.createJWT(),
-    };
+    return buildTokenResponse(user);
 };
 
 const getUserById = async (userId) => {
@@ -124,10 +133,7 @@ const updateUserProfile = async (userId, updates) => {
 
     await user.save();
 
-    return {
-        user: buildAuthResponse(user),
-        token: user.createJWT(),
-    };
+    return buildTokenResponse(user);
 };
 
 const googleLoginUser = async (profile) => {
@@ -167,9 +173,33 @@ const googleLoginUser = async (profile) => {
         });
     }
 
+    return buildTokenResponse(user);
+};
+
+const refreshAccessToken = async (refreshToken) => {
+    if (!refreshToken) {
+        throw createCustomError("Refresh token is required", 401);
+    }
+
+    const jwt = require("jsonwebtoken");
+    let payload;
+    try {
+        payload = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+    } catch {
+        throw createCustomError("Refresh token is invalid", 401);
+    }
+
+    const user = await User.findOne({ _id: payload.userId, refreshToken });
+    if (!user) {
+        throw createCustomError("Refresh token is invalid", 401);
+    }
+
+    const accessToken = user.createAccessToken();
+
     return {
         user: buildAuthResponse(user),
-        token: user.createJWT(),
+        accessToken,
+        token: accessToken,
     };
 };
 
@@ -180,4 +210,5 @@ module.exports = {
     updateUserAvatar,
     updateUserProfile,
     googleLoginUser,
+    refreshAccessToken,
 };
