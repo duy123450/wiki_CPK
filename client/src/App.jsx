@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import ScrollToTop from "./components/ScrollToTop";
 import DragonCursor from "./components/DragonCursor";
@@ -34,26 +34,26 @@ export default function App() {
   }, []);
 
   // Called on login / register — response is { user, token }
-  const handleAuthSuccess = ({ user, token }) => {
+  const handleAuthSuccess = useCallback(({ user, token }) => {
     window.localStorage.setItem(AUTH_TOKEN_KEY, token);
     setAuthUser(user);
-  };
+  }, []);
 
   // Called when only the avatar changes — no token resave needed
-  const handleAvatarUpdate = (avatar) => {
+  const handleAvatarUpdate = useCallback((avatar) => {
     setAuthUser((prev) => (prev ? { ...prev, avatar } : prev));
-  };
+  }, []);
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     window.localStorage.removeItem(AUTH_TOKEN_KEY);
     setAuthUser(null);
-  };
+  }, []);
 
   // Called when profile fields (username, email) are updated
-  const handleProfileUpdate = (user, token) => {
+  const handleProfileUpdate = useCallback((user, token) => {
     if (token) window.localStorage.setItem(AUTH_TOKEN_KEY, token);
     setAuthUser(user);
-  };
+  }, []);
 
   return (
     <Router>

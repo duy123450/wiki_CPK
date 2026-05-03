@@ -1,9 +1,6 @@
 const User = require("../models/user.model");
 const { createCustomError } = require("../errors/custom-error");
-const { OAuth2Client } = require("google-auth-library");
-const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-// Helper to format the user object for the client
 const buildAuthResponse = (user) => ({
     id: user._id,
     username: user.username,
@@ -76,15 +73,14 @@ const updateUserAvatar = async (userId, file) => {
     const user = await User.findById(userId);
     if (!user) throw createCustomError("User not found", 404);
 
-    // Delete old Cloudinary image only if it's not the default
     if (user.avatar?.public_id && user.avatar.public_id !== DEFAULT_PUBLIC_ID) {
         const { cloudinary } = require("../config/cloudinary");
         await cloudinary.uploader.destroy(user.avatar.public_id);
     }
 
     user.avatar = {
-        url: file.path,           // Cloudinary URL from multer-storage-cloudinary
-        public_id: file.filename, // Cloudinary public_id
+        url: file.path,
+        public_id: file.filename,
     };
 
     await user.save();
@@ -97,18 +93,16 @@ const updateUserProfile = async (userId, updates) => {
 
     const { username, email, currentPassword, newPassword } = updates;
 
-    // ── Username ────────────────────────────────────────────────────────────
     if (username && username.trim() !== user.username) {
         const trimmed = username.trim();
         if (trimmed.length < 3 || trimmed.length > 20) {
-            throw createCustomError("Username must be 3–20 characters", 400);
+            throw createCustomError("Username must be 3-20 characters", 400);
         }
         const taken = await User.findOne({ username: trimmed, _id: { $ne: userId } });
         if (taken) throw createCustomError("Username already taken", 400);
         user.username = trimmed;
     }
 
-    // ── Email ───────────────────────────────────────────────────────────────
     if (email && email.toLowerCase().trim() !== user.email) {
         const normalized = email.toLowerCase().trim();
         const taken = await User.findOne({ email: normalized, _id: { $ne: userId } });
@@ -116,7 +110,6 @@ const updateUserProfile = async (userId, updates) => {
         user.email = normalized;
     }
 
-    // ── Password ────────────────────────────────────────────────────────────
     if (newPassword) {
         if (!currentPassword) {
             throw createCustomError("Current password is required to set a new one", 400);
@@ -126,44 +119,36 @@ const updateUserProfile = async (userId, updates) => {
         if (newPassword.length < 6) {
             throw createCustomError("New password must be at least 6 characters", 400);
         }
-        user.password = newPassword; // hashed by pre-save hook
+        user.password = newPassword;
     }
 
     await user.save();
 
     return {
         user: buildAuthResponse(user),
-        token: user.createJWT(), // re-issue token in case username changed (embedded in JWT)
+        token: user.createJWT(),
     };
 };
 
-/**
- * Verify a Google ID token, then find-or-create the user.
- * Returns { user, token } — same shape as registerUser / loginUser.
- */
-const googleLoginUser = async (credential) => {
-    if (!credential) {
-        throw createCustomError("Google credential is required", 400);
+const googleLoginUser = async (profile) => {
+    if (!profile?.id) {
+        throw createCustomError("Google profile is required", 400);
     }
 
-    // 1. Verify the ID token with Google's servers
-    const ticket = await googleClient.verifyIdToken({
-        idToken: credential,
-        audience: process.env.GOOGLE_CLIENT_ID,
-    });
+    const email = profile.emails?.[0]?.value?.toLowerCase();
+    if (!email) {
+        throw createCustomError("Google account email is required", 400);
+    }
 
-    const payload = ticket.getPayload();
-    const { sub: googleId, email, name, picture } = payload;
+    const googleId = profile.id;
+    const name = profile.displayName || email.split("@")[0];
+    const picture = profile.photos?.[0]?.value;
 
-    console.log("✅ Google user verified:", { googleId, email, name, picture });
-
-    // 2. Find existing user by googleId or email
     let user = await User.findOne({
-        $or: [{ googleId }, { email: email.toLowerCase() }],
+        $or: [{ googleId }, { email }],
     });
 
     if (user) {
-        // Link Google ID if user existed by email but hadn't linked Google yet
         if (!user.googleId) {
             user.googleId = googleId;
             await user.save();
@@ -173,7 +158,7 @@ const googleLoginUser = async (credential) => {
         const baseName = name.replace(/\s+/g, "_").slice(0, 20 - suffix.length);
         user = await User.create({
             username: baseName + suffix,
-            email: email.toLowerCase(),
+            email,
             googleId,
             avatar: {
                 url: picture || undefined,
@@ -188,4 +173,11 @@ const googleLoginUser = async (credential) => {
     };
 };
 
-module.exports = { registerUser, loginUser, getUserById, updateUserAvatar, updateUserProfile, googleLoginUser };
+module.exports = {
+    registerUser,
+    loginUser,
+    getUserById,
+    updateUserAvatar,
+    updateUserProfile,
+    googleLoginUser,
+};

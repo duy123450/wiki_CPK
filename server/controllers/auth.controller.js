@@ -11,10 +11,10 @@ const login = async (req, res) => {
   res.status(200).json(result);
 };
 
-const googleLogin = async (req, res) => {
-  const { credential } = req.body;
-  const result = await authService.googleLoginUser(credential);
-  res.status(200).json(result);
+const googleLoginCallback = async (req, res) => {
+  const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+  const payload = encodeURIComponent(JSON.stringify(req.user));
+  res.redirect(`${frontendUrl}/auth?googleAuth=${payload}`);
 };
 
 const getCurrentUser = async (req, res) => {
@@ -33,4 +33,11 @@ const updateProfile = async (req, res) => {
   res.status(200).json(result);
 };
 
-module.exports = { register, login, googleLogin, getCurrentUser, updateAvatar, updateProfile };
+module.exports = {
+  register,
+  login,
+  googleLoginCallback,
+  getCurrentUser,
+  updateAvatar,
+  updateProfile,
+};

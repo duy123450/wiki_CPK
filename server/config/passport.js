@@ -1,6 +1,8 @@
 const passport = require("passport");
 const { Strategy: JwtStrategy, ExtractJwt } = require("passport-jwt");
+const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const User = require("../models/user.model");
+const { googleLoginUser } = require("../services/auth.service");
 
 const jwtOptions = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -30,5 +32,27 @@ passport.use(
     }
   }),
 );
+
+if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+  passport.use(
+    new GoogleStrategy(
+      {
+        clientID: process.env.GOOGLE_CLIENT_ID,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        callbackURL:
+          process.env.GOOGLE_CALLBACK_URL ||
+          "/api/v1/wiki/auth/google/callback",
+      },
+      async (accessToken, refreshToken, profile, done) => {
+        try {
+          const authResult = await googleLoginUser(profile);
+          return done(null, authResult);
+        } catch (error) {
+          return done(error, false);
+        }
+      },
+    ),
+  );
+}
 
 module.exports = passport;

@@ -1,5 +1,5 @@
-import { useState, useRef } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useState, useRef } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 import { loginUser, registerUser, uploadAvatar } from "../services/api";
 import GoogleLoginButton from "../components/GoogleLoginButton";
@@ -33,6 +33,27 @@ export default function AuthPage({
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const googleAuth = searchParams.get("googleAuth");
+  const googleError = searchParams.get("googleError");
+
+  useEffect(() => {
+    if (googleAuth) {
+      try {
+        onAuthSuccess(JSON.parse(googleAuth));
+        navigate("/auth", { replace: true });
+      } catch {
+        setError("Google sign-in failed. Please try again.");
+      }
+      return;
+    }
+
+    if (googleError) {
+      setError("Google sign-in was cancelled or failed.");
+      navigate("/auth", { replace: true });
+    }
+  }, [googleAuth, googleError, navigate, onAuthSuccess]);
 
   const updateField = (field) => (e) =>
     setForm((prev) => ({ ...prev, [field]: e.target.value }));
@@ -365,10 +386,7 @@ export default function AuthPage({
           </div>
 
           <div className="auth-google-wrap">
-            <GoogleLoginButton
-              onSuccess={onAuthSuccess}
-              onError={(msg) => setError(msg)}
-            />
+            <GoogleLoginButton />
           </div>
         </form>
       </div>

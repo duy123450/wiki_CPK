@@ -22,9 +22,9 @@ const defaultProps = {
     onLogout: vi.fn(),
 }
 
-const renderAuth = (overrides = {}) =>
+const renderAuth = (overrides = {}, routerOptions = {}) =>
     render(
-        <MemoryRouter>
+        <MemoryRouter initialEntries={routerOptions.initialEntries}>
             <AuthPage {...defaultProps} {...overrides} />
         </MemoryRouter>
     )
@@ -173,6 +173,33 @@ describe('AuthPage — Register Mode', () => {
                 password: 'pass123',
             })
             expect(defaultProps.onAuthSuccess).toHaveBeenCalledWith(response)
+        })
+    })
+})
+
+describe('AuthPage — Google OAuth Callback', () => {
+    it('calls onAuthSuccess when Google callback data is present', async () => {
+        const response = {
+            user: { id: 'user-1', username: 'googleuser', email: 'google@test.com' },
+            token: 'google-jwt',
+        }
+        const onAuthSuccess = vi.fn()
+
+        renderAuth(
+            { onAuthSuccess },
+            { initialEntries: [`/auth?googleAuth=${encodeURIComponent(JSON.stringify(response))}`] }
+        )
+
+        await waitFor(() => {
+            expect(onAuthSuccess).toHaveBeenCalledWith(response)
+        })
+    })
+
+    it('shows an error when Google callback fails', async () => {
+        renderAuth({}, { initialEntries: ['/auth?googleError=1'] })
+
+        await waitFor(() => {
+            expect(screen.getByText('Google sign-in was cancelled or failed.')).toBeInTheDocument()
         })
     })
 })

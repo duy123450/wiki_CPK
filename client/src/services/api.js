@@ -77,7 +77,7 @@ export const updateProfile = async (payload) => {
 
 // ─── Google OAuth ───────────────────────────────────────────────────────────
 
-export const googleLogin = async (credential) => {
-    const res = await api.post("/auth/google", { credential });
-    return res.data; // { user, token }
+export const getGoogleLoginUrl = () => {
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || "";
+    return `${baseUrl}/auth/google`;
 };
