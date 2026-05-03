@@ -5,6 +5,7 @@ vi.mock('axios', () => {
         get: vi.fn(),
         post: vi.fn(),
         put: vi.fn(),
+        request: vi.fn(),
         interceptors: {
             request: { use: vi.fn() },
             response: { use: vi.fn() },
@@ -32,6 +33,6 @@ afterEach(() => {
 
 describe('getGoogleLoginUrl', () => {
     it('returns the backend Google OAuth URL', () => {
-        expect(api.getGoogleLoginUrl()).toBe('/auth/google')
+        expect(api.getGoogleLoginUrl()).toBe('https://wiki-cpk-be.onrender.com/api/v1/wiki/auth/google')
     })
 })

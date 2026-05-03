@@ -64,7 +64,7 @@ api.interceptors.response.use(
             originalRequest.headers = originalRequest.headers ?? {};
             originalRequest.headers.Authorization = `Bearer ${accessToken}`;
 
-            return api(originalRequest);
+            return api.request(originalRequest);
         } catch (refreshError) {
             const refreshStatus = refreshError.response?.status;
             if (refreshStatus === 401 || refreshStatus === 403 || !refreshStatus) {

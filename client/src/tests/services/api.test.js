@@ -13,6 +13,7 @@ vi.mock('axios', () => {
         get: vi.fn(),
         post: vi.fn(),
         put: vi.fn(),
+        request: vi.fn(),
         interceptors: {
             request: { use: vi.fn() },
             response: { use: vi.fn() },
@@ -47,6 +48,51 @@ describe('AUTH_TOKEN_KEY', () => {
     it('has a default value', () => {
         expect(api.AUTH_TOKEN_KEY).toBeDefined()
         expect(typeof api.AUTH_TOKEN_KEY).toBe('string')
+    })
+})
+
+describe('axios instance', () => {
+    it('uses the Render backend URL and sends credentials', async () => {
+        expect(axios.create).toHaveBeenLastCalledWith({
+            baseURL: 'https://wiki-cpk-be.onrender.com/api/v1/wiki',
+            withCredentials: true,
+        })
+    })
+})
+
+describe('request interceptor', () => {
+    it('attaches the access token from localStorage', async () => {
+        window.localStorage.setItem(api.AUTH_TOKEN_KEY, 'access-token')
+        const requestHandler = mockAxiosInstance.interceptors.request.use.mock.calls[0][0]
+
+        const config = requestHandler({ headers: {} })
+
+        expect(config.headers.Authorization).toBe('Bearer access-token')
+    })
+})
+
+describe('response interceptor', () => {
+    it('refreshes on 401, saves the new access token, and retries the original request', async () => {
+        const responseErrorHandler = mockAxiosInstance.interceptors.response.use.mock.calls[0][1]
+        const originalRequest = { url: '/auth/me', headers: {} }
+
+        mockAxiosInstance.post.mockResolvedValueOnce({
+            data: { accessToken: 'fresh-access-token' },
+        })
+        mockAxiosInstance.request.mockResolvedValueOnce({ data: { ok: true } })
+
+        const result = await responseErrorHandler({
+            config: originalRequest,
+            response: { status: 401 },
+        })
+
+        expect(mockAxiosInstance.post).toHaveBeenCalledWith('/auth/refresh', undefined, {
+            _skipAuthRefresh: true,
+        })
+        expect(window.localStorage.getItem(api.AUTH_TOKEN_KEY)).toBe('fresh-access-token')
+        expect(originalRequest.headers.Authorization).toBe('Bearer fresh-access-token')
+        expect(mockAxiosInstance.request).toHaveBeenCalledWith(originalRequest)
+        expect(result).toEqual({ data: { ok: true } })
     })
 })
 
@@ -130,6 +176,21 @@ describe('getCurrentUser', () => {
         const result = await api.getCurrentUser()
         expect(mockAxiosInstance.get).toHaveBeenCalledWith('/auth/me')
         expect(result).toEqual(user)
+    })
+})
+
+describe('refreshAccessToken', () => {
+    it('posts to /auth/refresh and stores the returned access token', async () => {
+        const response = { accessToken: 'new-access-token' }
+        mockAxiosInstance.post.mockResolvedValueOnce({ data: response })
+
+        const result = await api.refreshAccessToken()
+
+        expect(mockAxiosInstance.post).toHaveBeenCalledWith('/auth/refresh', undefined, {
+            _skipAuthRefresh: true,
+        })
+        expect(window.localStorage.getItem(api.AUTH_TOKEN_KEY)).toBe('new-access-token')
+        expect(result).toEqual(response)
     })
 })
 
