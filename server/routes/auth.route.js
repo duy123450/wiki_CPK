@@ -7,6 +7,7 @@ const {
   register,
   login,
   googleLoginCallback,
+  twitterLoginCallback,
   refresh,
   getCurrentUser,
   updateAvatar,
@@ -24,6 +25,26 @@ const requireGoogleOAuthConfig = (req, res, next) => {
   return next();
 };
 
+const requireTwitterOAuthConfig = (req, res, next) => {
+  const isProduction = process.env.NODE_ENV === "production";
+  const clientId = isProduction
+    ? process.env.X_PROD_CLIENT_ID
+    : process.env.X_LOCAL_CLIENT_ID;
+  const clientSecret = isProduction
+    ? process.env.X_PROD_CLIENT_SECRET
+    : process.env.X_LOCAL_CLIENT_SECRET;
+
+  if (!clientId || !clientSecret) {
+    return res.status(500).json({
+      msg: isProduction
+        ? "Twitter OAuth is not configured. Set X_PROD_CLIENT_ID and X_PROD_CLIENT_SECRET in server/.env."
+        : "Twitter OAuth is not configured. Set X_LOCAL_CLIENT_ID and X_LOCAL_CLIENT_SECRET in server/.env.",
+    });
+  }
+
+  return next();
+};
+
 router.post("/register", register);
 router.post("/login", login);
 router.post("/refresh", refresh);
@@ -32,7 +53,6 @@ router.get(
   requireGoogleOAuthConfig,
   passport.authenticate("google", {
     scope: ["profile", "email"],
-    session: false,
   }),
 );
 router.get(
@@ -40,9 +60,39 @@ router.get(
   requireGoogleOAuthConfig,
   passport.authenticate("google", {
     failureRedirect: `${process.env.FRONTEND_URL || "http://localhost:5173"}/auth?googleError=1`,
-    session: false,
   }),
   googleLoginCallback,
+);
+router.get(
+  "/x",
+  requireTwitterOAuthConfig,
+  (req, res, next) => {
+    console.log("=== Twitter /x route hit ===");
+    console.log("Full URL:", req.originalUrl);
+    next();
+  },
+  passport.authenticate("twitter", {
+    scope: ['tweet.read', 'users.read'],
+  }),
+);
+router.get(
+  "/x/callback",
+  requireTwitterOAuthConfig,
+  (req, res, next) => {
+    console.log("=== Twitter callback route hit ===");
+    console.log("Query params:", req.query);
+    console.log("Session:", req.session?.passport);
+    next();
+  },
+  passport.authenticate("twitter", {
+    failureRedirect: `${process.env.FRONTEND_URL || "http://localhost:5173"}/auth?twitterError=1`,
+  }),
+  (req, res, next) => {
+    console.log("=== After passport.authenticate ===");
+    console.log("req.user:", req.user);
+    next();
+  },
+  twitterLoginCallback,
 );
 router.get("/me", authenticateUser, getCurrentUser);
 router.put("/avatar", authenticateUser, upload.single("avatar"), updateAvatar);

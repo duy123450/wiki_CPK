@@ -146,3 +146,8 @@ export const updateProfile = async (payload) => {
 export const getGoogleLoginUrl = () => {
     return `${API_BASE_URL}/auth/google`;
 };
+// ─── Twitter OAuth ──────────────────────────────────────────────────────
+
+export const getTwitterLoginUrl = () => {
+    return `${API_BASE_URL}/auth/x`;
+};

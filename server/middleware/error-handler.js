@@ -1,6 +1,15 @@
 const { CustomAPIError } = require('../errors/custom-error')
 
 const errorHandlerMiddleware = (err, req, res, next) => {
+    // Log ALL errors with full context
+    console.error("\n\n❌ ERROR HANDLER CAUGHT ERROR");
+    console.error("URL:", req.url);
+    console.error("Method:", req.method);
+    console.error("Message:", err.message);
+    console.error("Code:", err.code);
+    console.error("Stack:", err.stack);
+    console.error("\n");
+
     // 1. Set default values for generic server errors
     let customError = {
         statusCode: err.statusCode || 500,
@@ -33,7 +42,7 @@ const errorHandlerMiddleware = (err, req, res, next) => {
     }
 
     // 6. Mongoose: Connection/Timeout Errors
-    if (err.message.includes('buffered query timed out')) {
+    if (err.message && err.message.includes('buffered query timed out')) {
         customError.msg = 'Database connection timed out. Please try again'
         customError.statusCode = 503
     }

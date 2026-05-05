@@ -32,6 +32,20 @@ const googleLoginCallback = async (req, res) => {
   res.redirect(`${frontendUrl}/auth?accessToken=${encodeURIComponent(accessToken)}&user=${userPayload}`);
 };
 
+const twitterLoginCallback = async (req, res) => {
+  try {
+    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+    const { refreshToken, accessToken, user } = req.user;
+    res.cookie("refreshToken", refreshToken, refreshCookieOptions);
+    const userPayload = encodeURIComponent(JSON.stringify(user));
+    res.redirect(`${frontendUrl}/auth?accessToken=${encodeURIComponent(accessToken)}&user=${userPayload}`);
+  } catch (error) {
+    console.error("Twitter callback error:", error);
+    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+    res.redirect(`${frontendUrl}/auth?twitterError=1&msg=${encodeURIComponent(error.message)}`);
+  }
+};
+
 const refresh = async (req, res) => {
   const result = await authService.refreshAccessToken(req.cookies?.refreshToken);
   res.status(200).json(result);
@@ -57,6 +71,7 @@ module.exports = {
   register,
   login,
   googleLoginCallback,
+  twitterLoginCallback,
   refresh,
   getCurrentUser,
   updateAvatar,

@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 import { loginUser, registerUser, uploadAvatar } from "../services/api";
 import GoogleLoginButton from "../components/GoogleLoginButton";
+import TwitterLoginButton from "../components/TwitterLoginButton";
 import "../styles/AuthPage.css";
 
 const INITIAL_FORM = {
@@ -36,20 +37,21 @@ export default function AuthPage({
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const accessToken = searchParams.get("accessToken");
-  const googleUser = searchParams.get("user");
+  const oauthUser = searchParams.get("user");
   const googleError = searchParams.get("googleError");
+  const twitterError = searchParams.get("twitterError");
 
   useEffect(() => {
-    if (accessToken && googleUser) {
+    if (accessToken && oauthUser) {
       try {
         onAuthSuccess({
-          user: JSON.parse(googleUser),
+          user: JSON.parse(oauthUser),
           accessToken,
           token: accessToken,
         });
         navigate("/auth", { replace: true });
       } catch {
-        setError("Google sign-in failed. Please try again.");
+        setError("Sign-in failed. Please try again.");
       }
       return;
     }
@@ -58,7 +60,19 @@ export default function AuthPage({
       setError("Google sign-in was cancelled or failed.");
       navigate("/auth", { replace: true });
     }
-  }, [accessToken, googleError, googleUser, navigate, onAuthSuccess]);
+
+    if (twitterError) {
+      setError("X sign-in was cancelled or failed.");
+      navigate("/auth", { replace: true });
+    }
+  }, [
+    accessToken,
+    googleError,
+    twitterError,
+    oauthUser,
+    navigate,
+    onAuthSuccess,
+  ]);
 
   const updateField = (field) => (e) =>
     setForm((prev) => ({ ...prev, [field]: e.target.value }));
@@ -205,10 +219,10 @@ export default function AuthPage({
             {avatarError && <p className="auth-error">{avatarError}</p>}
           </div>
 
-          <h1 className="auth-title">Chào mừng trở lại, {currentUser.username}</h1>
-          <p className="auth-copy">
-            Quay về wiki hoặc đăng xuất tại đây.
-          </p>
+          <h1 className="auth-title">
+            Chào mừng trở lại, {currentUser.username}
+          </h1>
+          <p className="auth-copy">Quay về wiki hoặc đăng xuất tại đây.</p>
 
           <div className="auth-user-card">
             <span className="auth-user-label">Email</span>
@@ -241,9 +255,7 @@ export default function AuthPage({
       <div className="auth-shell">
         <div className="auth-hero">
           <span className="auth-badge">Member Access</span>
-          <h1 className="auth-title">
-            Đăng nhập hoặc đăng ký vào CPK Wiki
-          </h1>
+          <h1 className="auth-title">Đăng nhập hoặc đăng ký vào CPK Wiki</h1>
         </div>
 
         <div className="auth-tabs" role="tablist" aria-label="Auth mode tabs">
@@ -361,9 +373,15 @@ export default function AuthPage({
                   type="button"
                   className="auth-password-toggle"
                   onClick={() => setShowConfirmPassword((prev) => !prev)}
-                  title={showConfirmPassword ? "Hide password" : "Show password"}
+                  title={
+                    showConfirmPassword ? "Hide password" : "Show password"
+                  }
                 >
-                  {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  {showConfirmPassword ? (
+                    <EyeOff size={18} />
+                  ) : (
+                    <Eye size={18} />
+                  )}
                 </button>
               </div>
             </label>
@@ -392,6 +410,7 @@ export default function AuthPage({
 
           <div className="auth-google-wrap">
             <GoogleLoginButton />
+            <TwitterLoginButton />
           </div>
         </form>
       </div>

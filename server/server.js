@@ -6,6 +6,7 @@ const passport = require('./config/passport')
 // Import Security Packages
 const helmet = require('helmet')
 const cors = require('cors')
+const session = require('express-session')
 const rateLimit = require('express-rate-limit')
 const cookieParser = require('cookie-parser')
 
@@ -46,6 +47,15 @@ const corsOptions = {
 
 // 1. Security Middleware
 app.set('trust proxy', 1)
+
+// Request logging
+app.use((req, res, next) => {
+    if (req.url.includes('/auth')) {
+        console.log(`📨 ${req.method} ${req.url}`);
+    }
+    next();
+})
+
 app.use(rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 300
@@ -54,7 +64,18 @@ app.use(express.json({ limit: '10kb' }))
 app.use(cookieParser())
 app.use(cors(corsOptions))
 app.use(helmet())
+app.use(session({
+    secret: process.env.SESSION_SECRET || 'your-secret-key',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        secure: process.env.NODE_ENV === 'production',
+        httpOnly: true,
+        maxAge: 1000 * 60 * 60 * 24
+    }
+}))
 app.use(passport.initialize())
+app.use(passport.session())
 
 // 2. Routes
 app.use('/api/v1/wiki', wikiRouter)

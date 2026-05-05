@@ -24,12 +24,17 @@ const UserSchema = new mongoose.Schema({
     password: {
         type: String,
         required: function () {
-            // Password is only required when there is no Google ID
-            return !this.googleId;
+            // Password is only required when there is no Google ID or X ID
+            return !this.googleId && !this.xId;
         },
         minlength: 6,
     },
     googleId: {
+        type: String,
+        unique: true,
+        sparse: true, // allows multiple docs to have null/undefined
+    },
+    xId: {
         type: String,
         unique: true,
         sparse: true, // allows multiple docs to have null/undefined

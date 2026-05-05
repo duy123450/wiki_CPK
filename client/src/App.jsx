@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import ScrollToTop from "./components/ScrollToTop";
 import DragonCursor from "./components/DragonCursor";
 import Sidebar from "./components/Sidebar";
+import ProtectedRoute from "./components/ProtectedRoute";
 import HeroPage from "./pages/HeroPage";
 import MovieOverviewPage from "./pages/MovieOverviewPage";
 import CharactersPage from "./pages/CharactersPage";
@@ -99,13 +100,15 @@ export default function App() {
           <Route
             path="/profile"
             element={
-              <ProfilePage
-                sidebarCollapsed={sidebarCollapsed}
-                currentUser={authUser}
-                onProfileUpdate={handleProfileUpdate}
-                onAvatarUpdate={handleAvatarUpdate}
-                onLogout={handleLogout}
-              />
+              <ProtectedRoute currentUser={authUser}>
+                <ProfilePage
+                  sidebarCollapsed={sidebarCollapsed}
+                  currentUser={authUser}
+                  onProfileUpdate={handleProfileUpdate}
+                  onAvatarUpdate={handleAvatarUpdate}
+                  onLogout={handleLogout}
+                />
+              </ProtectedRoute>
             }
           />
           <Route
