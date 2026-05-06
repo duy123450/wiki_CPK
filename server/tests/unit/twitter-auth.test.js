@@ -62,6 +62,12 @@ describe('twitterLoginUser()', () => {
             expect(result.user.username).toMatch(/^John_Doe_/);
         });
 
+        it('should normalize diacritics in displayName to generate username', async () => {
+            const result = await twitterLoginUser(buildMockTwitterProfile({ displayName: 'Phạm Đăng' }));
+
+            expect(result.user.username).toMatch(/^Pham_Dang_/);
+        });
+
         it('should use Twitter username if displayName not provided', async () => {
             const result = await twitterLoginUser(buildMockTwitterProfile({ displayName: undefined, username: 'xuser123' }));
 
@@ -76,9 +82,10 @@ describe('twitterLoginUser()', () => {
         });
 
         it('should generate email from username and xId', async () => {
-            const result = await twitterLoginUser(buildMockTwitterProfile({ displayName: 'Jane' }));
+            const profile = buildMockTwitterProfile({ displayName: 'Jane', id: '12345' });
+            const result = await twitterLoginUser(profile);
 
-            expect(result.user.email).toMatch(/@twitter\.local$/);
+            expect(result.user.email).toBe('jane_12345@twitter.local');
         });
 
         it('should store xId on the new user', async () => {
