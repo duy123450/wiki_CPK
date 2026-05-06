@@ -177,12 +177,8 @@ const googleLoginUser = async (profile) => {
 };
 
 const twitterLoginUser = async (profile) => {
-    console.log("\n📍 twitterLoginUser called");
-    console.log("Profile ID:", profile?.id);
-    console.log("Profile username:", profile?.username);
 
     if (!profile?.id) {
-        console.error("❌ No profile ID");
         throw createCustomError("Twitter profile is required", 400);
     }
 
@@ -190,29 +186,30 @@ const twitterLoginUser = async (profile) => {
     const name = profile.displayName || profile.username || "x_user";
     const picture = profile.photos?.[0]?.value;
 
-    console.log("Creating/finding user with xId:", xId);
     let user = await User.findOne({ xId });
 
     if (!user) {
-        console.log("User not found, creating...");
         const suffix = "_" + xId.slice(-4);
-        const baseName = name.replace(/\s+/g, "_").slice(0, 20 - suffix.length);
+        // Normalize name to remove diacritics (e.g., Phạm -> Pham)
+        const normalizedName = name
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .replace(/đ/g, "d")
+            .replace(/Đ/g, "D");
+            
+        const baseName = normalizedName.replace(/\s+/g, "_").slice(0, 20 - suffix.length);
         user = await User.create({
             username: baseName + suffix,
-            email: `${baseName}_${xId}@twitter.local`,
+            email: `${baseName.toLowerCase()}_${xId}@twitter.local`,
             xId,
             avatar: {
                 url: picture || undefined,
                 public_id: "twitter-avatar",
             },
         });
-        console.log("✅ User created:", user._id);
-    } else {
-        console.log("✅ User found:", user._id);
     }
 
     const result = await buildTokenResponse(user);
-    console.log("✅ Token response built");
     return result;
 };
 

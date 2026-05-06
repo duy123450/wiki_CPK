@@ -48,13 +48,6 @@ const corsOptions = {
 // 1. Security Middleware
 app.set('trust proxy', 1)
 
-// Request logging
-app.use((req, res, next) => {
-    if (req.url.includes('/auth')) {
-        console.log(`📨 ${req.method} ${req.url}`);
-    }
-    next();
-})
 
 app.use(rateLimit({
     windowMs: 15 * 60 * 1000,

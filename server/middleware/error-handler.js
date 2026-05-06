@@ -1,14 +1,7 @@
 const { CustomAPIError } = require('../errors/custom-error')
 
 const errorHandlerMiddleware = (err, req, res, next) => {
-    // Log ALL errors with full context
-    console.error("\n\n❌ ERROR HANDLER CAUGHT ERROR");
-    console.error("URL:", req.url);
-    console.error("Method:", req.method);
-    console.error("Message:", err.message);
-    console.error("Code:", err.code);
-    console.error("Stack:", err.stack);
-    console.error("\n");
+    // Error logging removed for cleaner output
 
     // 1. Set default values for generic server errors
     let customError = {

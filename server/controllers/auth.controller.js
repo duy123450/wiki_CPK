@@ -40,7 +40,6 @@ const twitterLoginCallback = async (req, res) => {
     const userPayload = encodeURIComponent(JSON.stringify(user));
     res.redirect(`${frontendUrl}/auth?accessToken=${encodeURIComponent(accessToken)}&user=${userPayload}`);
   } catch (error) {
-    console.error("Twitter callback error:", error);
     const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
     res.redirect(`${frontendUrl}/auth?twitterError=1&msg=${encodeURIComponent(error.message)}`);
   }

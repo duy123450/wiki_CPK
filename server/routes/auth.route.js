@@ -66,11 +66,6 @@ router.get(
 router.get(
   "/x",
   requireTwitterOAuthConfig,
-  (req, res, next) => {
-    console.log("=== Twitter /x route hit ===");
-    console.log("Full URL:", req.originalUrl);
-    next();
-  },
   passport.authenticate("twitter", {
     scope: ['tweet.read', 'users.read'],
   }),
@@ -78,20 +73,9 @@ router.get(
 router.get(
   "/x/callback",
   requireTwitterOAuthConfig,
-  (req, res, next) => {
-    console.log("=== Twitter callback route hit ===");
-    console.log("Query params:", req.query);
-    console.log("Session:", req.session?.passport);
-    next();
-  },
   passport.authenticate("twitter", {
     failureRedirect: `${process.env.FRONTEND_URL || "http://localhost:5173"}/auth?twitterError=1`,
   }),
-  (req, res, next) => {
-    console.log("=== After passport.authenticate ===");
-    console.log("req.user:", req.user);
-    next();
-  },
   twitterLoginCallback,
 );
 router.get("/me", authenticateUser, getCurrentUser);

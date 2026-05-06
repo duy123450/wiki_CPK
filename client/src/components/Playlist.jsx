@@ -436,6 +436,13 @@ export default function Playlist() {
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === " ") {
+        // Ignore if user is typing in an input field
+        const target = e.target;
+        const tagName = target.tagName.toLowerCase();
+        if (tagName === 'input' || tagName === 'textarea' || target.isContentEditable) {
+          return;
+        }
+        
         e.preventDefault();
         handlePlayPause();
       }
