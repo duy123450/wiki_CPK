@@ -126,15 +126,21 @@ wiki_CPK/
 ├── client/              # React Application (Vite)
 │   ├── src/
 │   │   ├── components/  # Reusable UI components
-│   │   ├── context/     # Global state management
-│   │   ├── services/    # API calls (Axios)
-│   │   └── pages/       # Page components
-├── server/              # Express API
+│   │   ├── context/     # Global state management (Auth, etc.)
+│   │   ├── pages/       # Page components (Home, Wiki, etc.)
+│   │   ├── services/    # API call services (Axios)
+│   │   ├── styles/      # Global and component styles (CSS)
+│   │   └── tests/       # Frontend testing (Vitest)
+│   ├── public/          # Static assets
+├── server/              # Express API (Node.js)
 │   ├── config/          # Passport, Database, Cloudinary config
-│   ├── controllers/     # Route logic
-│   ├── models/          # Mongoose schemas
-│   ├── routes/          # Express routes
-│   └── services/        # Business logic
+│   ├── controllers/     # Route request handlers
+│   ├── errors/          # Custom error classes
+│   ├── middleware/      # Global and route-specific middleware
+│   ├── models/          # Mongoose database schemas
+│   ├── routes/          # API route definitions
+│   ├── services/        # Core business logic
+│   └── tests/           # Backend testing (Jest & Supertest)
 └── README.md
 ```
 
