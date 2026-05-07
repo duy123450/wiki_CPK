@@ -39,7 +39,9 @@ const OPEN_CATEGORY_COOKIE = "cpkSidebarOpenCategory";
 function getCookie(name) {
   const cookies = document.cookie ? document.cookie.split("; ") : [];
   const target = cookies.find((entry) => entry.startsWith(`${name}=`));
-  return target ? decodeURIComponent(target.split("=").slice(1).join("=")) : null;
+  return target
+    ? decodeURIComponent(target.split("=").slice(1).join("="))
+    : null;
 }
 
 function setCookie(name, value, maxAgeSeconds = 60 * 60 * 24 * 30) {
@@ -124,7 +126,6 @@ const DEFAULT_AVATAR =
 
 export default function Sidebar({
   onCollapseChange,
-  onDragonCursorToggle,
   dragonCursorEnabled,
   currentUser,
   onLogout,
@@ -415,7 +416,18 @@ export default function Sidebar({
           <div className="sidebar-footer-row">
             <button
               className={`dragon-toggle-btn ${dragonCursorEnabled ? "active" : ""}`}
-              onClick={onDragonCursorToggle}
+              onClick={() => {
+                console.log(
+                  "clicked, window.toggleDragonCursor exists?",
+                  typeof window.toggleDragonCursor,
+                );
+                if (
+                  typeof window !== "undefined" &&
+                  window.toggleDragonCursor
+                ) {
+                  window.toggleDragonCursor();
+                }
+              }}
               title={
                 dragonCursorEnabled
                   ? "Disable dragon cursor"

@@ -3,13 +3,11 @@ import "../styles/DragonCursor.css";
 
 const SEG_DIST = 55;
 const SPARKLES = ["✦", "⋆", "✧", "·", "✩", "꩜"];
+const DRAGON_ENABLED_KEY = "cpk-dragon-cursor-enabled";
 
 function Sparkle({ x, y, char, color }) {
   return (
-    <div
-      className="dragon-sparkle"
-      style={{ left: x, top: y, color }}
-    >
+    <div className="dragon-sparkle" style={{ left: x, top: y, color }}>
       {char}
     </div>
   );
@@ -36,6 +34,13 @@ export default function DragonCursor() {
   const animRef = useRef(null);
   const targetRef = useRef({ x: -300, y: -300 });
 
+  // Read initial state from localStorage (defaults to true if not set)
+  const [isEnabled, setIsEnabled] = useState(() => {
+    if (typeof window === "undefined") return true;
+    const stored = window.localStorage.getItem(DRAGON_ENABLED_KEY);
+    return stored === null ? true : stored === "true";
+  });
+
   const segsRef = useRef([
     { x: -300, y: -300 },
     { x: -355, y: -300 },
@@ -54,6 +59,27 @@ export default function DragonCursor() {
   const flipsRef = useRef(Array(8).fill(false));
   const [sparkles, setSparkles] = useState([]);
   const sparkTimer = useRef(0);
+
+  // Persist enabled state to localStorage
+  useEffect(() => {
+    window.localStorage.setItem(DRAGON_ENABLED_KEY, isEnabled.toString());
+    // Dispatch custom event so Sidebar and other components stay in sync
+    window.dispatchEvent(
+      new CustomEvent("dragon-cursor-toggle", {
+        detail: { enabled: isEnabled },
+      }),
+    );
+  }, [isEnabled]);
+
+  // Export toggle function globally so Sidebar can call it
+  useEffect(() => {
+    window.toggleDragonCursor = () => {
+      setIsEnabled((prev) => !prev);
+    };
+    return () => {
+      delete window.toggleDragonCursor;
+    };
+  }, []);
 
   useEffect(() => {
     // Mouse support
@@ -157,19 +183,81 @@ export default function DragonCursor() {
   }, []);
 
   return (
-    <>
+    <div style={{ display: isEnabled ? "block" : "none" }}>
       {sparkles.map((sp) => (
-        <Sparkle key={sp.id} x={sp.x} y={sp.y} char={sp.char} color={sp.color} />
+        <Sparkle
+          key={sp.id}
+          x={sp.x}
+          y={sp.y}
+          char={sp.char}
+          color={sp.color}
+        />
       ))}
 
-      <Seg pos={renderSegs[7]} flipped={flips[7]} src="https://res.cloudinary.com/dvlaoxjzi/image/upload/q_auto/f_auto/v1775629481/ZoroChibi_mmr28n.png"      alt="Zoro"      shadow="0 4px 16px rgba(100,200,150,0.6)" zIndex={9992} />
-      <Seg pos={renderSegs[6]} flipped={flips[6]} src="https://res.cloudinary.com/dvlaoxjzi/image/upload/q_auto/f_auto/v1775629481/MamiChibi_ul1hrw.png"      alt="Mami"      shadow="0 4px 16px rgba(255,180,120,0.6)" zIndex={9993} />
-      <Seg pos={renderSegs[5]} flipped={flips[5]} src="https://res.cloudinary.com/dvlaoxjzi/image/upload/q_auto/f_auto/v1775629482/NoiMikadoChibi_cqqhdn.png" alt="NoiMikado" shadow="0 4px 16px rgba(220,100,200,0.6)" zIndex={9994} />
-      <Seg pos={renderSegs[4]} flipped={flips[4]} src="https://res.cloudinary.com/dvlaoxjzi/image/upload/q_auto/f_auto/v1775629481/MoonPeople_ipnssa.png"     alt="MoonPeople" shadow="0 4px 16px rgba(100,150,255,0.6)" zIndex={9995} />
-      <Seg pos={renderSegs[3]} flipped={flips[3]} src="https://res.cloudinary.com/dvlaoxjzi/image/upload/q_auto/f_auto/v1775629481/KaguyaChibi_fspqxf.png"    alt="Kaguya"    shadow="0 4px 16px rgba(255,150,180,0.6)" zIndex={9996} />
-      <Seg pos={renderSegs[2]} flipped={flips[2]} src="https://res.cloudinary.com/dvlaoxjzi/image/upload/q_auto/f_auto/v1775629482/RokaChibi_qefo1f.png"      alt="Roka"      shadow="0 4px 16px rgba(150,100,80,0.5)"  zIndex={9997} />
-      <Seg pos={renderSegs[1]} flipped={flips[1]} src="https://res.cloudinary.com/dvlaoxjzi/image/upload/q_auto/f_auto/v1775629481/IrohaChibi_qwmv8n.png"     alt="Iroha"     shadow="0 4px 16px rgba(180,100,255,0.5)" zIndex={9998} />
-      <Seg pos={renderSegs[0]} flipped={flips[0]} src="https://res.cloudinary.com/dvlaoxjzi/image/upload/q_auto/f_auto/v1775629481/YachiyoChibi_opfpce.png"   alt="Yaccho"    shadow="0 4px 16px rgba(100,160,255,0.5)" zIndex={9999} />
-    </>
+      <Seg
+        pos={renderSegs[7]}
+        flipped={flips[7]}
+        src="https://res.cloudinary.com/dvlaoxjzi/image/upload/q_auto/f_auto/v1775629481/ZoroChibi_mmr28n.png"
+        alt="Zoro"
+        shadow="0 4px 16px rgba(100,200,150,0.6)"
+        zIndex={9992}
+      />
+      <Seg
+        pos={renderSegs[6]}
+        flipped={flips[6]}
+        src="https://res.cloudinary.com/dvlaoxjzi/image/upload/q_auto/f_auto/v1775629481/MamiChibi_ul1hrw.png"
+        alt="Mami"
+        shadow="0 4px 16px rgba(255,180,120,0.6)"
+        zIndex={9993}
+      />
+      <Seg
+        pos={renderSegs[5]}
+        flipped={flips[5]}
+        src="https://res.cloudinary.com/dvlaoxjzi/image/upload/q_auto/f_auto/v1775629482/NoiMikadoChibi_cqqhdn.png"
+        alt="NoiMikado"
+        shadow="0 4px 16px rgba(220,100,200,0.6)"
+        zIndex={9994}
+      />
+      <Seg
+        pos={renderSegs[4]}
+        flipped={flips[4]}
+        src="https://res.cloudinary.com/dvlaoxjzi/image/upload/q_auto/f_auto/v1775629481/MoonPeople_ipnssa.png"
+        alt="MoonPeople"
+        shadow="0 4px 16px rgba(100,150,255,0.6)"
+        zIndex={9995}
+      />
+      <Seg
+        pos={renderSegs[3]}
+        flipped={flips[3]}
+        src="https://res.cloudinary.com/dvlaoxjzi/image/upload/q_auto/f_auto/v1775629481/KaguyaChibi_fspqxf.png"
+        alt="Kaguya"
+        shadow="0 4px 16px rgba(255,150,180,0.6)"
+        zIndex={9996}
+      />
+      <Seg
+        pos={renderSegs[2]}
+        flipped={flips[2]}
+        src="https://res.cloudinary.com/dvlaoxjzi/image/upload/q_auto/f_auto/v1775629482/RokaChibi_qefo1f.png"
+        alt="Roka"
+        shadow="0 4px 16px rgba(150,100,80,0.5)"
+        zIndex={9997}
+      />
+      <Seg
+        pos={renderSegs[1]}
+        flipped={flips[1]}
+        src="https://res.cloudinary.com/dvlaoxjzi/image/upload/q_auto/f_auto/v1775629481/IrohaChibi_qwmv8n.png"
+        alt="Iroha"
+        shadow="0 4px 16px rgba(180,100,255,0.5)"
+        zIndex={9998}
+      />
+      <Seg
+        pos={renderSegs[0]}
+        flipped={flips[0]}
+        src="https://res.cloudinary.com/dvlaoxjzi/image/upload/q_auto/f_auto/v1775629481/YachiyoChibi_opfpce.png"
+        alt="Yaccho"
+        shadow="0 4px 16px rgba(100,160,255,0.5)"
+        zIndex={9999}
+      />
+    </div>
   );
 }
