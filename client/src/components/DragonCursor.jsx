@@ -3,7 +3,7 @@ import "../styles/DragonCursor.css";
 
 const SEG_DIST = 55;
 const SPARKLES = ["✦", "⋆", "✧", "·", "✩", "꩜"];
-const DRAGON_ENABLED_KEY = "cpk-dragon-cursor-enabled";
+const DRAGON_ENABLED_KEY = import.meta.env.VITE_DRAGON_ENABLED_KEY || "cpkDragonCursorEnabled";
 
 function Sparkle({ x, y, char, color }) {
   return (

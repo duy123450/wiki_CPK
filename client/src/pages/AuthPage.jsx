@@ -107,7 +107,6 @@ export default function AuthPage({
     setAvatarUploading(true);
     try {
       const data = await uploadAvatar(file);
-      // data = { avatar: { url, public_id } }
       onAvatarUpdate(data.avatar);
       // Keep the preview until the parent re-renders with the new URL
     } catch (err) {

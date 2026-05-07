@@ -34,7 +34,7 @@ const MOVIE_EXTERNAL_LINKS = [
     url: "https://ln.hako.vn/truyen/24840-kaguya-cong-chua-vu-tru",
   },
 ];
-const OPEN_CATEGORY_COOKIE = "cpkSidebarOpenCategory";
+const OPEN_CATEGORY_COOKIE = import.meta.env.VITE_OPEN_CATEGORY_COOKIE || "cpkSidebarOpenCategory";
 
 function getCookie(name) {
   const cookies = document.cookie ? document.cookie.split("; ") : [];

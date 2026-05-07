@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/purity */
 import { Link } from "react-router-dom";
 import "../styles/NotFoundPage.css";
 
