@@ -19,6 +19,7 @@ import {
   Shield,
 } from "lucide-react";
 import { getSidebar } from "../services/api";
+import LiveUserCount from "./LiveUserCount";
 import "../styles/Sidebar.css";
 
 const LOGO_URL =
@@ -297,6 +298,12 @@ export default function Sidebar({
         <div className="wiki-label">
           <span>Navigation</span>
         </div>
+
+        {!isCollapsed && (
+          <div style={{ paddingBottom: "12px" }}>
+            <LiveUserCount />
+          </div>
+        )}
 
         <nav className="sidebar-nav">
           {loading ? (

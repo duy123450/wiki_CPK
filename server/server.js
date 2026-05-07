@@ -1,6 +1,9 @@
 require('dotenv').config()
 const express = require('express')
 const app = express()
+const http = require('http')
+const server = http.createServer(app)
+const { Server } = require('socket.io')
 const passport = require('./config/passport')
 
 // Import Security Packages
@@ -45,10 +48,20 @@ const corsOptions = {
     optionsSuccessStatus: 200
 }
 
+const io = new Server(server, { cors: corsOptions })
+
+let onlineUsers = 0
+io.on('connection', (socket) => {
+    onlineUsers++
+    io.emit('update_user_count', onlineUsers)
+    socket.on('disconnect', () => {
+        onlineUsers--
+        io.emit('update_user_count', onlineUsers)
+    })
+})
+
 // 1. Security Middleware
 app.set('trust proxy', 1)
-
-
 app.use(rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 300
@@ -86,7 +99,7 @@ const port = process.env.PORT || 3000
 const start = async () => {
     try {
         await connectDB(process.env.MONGO_URI)
-        app.listen(port, () => {
+        server.listen(port, () => {
             console.log(`Server is listening on port ${port}...`)
         })
     } catch (error) {
