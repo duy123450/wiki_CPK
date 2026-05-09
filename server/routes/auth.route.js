@@ -8,6 +8,7 @@ const {
   login,
   googleLoginCallback,
   twitterLoginCallback,
+  discordLoginCallback,
   refresh,
   getCurrentUser,
   updateAvatar,
@@ -39,6 +40,24 @@ const requireTwitterOAuthConfig = (req, res, next) => {
       msg: isProduction
         ? "Twitter OAuth is not configured. Set X_PROD_CLIENT_ID and X_PROD_CLIENT_SECRET in server/.env."
         : "Twitter OAuth is not configured. Set X_LOCAL_CLIENT_ID and X_LOCAL_CLIENT_SECRET in server/.env.",
+    });
+  }
+
+  return next();
+};
+
+const requireDiscordOAuthConfig = (req, res, next) => {
+  const isProduction = process.env.NODE_ENV === "production";
+  const clientId = isProduction
+    ? process.env.DISCORD_PROD_CLIENT_ID
+    : process.env.DISCORD_CLIENT_ID;
+  const clientSecret = isProduction
+    ? process.env.DISCORD_PROD_CLIENT_SECRET
+    : process.env.DISCORD_CLIENT_SECRET;
+
+  if (!clientId || !clientSecret) {
+    return res.status(500).json({
+      msg: "Discord OAuth is not configured. Set DISCORD_CLIENT_ID and DISCORD_CLIENT_SECRET in server/.env.",
     });
   }
 
@@ -77,6 +96,32 @@ router.get(
     failureRedirect: `${process.env.FRONTEND_URL || "http://localhost:5173"}/auth?twitterError=1`,
   }),
   twitterLoginCallback,
+);
+router.get(
+  "/discord",
+  requireDiscordOAuthConfig,
+  passport.authenticate("discord"),
+);
+router.get(
+  "/discord/callback",
+  requireDiscordOAuthConfig,
+  (req, res, next) => {
+    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+    passport.authenticate("discord", (err, user) => {
+      if (err) {
+        if (err.message === "email_taken_other_method") {
+          return res.redirect(`${frontendUrl}/auth?error=social_conflict`);
+        }
+        return res.redirect(`${frontendUrl}/auth?discordError=1&msg=${encodeURIComponent(err.message)}`);
+      }
+      if (!user) {
+        return res.redirect(`${frontendUrl}/auth?discordError=1`);
+      }
+      req.user = user;
+      next();
+    })(req, res, next);
+  },
+  discordLoginCallback,
 );
 router.get("/me", authenticateUser, getCurrentUser);
 router.put("/avatar", authenticateUser, upload.single("avatar"), updateAvatar);

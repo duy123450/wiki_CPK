@@ -24,8 +24,8 @@ const UserSchema = new mongoose.Schema({
     password: {
         type: String,
         required: function () {
-            // Password is only required when there is no Google ID or X ID
-            return !this.googleId && !this.xId;
+            // Password is only required when there is no Google ID, X ID or Discord ID
+            return !this.googleId && !this.xId && !this.discordId;
         },
         minlength: 6,
     },
@@ -38,6 +38,11 @@ const UserSchema = new mongoose.Schema({
         type: String,
         unique: true,
         sparse: true, // allows multiple docs to have null/undefined
+    },
+    discordId: {
+        type: String,
+        unique: true,
+        sparse: true,
     },
     refreshToken: {
         type: String,

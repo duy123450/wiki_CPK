@@ -45,6 +45,19 @@ const twitterLoginCallback = async (req, res) => {
   }
 };
 
+const discordLoginCallback = async (req, res) => {
+  try {
+    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+    const { refreshToken, accessToken, user } = req.user;
+    res.cookie("refreshToken", refreshToken, refreshCookieOptions);
+    const userPayload = encodeURIComponent(JSON.stringify(user));
+    res.redirect(`${frontendUrl}/auth?accessToken=${encodeURIComponent(accessToken)}&user=${userPayload}`);
+  } catch (error) {
+    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+    res.redirect(`${frontendUrl}/auth?discordError=1&msg=${encodeURIComponent(error.message)}`);
+  }
+};
+
 const refresh = async (req, res) => {
   const result = await authService.refreshAccessToken(req.cookies?.refreshToken);
   res.status(200).json(result);
@@ -71,6 +84,7 @@ module.exports = {
   login,
   googleLoginCallback,
   twitterLoginCallback,
+  discordLoginCallback,
   refresh,
   getCurrentUser,
   updateAvatar,

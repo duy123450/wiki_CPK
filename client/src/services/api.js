@@ -151,3 +151,9 @@ export const getGoogleLoginUrl = () => {
 export const getTwitterLoginUrl = () => {
     return `${API_BASE_URL}/auth/x`;
 };
+
+// ─── Discord OAuth ──────────────────────────────────────────────────────
+
+export const getDiscordLoginUrl = () => {
+    return `${API_BASE_URL}/auth/discord`;
+};

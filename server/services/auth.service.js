@@ -213,6 +213,45 @@ const twitterLoginUser = async (profile) => {
     return result;
 };
 
+const discordLoginUser = async (profile) => {
+    if (!profile?.id) {
+        throw createCustomError("Discord profile is required", 400);
+    }
+
+    const discordId = profile.id;
+    const email = profile.email?.toLowerCase();
+    const username = profile.username || "discord_user";
+    const avatarHash = profile.avatar;
+    const picture = avatarHash ? `https://cdn.discordapp.com/avatars/${discordId}/${avatarHash}.png` : null;
+
+    let user = await User.findOne({ discordId });
+
+    if (user) {
+        return buildTokenResponse(user);
+    }
+
+    if (email) {
+        const existingByEmail = await User.findOne({ email });
+        if (existingByEmail) {
+            throw createCustomError("email_taken_other_method", 409);
+        }
+    }
+
+    const suffix = "_" + discordId.slice(-4);
+    const baseName = username.replace(/\s+/g, "_").slice(0, 20 - suffix.length);
+    user = await User.create({
+        username: baseName + suffix,
+        email: email || `${baseName.toLowerCase()}_${discordId}@discord.local`,
+        discordId,
+        avatar: {
+            url: picture || undefined,
+            public_id: "discord-avatar",
+        },
+    });
+
+    return buildTokenResponse(user);
+};
+
 const refreshAccessToken = async (refreshToken) => {
     if (!refreshToken) {
         throw createCustomError("Refresh token is required", 401);
@@ -248,5 +287,6 @@ module.exports = {
     updateUserProfile,
     googleLoginUser,
     twitterLoginUser,
+    discordLoginUser,
     refreshAccessToken,
 };

@@ -27,6 +27,8 @@ export default defineConfig({
   build: {
     cssMinify: 'lightningcss',
     sourcemap: false,
+    reportCompressedSize: false,
+    target: 'esnext',
     rollupOptions: {
       output: {
         manualChunks(id) {
