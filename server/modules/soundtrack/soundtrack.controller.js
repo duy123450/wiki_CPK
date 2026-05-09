@@ -1,5 +1,5 @@
-const soundtrackService = require('../services/soundtrack.service');
-const asyncWrapper = require('../middleware/async');
+const soundtrackService = require('./soundtrack.service');
+const asyncWrapper = require('../../middleware/async');
 
 const getNextTrack = asyncWrapper(async (req, res) => {
     // Service handles sequential, shuffle, and infinite logic

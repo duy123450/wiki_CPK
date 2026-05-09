@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
 const { connect, clearDatabase, disconnect } = require('../../setup');
 
-const Character = require('../../../models/character.model');
-const Movie = require('../../../models/movie.model');
+const Character = require('../../../modules/characters/character.model');
+const Movie = require('../../../modules/wiki/models/movie.model');
 
 beforeAll(async () => { await connect(); });
 afterEach(async () => { await clearDatabase(); });

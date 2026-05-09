@@ -1,5 +1,5 @@
-const User = require("../models/user.model");
-const { createCustomError } = require("../errors/custom-error");
+const User = require("./user.model");
+const { createCustomError } = require("../../errors/custom-error");
 
 const buildAuthResponse = (user) => ({
     id: user._id,

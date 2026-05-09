@@ -1,5 +1,5 @@
-const Character = require('../models/character.model');
-const { createCustomError } = require('../errors/custom-error');
+const Character = require('./character.model');
+const { createCustomError } = require('../../errors/custom-error');
 
 // ─── Canonical display order ──────────────────────────────────────────────────
 const CHARACTER_ORDER = [

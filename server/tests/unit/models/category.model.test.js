@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const { connect, clearDatabase, disconnect } = require('../../setup');
 
-const Category = require('../../../models/category.model');
+const Category = require('../../../modules/wiki/models/category.model');
 
 beforeAll(async () => { await connect(); });
 afterEach(async () => { await clearDatabase(); });

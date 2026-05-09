@@ -1,5 +1,5 @@
-const Soundtrack = require('../models/sound-track.model');
-const { createCustomError } = require('../errors/custom-error');
+const Soundtrack = require('./sound-track.model');
+const { createCustomError } = require('../../errors/custom-error');
 
 /**
  * Helper: Formats a track document including the lyrics and virtuals

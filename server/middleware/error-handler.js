@@ -1,4 +1,4 @@
-const { CustomAPIError } = require('../errors/custom-error')
+const { CustomAPIError } = require('../errors')
 
 const errorHandlerMiddleware = (err, req, res, next) => {
     // Error logging removed for cleaner output

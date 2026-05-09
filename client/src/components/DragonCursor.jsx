@@ -1,9 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import "../styles/DragonCursor.css";
 
-const SEG_DIST = 55;
-const SPARKLES = ["✦", "⋆", "✧", "·", "✩", "꩜"];
-const DRAGON_ENABLED_KEY = import.meta.env.VITE_DRAGON_ENABLED_KEY || "cpkDragonCursorEnabled";
+import { SEG_DIST, SPARKLES, DRAGON_ENABLED_KEY } from "../constants/dragon.constants";
 
 function Sparkle({ x, y, char, color }) {
   return (

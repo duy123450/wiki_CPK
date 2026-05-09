@@ -1,7 +1,7 @@
 const request = require('supertest');
 const { connect, clearDatabase, disconnect } = require('../setup');
 const passport = require('../../config/passport');
-const User = require('../../models/user.model');
+const User = require('../../modules/auth/user.model');
 
 process.env.NODE_ENV = 'test';
 process.env.JWT_ACCESS_SECRET = 'test-access-secret-key-for-jest';

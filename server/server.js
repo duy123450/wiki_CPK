@@ -21,10 +21,10 @@ const notFoundMiddleware = require('./middleware/not-found')
 const errorHandlerMiddleware = require('./middleware/error-handler')
 
 // Import Routers
-const wikiRouter = require('./routes/wiki.route')
-const nextTrackRouter = require('./routes/next-track.route')
-const characterRouter = require('./routes/character.route')
-const authRouter = require('./routes/auth.route')
+const wikiRouter = require('./modules/wiki/wiki.route')
+const nextTrackRouter = require('./modules/soundtrack/soundtrack.route')
+const characterRouter = require('./modules/characters/character.route')
+const authRouter = require('./modules/auth/auth.route')
 
 // Allowed Origins & Options
 const allowedOrigins = [

@@ -1,7 +1,9 @@
 const express = require("express");
 const router = express.Router();
-const { upload } = require("../config/cloudinary");
-const passport = require("../config/passport");
+const { upload } = require("../../config/cloudinary");
+const passport = require("../../config/passport");
+const authController = require("./auth.controller");
+const authenticateUser = require("../../middleware/authentication");
 
 const {
   register,
@@ -13,8 +15,7 @@ const {
   getCurrentUser,
   updateAvatar,
   updateProfile,
-} = require("../controllers/auth.controller");
-const authenticateUser = require("../middleware/authentication");
+} = authController;
 
 const requireGoogleOAuthConfig = (req, res, next) => {
   if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {

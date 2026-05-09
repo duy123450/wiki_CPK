@@ -8,9 +8,9 @@ process.env.JWT_REFRESH_SECRET = 'test-refresh-secret-key-for-jest';
 process.env.JWT_ACCESS_LIFETIME = '15m';
 process.env.JWT_REFRESH_LIFETIME = '30d';
 
-const Movie = require('../../models/movie.model');
-const Category = require('../../models/category.model');
-const WikiPage = require('../../models/wiki-page.model');
+const Movie = require('../../modules/wiki/models/movie.model');
+const Category = require('../../modules/wiki/models/category.model');
+const WikiPage = require('../../modules/wiki/models/wiki-page.model');
 
 let app;
 

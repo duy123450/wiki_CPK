@@ -8,8 +8,8 @@ process.env.JWT_REFRESH_SECRET = 'test-refresh-secret-key-for-jest';
 process.env.JWT_ACCESS_LIFETIME = '15m';
 process.env.JWT_REFRESH_LIFETIME = '30d';
 
-const Movie = require('../../models/movie.model');
-const Character = require('../../models/character.model');
+const Movie = require('../../modules/wiki/models/movie.model');
+const Character = require('../../modules/characters/character.model');
 
 let app;
 

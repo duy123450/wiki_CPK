@@ -1,8 +1,9 @@
 const mongoose = require('mongoose');
 const { connect, clearDatabase, disconnect } = require('../../setup');
 
-const WikiPage = require('../../../models/wiki-page.model');
-const Category = require('../../../models/category.model');
+const WikiPage = require('../../../modules/wiki/models/wiki-page.model');
+const Category = require('../../../modules/wiki/models/category.model');
+const Movie = require('../../../modules/wiki/models/movie.model');
 
 beforeAll(async () => { await connect(); });
 afterEach(async () => { await clearDatabase(); });

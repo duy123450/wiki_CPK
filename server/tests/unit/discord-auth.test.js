@@ -1,5 +1,5 @@
 const { connect, clearDatabase, disconnect } = require('../setup');
-const User = require('../../models/user.model');
+const User = require('../../modules/auth/user.model');
 
 process.env.JWT_ACCESS_SECRET = 'test-access-secret-key-for-jest';
 process.env.JWT_REFRESH_SECRET = 'test-refresh-secret-key-for-jest';
@@ -7,7 +7,7 @@ process.env.JWT_ACCESS_LIFETIME = '15m';
 process.env.JWT_REFRESH_LIFETIME = '30d';
 process.env.NODE_ENV = 'test';
 
-const { discordLoginUser } = require('../../services/auth.service');
+const { discordLoginUser } = require('../../modules/auth/auth.service');
 
 const buildMockProfile = (overrides = {}) => ({
     id: 'discord-uid-123456',

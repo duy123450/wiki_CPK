@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-const { getAllCharacters, getCharacterBySlug } = require('../controllers/character.controller');
+const { getAllCharacters, getCharacterBySlug } = require('./character.controller');
 
 // GET /api/v1/wiki/characters
 router.get('/', getAllCharacters);

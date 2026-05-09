@@ -1,12 +1,7 @@
 import { Mail, ExternalLink } from "lucide-react";
 import "../styles/Footer.css";
 
-const QUICK_LINKS = [
-  { label: "Movie Info / Phim", href: "/wiki/chou-kaguya-hime-overview" },
-  { label: "Characters / Nhân vật", href: "/wiki/characters" },
-  { label: "Music / Âm nhạc", href: "/wiki/soundtrack" },
-  { label: "Lore & World / Thế giới", href: "/wiki/lore" },
-];
+import { QUICK_LINKS } from "../constants/ui.constants";
 
 export default function Footer({ sidebarCollapsed }) {
   const year = new Date().getFullYear();

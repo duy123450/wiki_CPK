@@ -1,5 +1,5 @@
-const wikiService = require('../services/wiki.service');
-const asyncWrapper = require('../middleware/async');
+const wikiService = require('./wiki.service');
+const asyncWrapper = require('../../middleware/async');
 
 const getSidebar = asyncWrapper(async (req, res) => {
     const categories = await wikiService.fetchSidebarData();

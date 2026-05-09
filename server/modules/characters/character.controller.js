@@ -1,5 +1,5 @@
-const characterService = require('../services/character.service');
-const asyncWrapper = require('../middleware/async');
+const characterService = require('./character.service');
+const asyncWrapper = require('../../middleware/async');
 
 const getAllCharacters = asyncWrapper(async (req, res) => {
     const result = await characterService.fetchAllCharacters(req.query);

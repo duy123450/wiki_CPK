@@ -1,7 +1,7 @@
-const Category = require('../models/category.model');
-const Movie = require('../models/movie.model');
-const WikiPage = require('../models/wiki-page.model');
-const { createCustomError } = require('../errors/custom-error');
+const Category = require('./models/category.model');
+const Movie = require('./models/movie.model');
+const WikiPage = require('./models/wiki-page.model');
+const { createCustomError } = require('../../errors/custom-error');
 
 /**
  * Logic for the Hero section: Fetches the primary movie information.
