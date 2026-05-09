@@ -33,6 +33,6 @@ afterEach(() => {
 
 describe('getGoogleLoginUrl', () => {
     it('returns the backend Google OAuth URL', () => {
-        expect(api.getGoogleLoginUrl()).toBe('https://wiki-cpk-be.onrender.com/api/v1/wiki/auth/google')
+        expect(api.getGoogleLoginUrl()).toBe(`${api.API_BASE_URL}/auth/google`)
     })
 })

@@ -54,7 +54,7 @@ describe('AUTH_TOKEN_KEY', () => {
 describe('axios instance', () => {
     it('uses the Render backend URL and sends credentials', async () => {
         expect(axios.create).toHaveBeenLastCalledWith({
-            baseURL: 'https://wiki-cpk-be.onrender.com/api/v1/wiki',
+            baseURL: api.API_BASE_URL,
             withCredentials: true,
         })
     })

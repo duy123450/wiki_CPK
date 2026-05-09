@@ -1,7 +1,8 @@
 /* eslint-disable react-hooks/purity */
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import { getMovieInfo } from "../services/api";
+import useMovieInfo from "../hooks/useMovieInfo";
+import useReveal from "../hooks/useReveal";
 import "../styles/MovieOverviewPage.css";
 
 // ─── Floating particles ───────────────────────────────────────────────────────
@@ -46,27 +47,7 @@ function StatCard({ label, value, accent }) {
   );
 }
 
-// ─── Scroll reveal hook ───────────────────────────────────────────────────────
-function useReveal() {
-  const ref = useRef(null);
-  const [visible, setVisible] = useState(false);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setVisible(true);
-          io.disconnect();
-        }
-      },
-      { threshold: 0.12 },
-    );
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
-  return [ref, visible];
-}
+// ─── Scroll reveal hook (imported from hooks/useReveal) ──────────────────────
 
 function Reveal({ children, delay = 0, className = "" }) {
   const [ref, visible] = useReveal();
@@ -126,17 +107,8 @@ function formatRuntime(minutes) {
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 export default function MovieOverviewPage({ sidebarCollapsed }) {
-  const [movie, setMovie] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const { data: movie, loading, error } = useMovieInfo();
   const [imgLoaded, setImgLoaded] = useState(false);
-
-  useEffect(() => {
-    getMovieInfo()
-      .then(setMovie)
-      .catch((e) => setError(e.message))
-      .finally(() => setLoading(false));
-  }, []);
 
   const releaseYear = movie?.details?.releaseDate
     ? new Date(movie.details.releaseDate).getFullYear()

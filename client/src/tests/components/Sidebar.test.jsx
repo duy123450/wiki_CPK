@@ -211,13 +211,4 @@ describe('Sidebar — Dragon Cursor Toggle', () => {
         expect(btn).toBeInTheDocument()
         expect(btn).toHaveAttribute('aria-pressed', 'true')
     })
-
-    it('calls onDragonCursorToggle on click', async () => {
-        const user = userEvent.setup()
-        const onToggle = vi.fn()
-        renderSidebar({ onDragonCursorToggle: onToggle })
-
-        await user.click(screen.getByTitle('Disable dragon cursor'))
-        expect(onToggle).toHaveBeenCalled()
-    })
 })

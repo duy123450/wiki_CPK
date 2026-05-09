@@ -9,7 +9,7 @@ describe('OAuth URL generation', () => {
     describe('getTwitterLoginUrl()', () => {
         it('should return the Twitter OAuth endpoint URL', () => {
             const url = getTwitterLoginUrl()
-            expect(url).toBe(`${API_BASE_URL}/auth/twitter`)
+            expect(url).toBe(`${API_BASE_URL}/auth/x`)
         })
 
         it('should be a valid URL string', () => {
@@ -20,19 +20,19 @@ describe('OAuth URL generation', () => {
 
         it('should contain the auth path', () => {
             const url = getTwitterLoginUrl()
-            expect(url).toContain('/auth/twitter')
+            expect(url).toContain('/auth/x')
         })
 
         it('should match the backend route structure', () => {
             const url = getTwitterLoginUrl()
-            expect(url).toMatch(/\/api\/v1\/wiki\/auth\/twitter$/)
+            expect(url).toMatch(/\/api\/v1\/wiki\/auth\/x$/)
         })
 
         it('should be different from Google OAuth URL', () => {
             const twitterUrl = getTwitterLoginUrl()
             const googleUrl = getGoogleLoginUrl()
             expect(twitterUrl).not.toBe(googleUrl)
-            expect(twitterUrl).toContain('twitter')
+            expect(twitterUrl).toContain('/auth/x')
             expect(googleUrl).toContain('google')
         })
     })

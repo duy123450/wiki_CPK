@@ -1,24 +1,8 @@
 /* eslint-disable react-hooks/purity */
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { getMovieInfo } from "../services/api";
+import useMovieInfo from "../hooks/useMovieInfo";
 import "../styles/HeroPage.css";
-
-// ─── fetch hook ───────────────────────────────────────────────────────────────
-function useMovieInfo() {
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    getMovieInfo()
-      .then((movie) => setData(movie))
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false));
-  }, []);
-
-  return { data, loading, error };
-}
 
 // ─── stars ────────────────────────────────────────────────────────────────────
 function Stars() {
