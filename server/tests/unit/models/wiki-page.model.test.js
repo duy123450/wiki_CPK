@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { connect, clearDatabase, disconnect } = require('../../setup');
+const { connect, clearDatabase, disconnect } = require('../../utils/dbHandler');
 
 const WikiPage = require('../../../modules/wiki/models/wiki-page.model');
 const Category = require('../../../modules/wiki/models/category.model');

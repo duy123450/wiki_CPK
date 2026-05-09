@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/purity */
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
+import { IMAGE_LABELS, ROLE_COLORS, ABILITY_TYPE_COLORS } from "../constants";
 import "../styles/CharacterPage.css";
 import { getCharacterBySlug } from "../services/api";
 
@@ -26,7 +27,6 @@ const getAppearance = (appearance) => {
 };
 
 // ─── Image switcher ───────────────────────────────────────────────────────────
-const IMAGE_LABELS = ["Real World", "Tsukuyomi", "Alt", "Other"];
 
 function ImageSwitcher({ images }) {
   const [active, setActive] = useState(0);
@@ -96,12 +96,6 @@ function ImageSwitcher({ images }) {
 }
 
 // ─── Role badge ───────────────────────────────────────────────────────────────
-const ROLE_COLORS = {
-  Protagonist: "var(--chr-gold)",
-  Supporting: "var(--chr-teal)",
-  Antagonist: "var(--chr-rose)",
-  Cameo: "var(--chr-muted)",
-};
 
 function RoleBadge({ role }) {
   return (
@@ -142,12 +136,6 @@ function SectionCard({ title, ornamentColor, children }) {
 }
 
 // ─── Ability card ─────────────────────────────────────────────────────────────
-const ABILITY_TYPE_COLORS = {
-  Passive: "var(--chr-teal)",
-  Active: "var(--chr-purple)",
-  Ultimate: "var(--chr-gold)",
-  Debuff: "var(--chr-rose)",
-};
 
 function AbilityCard({ ability }) {
   const effects = getEffects(ability);

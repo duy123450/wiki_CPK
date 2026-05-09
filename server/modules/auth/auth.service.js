@@ -1,5 +1,5 @@
 const User = require("./user.model");
-const { createCustomError } = require("../../errors/custom-error");
+const { AuthError, ValidationError, NotFoundError } = require("../../errors");
 
 const buildAuthResponse = (user) => ({
     id: user._id,
@@ -29,7 +29,7 @@ const registerUser = async (userData) => {
     const { username, email, password } = userData;
 
     if (!username || !email || !password) {
-        throw createCustomError("Username, email, and password are required", 400);
+        throw new ValidationError("Username, email, and password are required");
     }
 
     const existingUser = await User.findOne({
@@ -37,7 +37,7 @@ const registerUser = async (userData) => {
     });
 
     if (existingUser) {
-        throw createCustomError("Username or email already in use", 400);
+        throw new ValidationError("Username or email already in use");
     }
 
     const user = await User.create({
@@ -51,7 +51,7 @@ const registerUser = async (userData) => {
 
 const loginUser = async (identifier, password) => {
     if (!identifier || !password) {
-        throw createCustomError("Email/username and password are required", 400);
+        throw new ValidationError("Email/username and password are required");
     }
 
     const isEmail = identifier.includes("@");
@@ -61,7 +61,7 @@ const loginUser = async (identifier, password) => {
 
     const user = await User.findOne(query);
     if (!user || !(await user.comparePassword(password))) {
-        throw createCustomError("Invalid credentials", 401);
+        throw new AuthError("Invalid credentials");
     }
 
     return buildTokenResponse(user);
@@ -69,7 +69,7 @@ const loginUser = async (identifier, password) => {
 
 const getUserById = async (userId) => {
     const user = await User.findById(userId).select("_id username email role avatar createdAt");
-    if (!user) throw createCustomError("User not found", 404);
+    if (!user) throw new NotFoundError("User not found");
 
     return { user: buildAuthResponse(user) };
 };
@@ -77,10 +77,10 @@ const getUserById = async (userId) => {
 const DEFAULT_PUBLIC_ID = "default-avatar-photo-placeholder-profile-icon-vector_c0iz1k";
 
 const updateUserAvatar = async (userId, file) => {
-    if (!file) throw createCustomError("No file uploaded", 400);
+    if (!file) throw new ValidationError("No file uploaded");
 
     const user = await User.findById(userId);
-    if (!user) throw createCustomError("User not found", 404);
+    if (!user) throw new NotFoundError("User not found");
 
     if (user.avatar?.public_id && user.avatar.public_id !== DEFAULT_PUBLIC_ID) {
         const { cloudinary } = require("../config/cloudinary");
@@ -98,35 +98,35 @@ const updateUserAvatar = async (userId, file) => {
 
 const updateUserProfile = async (userId, updates) => {
     const user = await User.findById(userId);
-    if (!user) throw createCustomError("User not found", 404);
+    if (!user) throw new NotFoundError("User not found");
 
     const { username, email, currentPassword, newPassword } = updates;
 
     if (username && username.trim() !== user.username) {
         const trimmed = username.trim();
         if (trimmed.length < 3 || trimmed.length > 20) {
-            throw createCustomError("Username must be 3-20 characters", 400);
+            throw new ValidationError("Username must be 3-20 characters");
         }
         const taken = await User.findOne({ username: trimmed, _id: { $ne: userId } });
-        if (taken) throw createCustomError("Username already taken", 400);
+        if (taken) throw new ValidationError("Username already taken");
         user.username = trimmed;
     }
 
     if (email && email.toLowerCase().trim() !== user.email) {
         const normalized = email.toLowerCase().trim();
         const taken = await User.findOne({ email: normalized, _id: { $ne: userId } });
-        if (taken) throw createCustomError("Email already in use", 400);
+        if (taken) throw new ValidationError("Email already in use");
         user.email = normalized;
     }
 
     if (newPassword) {
         if (!currentPassword) {
-            throw createCustomError("Current password is required to set a new one", 400);
+            throw new ValidationError("Current password is required to set a new one");
         }
         const isMatch = await user.comparePassword(currentPassword);
-        if (!isMatch) throw createCustomError("Current password is incorrect", 401);
+        if (!isMatch) throw new AuthError("Current password is incorrect");
         if (newPassword.length < 6) {
-            throw createCustomError("New password must be at least 6 characters", 400);
+            throw new ValidationError("New password must be at least 6 characters");
         }
         user.password = newPassword;
     }
@@ -138,12 +138,12 @@ const updateUserProfile = async (userId, updates) => {
 
 const googleLoginUser = async (profile) => {
     if (!profile?.id) {
-        throw createCustomError("Google profile is required", 400);
+        throw new ValidationError("Google profile is required");
     }
 
     const email = profile.emails?.[0]?.value?.toLowerCase();
     if (!email) {
-        throw createCustomError("Google account email is required", 400);
+        throw new ValidationError("Google account email is required");
     }
 
     const googleId = profile.id;
@@ -179,7 +179,7 @@ const googleLoginUser = async (profile) => {
 const twitterLoginUser = async (profile) => {
 
     if (!profile?.id) {
-        throw createCustomError("Twitter profile is required", 400);
+        throw new ValidationError("Twitter profile is required");
     }
 
     const xId = profile.id;
@@ -215,7 +215,7 @@ const twitterLoginUser = async (profile) => {
 
 const discordLoginUser = async (profile) => {
     if (!profile?.id) {
-        throw createCustomError("Discord profile is required", 400);
+        throw new ValidationError("Discord profile is required");
     }
 
     const discordId = profile.id;
@@ -233,7 +233,7 @@ const discordLoginUser = async (profile) => {
     if (email) {
         const existingByEmail = await User.findOne({ email });
         if (existingByEmail) {
-            throw createCustomError("email_taken_other_method", 409);
+            throw new AuthError("email_taken_other_method", 409);
         }
     }
 
@@ -254,7 +254,7 @@ const discordLoginUser = async (profile) => {
 
 const refreshAccessToken = async (refreshToken) => {
     if (!refreshToken) {
-        throw createCustomError("Refresh token is required", 401);
+        throw new AuthError("Refresh token is required");
     }
 
     const jwt = require("jsonwebtoken");
@@ -262,12 +262,12 @@ const refreshAccessToken = async (refreshToken) => {
     try {
         payload = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
     } catch {
-        throw createCustomError("Refresh token is invalid", 401);
+        throw new AuthError("Refresh token is invalid");
     }
 
     const user = await User.findOne({ _id: payload.userId, refreshToken });
     if (!user) {
-        throw createCustomError("Refresh token is invalid", 401);
+        throw new AuthError("Refresh token is invalid");
     }
 
     const accessToken = user.createAccessToken();

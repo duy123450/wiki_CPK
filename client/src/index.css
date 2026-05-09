@@ -1,6 +1,13 @@
 :root {
   background-color: #0f0e1a;
   --sidebar-current-width: 260px;
+  
+  /* Wiki Theme Variables */
+  --wiki-purple: #c084fc;
+  --wiki-teal: #67e8f9;
+  --wiki-gold: #e8c97a;
+  --wiki-rose: #f9a8d4;
+  --wiki-muted: rgba(240, 232, 255, 0.35);
 }
 
 html {

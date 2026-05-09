@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { connect, clearDatabase, disconnect } = require('../../setup');
+const { connect, clearDatabase, disconnect } = require('../../utils/dbHandler');
 
 const Soundtrack = require('../../../modules/soundtrack/sound-track.model');
 const Movie = require('../../../modules/wiki/models/movie.model');

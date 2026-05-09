@@ -1,5 +1,5 @@
 const request = require('supertest');
-const { connect, clearDatabase, disconnect } = require('../setup');
+const { connect, clearDatabase, disconnect } = require('../utils/dbHandler');
 
 process.env.NODE_ENV = 'test';
 process.env.JWT_ACCESS_SECRET = 'test-access-secret-key-for-jest';

@@ -4,7 +4,7 @@ const {
     getSidebar,
     getMovieInfo,
     getPageBySlug
-} = require('./wiki.controller');
+} = require('./wiki.service');
 
 router.get('/sidebar', getSidebar);
 router.get('/movie-info', getMovieInfo);

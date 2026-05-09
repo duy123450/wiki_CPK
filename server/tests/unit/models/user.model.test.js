@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { connect, clearDatabase, disconnect } = require('../../setup');
+const { connect, clearDatabase, disconnect } = require('../../utils/dbHandler');
 
 process.env.JWT_ACCESS_SECRET = 'test-access-secret-key-for-jest';
 process.env.JWT_REFRESH_SECRET = 'test-refresh-secret-key-for-jest';

@@ -1,5 +1,5 @@
 const Character = require('./character.model');
-const { createCustomError } = require('../../errors/custom-error');
+const { WikiError, ValidationError } = require('../../errors');
 
 // ─── Canonical display order ──────────────────────────────────────────────────
 const CHARACTER_ORDER = [
@@ -91,7 +91,7 @@ const fetchCharacterBySlug = async (slug) => {
     }
 
     if (!character) {
-        throw createCustomError(`No character found with slug: ${slug}`, 404);
+        throw new WikiError(`No character found with slug: ${slug}`);
     }
 
     return formatCharacter(character.toJSON ? character.toJSON() : character);

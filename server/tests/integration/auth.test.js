@@ -1,5 +1,5 @@
 const request = require('supertest');
-const { connect, clearDatabase, disconnect } = require('../setup');
+const { connect, clearDatabase, disconnect } = require('../utils/dbHandler');
 
 // Must set env before requiring app
 process.env.NODE_ENV = 'test';

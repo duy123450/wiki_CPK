@@ -1,5 +1,5 @@
 const Soundtrack = require('./sound-track.model');
-const { createCustomError } = require('../../errors/custom-error');
+const { WikiError, ValidationError } = require('../../errors');
 
 /**
  * Helper: Formats a track document including the lyrics and virtuals
@@ -33,7 +33,7 @@ const formatTrack = (track) => {
  */
 const fetchTracksByMovie = async (movieId) => {
     if (!movieId) {
-        throw createCustomError('movieId query parameter is required.', 400);
+        throw new ValidationError('movieId query parameter is required.');
     }
     const tracks = await Soundtrack.find({ movie: movieId }).sort({ trackNumber: 1 });
     return tracks.map(formatTrack);
@@ -46,12 +46,12 @@ const getNextTrackLogic = async (params) => {
     const { currentTrackId, mode, movieId } = params;
 
     if (!currentTrackId || !mode || !movieId) {
-        throw createCustomError('currentTrackId, mode, and movieId are required.', 400);
+        throw new ValidationError('currentTrackId, mode, and movieId are required.');
     }
 
     const currentTrack = await Soundtrack.findOne({ _id: currentTrackId, movie: movieId });
     if (!currentTrack) {
-        throw createCustomError('Track not found in this movie context.', 404);
+        throw new WikiError('Track not found in this movie context.');
     }
 
     // 1. Mode: INFINITE (Loops the same song)
@@ -97,7 +97,7 @@ const getNextTrackLogic = async (params) => {
         };
     }
 
-    throw createCustomError('Invalid playback mode.', 400);
+    throw new ValidationError('Invalid playback mode.');
 };
 
 module.exports = {

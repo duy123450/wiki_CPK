@@ -4,13 +4,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import {
   ChevronDown,
   BookOpen,
-  Music,
-  Users,
-  Film,
-  Scroll,
-  Star,
-  Map,
-  Sparkles,
   Wand2,
   LogIn,
   LogOut,
@@ -18,6 +11,7 @@ import {
   Bookmark,
   Shield,
 } from "lucide-react";
+import { ICON_MAP } from "../constants";
 import { getSidebar } from "../services/api";
 import LiveUserCount from "./LiveUserCount";
 import "../styles/Sidebar.css";
@@ -38,17 +32,7 @@ function setCookie(name, value, maxAgeSeconds = 60 * 60 * 24 * 30) {
   document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=${maxAgeSeconds}; samesite=lax`;
 }
 
-const ICON_MAP = {
-  users: Users,
-  music: Music,
-  film: Film,
-  "book-open": BookOpen,
-  scroll: Scroll,
-  star: Star,
-  map: Map,
-  sparkles: Sparkles,
-  "file-text": BookOpen,
-};
+
 
 function CategoryItem({
   category,

@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { getCharacters } from "../services/api";
+import { ROLE_COLORS } from "../constants";
 import "../styles/CharactersPage.css";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -42,18 +43,12 @@ function Particles() {
 }
 
 // ─── Role badge ───────────────────────────────────────────────────────────────
-const ROLE_COLORS = {
-  Protagonist: "var(--chrs-gold)",
-  Supporting: "var(--chrs-teal)",
-  Antagonist: "var(--chrs-rose)",
-  Cameo: "var(--chrs-muted)",
-};
 
 function RoleBadge({ role }) {
   return (
     <span
       className="chrs-role-badge"
-      style={{ "--badge-color": ROLE_COLORS[role] ?? "var(--chrs-purple)" }}
+      style={{ "--badge-color": ROLE_COLORS[role] ?? "var(--wiki-purple)" }}
     >
       {role}
     </span>

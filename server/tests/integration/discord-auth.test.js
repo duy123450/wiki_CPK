@@ -1,5 +1,5 @@
 const request = require('supertest');
-const { connect, clearDatabase, disconnect } = require('../setup');
+const { connect, clearDatabase, disconnect } = require('../utils/dbHandler');
 const passport = require('../../config/passport');
 const User = require('../../modules/auth/user.model');
 

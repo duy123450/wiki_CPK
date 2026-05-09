@@ -1,4 +1,4 @@
-const { connect, clearDatabase, disconnect } = require('../setup');
+const { connect, clearDatabase, disconnect } = require('../utils/dbHandler');
 const User = require('../../modules/auth/user.model');
 
 process.env.JWT_ACCESS_SECRET = 'test-access-secret-key-for-jest';
