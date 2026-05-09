@@ -9,9 +9,12 @@ const errorHandlerMiddleware = (err, req, res, next) => {
         msg: err.message || 'Something went wrong, please try again later',
     };
 
-    // 2. Check if it's our manual Custom Error (e.g., 404 Not Found)
+    // 2. Domain-Specific Errors
     if (err instanceof CustomAPIError) {
-        return res.status(err.statusCode).json({ msg: err.message })
+        return res.status(err.statusCode).json({ 
+            msg: err.message,
+            errorType: err.constructor.name 
+        })
     }
 
     // 3. Mongoose: Handling Duplicate Key Error (e.g., Code: 11000)

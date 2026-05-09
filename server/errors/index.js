@@ -6,6 +6,7 @@ const UnauthorizedError = require("./unauthorized");
 const AuthError = require("./auth-error");
 const WikiError = require("./wiki-error");
 const ValidationError = require("./validation-error");
+const SoundtrackError = require("./soundtrack-error");
 
 module.exports = {
   CustomAPIError,
@@ -16,4 +17,5 @@ module.exports = {
   AuthError,
   WikiError,
   ValidationError,
+  SoundtrackError,
 };
