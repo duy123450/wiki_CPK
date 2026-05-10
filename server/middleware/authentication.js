@@ -1,5 +1,5 @@
 const passport = require("../config/passport");
-const { createCustomError } = require("../errors/custom-error");
+const { UnauthenticatedError } = require("../errors");
 
 const authenticateUser = (req, res, next) => {
   passport.authenticate("jwt", { session: false }, (error, user) => {
@@ -8,8 +8,9 @@ const authenticateUser = (req, res, next) => {
     }
 
     if (!user) {
-      return next(createCustomError("Authentication invalid", 401));
+      return next(new UnauthenticatedError("Authentication invalid"));
     }
+
 
     req.user = user;
     next();

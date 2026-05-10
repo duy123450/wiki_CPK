@@ -1,12 +1,5 @@
 const request = require('supertest');
 const mongoose = require('mongoose');
-const { connect, clearDatabase, disconnect } = require('../utils/dbHandler');
-
-process.env.NODE_ENV = 'test';
-process.env.JWT_ACCESS_SECRET = 'test-access-secret-key-for-jest';
-process.env.JWT_REFRESH_SECRET = 'test-refresh-secret-key-for-jest';
-process.env.JWT_ACCESS_LIFETIME = '15m';
-process.env.JWT_REFRESH_LIFETIME = '30d';
 
 const Movie = require('../../modules/wiki/models/movie.model');
 const Character = require('../../modules/characters/character.model');
@@ -14,11 +7,9 @@ const Character = require('../../modules/characters/character.model');
 let app;
 
 beforeAll(async () => {
-    await connect();
     app = require('../../server');
 });
-afterEach(async () => { await clearDatabase(); });
-afterAll(async () => { await disconnect(); });
+
 
 const BASE = '/api/v1/wiki/characters';
 

@@ -1,27 +1,11 @@
 const request = require('supertest');
-const { connect, clearDatabase, disconnect } = require('../utils/dbHandler');
-
-// Must set env before requiring app
-process.env.NODE_ENV = 'test';
-process.env.JWT_ACCESS_SECRET = 'test-access-secret-key-for-jest';
-process.env.JWT_REFRESH_SECRET = 'test-refresh-secret-key-for-jest';
-process.env.JWT_ACCESS_LIFETIME = '15m';
-process.env.JWT_REFRESH_LIFETIME = '30d';
 
 let app;
 
 beforeAll(async () => {
-    await connect();
     app = require('../../server');
 });
 
-afterEach(async () => {
-    await clearDatabase();
-});
-
-afterAll(async () => {
-    await disconnect();
-});
 
 const BASE = '/api/v1/wiki/auth';
 

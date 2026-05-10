@@ -1,17 +1,5 @@
-/**
- * Character-related utility functions
- */
+import { nameToSlug } from "./slugify";
 
-/**
- * Converts a name string to a URL-friendly slug
- * @param {string} name 
- * @returns {string}
- */
-export const nameToSlug = (name) =>
-  name
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
 
 /**
  * Normalizes character appearance data across different schema versions

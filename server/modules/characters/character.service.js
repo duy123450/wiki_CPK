@@ -1,44 +1,8 @@
 const Character = require('./character.model');
 const { WikiError, ValidationError } = require('../../errors');
+const { sortByCanonicalOrder } = require('./character.constants');
+const { nameToSlug, formatCharacter } = require('./character.utils');
 
-// ─── Canonical display order ──────────────────────────────────────────────────
-const CHARACTER_ORDER = [
-    "Sakayori Iroha", "Kaguya", "Runami Yachiyo", "Ayatsumugi Roka",
-    "Isayama Mami", "Sakayori Asahi", "Komazawa Rai", "Komazawa Noi",
-    "inuDoge", "Fushi",
-];
-
-const sortByCanonicalOrder = (characters) => {
-    const indexMap = new Map(
-        CHARACTER_ORDER.map((name, i) => [name.toLowerCase(), i])
-    );
-    return [...characters].sort((a, b) => {
-        const ai = indexMap.get(a.name.toLowerCase()) ?? Number.MAX_SAFE_INTEGER;
-        const bi = indexMap.get(b.name.toLowerCase()) ?? Number.MAX_SAFE_INTEGER;
-        if (ai !== bi) return ai - bi;
-        return a.name.localeCompare(b.name);
-    });
-};
-
-const nameToSlug = (name) =>
-    name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-
-const formatCharacter = (char) => ({
-    _id: char._id,
-    name: char.name,
-    slug: char.slug || nameToSlug(char.name),
-    role: char.role,
-    description: char.description ?? null,
-    origin: char.origin ?? null,
-    abilities: char.abilities ?? [],
-    relationships: (char.relationships ?? []).map((rel) => ({
-        ...rel,
-        targetId: rel.targetId ?? null,
-    })),
-    image: char.image ?? [],
-    voiceActor: char.voiceActor ?? null,
-    movie: char.movie,
-});
 
 /**
  * Fetch characters with filtering and canonical sorting
@@ -68,11 +32,16 @@ const fetchAllCharacters = async (query) => {
 
     return {
         characters: paginated.map(formatCharacter),
-        total,
-        totalPages: Math.ceil(total / parsedLimit),
-        parsedPage,
-        parsedLimit
+        pagination: {
+            total,
+            totalPages: Math.ceil(total / parsedLimit),
+            currentPage: parsedPage,
+            limit: parsedLimit,
+            hasNextPage: parsedPage < Math.ceil(total / parsedLimit),
+            hasPrevPage: parsedPage > 1,
+        }
     };
+
 };
 
 /**

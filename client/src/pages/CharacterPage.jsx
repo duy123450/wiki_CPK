@@ -1,84 +1,17 @@
 /* eslint-disable react-hooks/purity */
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { IMAGE_LABELS, ROLE_COLORS, ABILITY_TYPE_COLORS } from "../constants";
+import { ROLE_COLORS } from "../constants";
 import "../styles/CharacterPage.css";
-import { getCharacterBySlug } from "../services/api";
 
-import {
-  nameToSlug,
-  getEffects,
-  getAppearance,
-} from "../utils/characterUtils";
+import { getAppearance } from "../utils/characterUtils";
+import { generateParticles } from "../utils/uiUtils";
+import { useCharacter } from "../hooks/useCharacter";
 
-// ─── Image switcher ───────────────────────────────────────────────────────────
-
-function ImageSwitcher({ images }) {
-  const [active, setActive] = useState(0);
-  const [fading, setFading] = useState(false);
-  const timerRef = useRef(null);
-
-  const switchTo = useCallback(
-    (idx) => {
-      if (idx === active || fading) return;
-      setFading(true);
-      clearTimeout(timerRef.current);
-      timerRef.current = setTimeout(() => {
-        setActive(idx);
-        setFading(false);
-      }, 260);
-    },
-    [active, fading],
-  );
-
-  useEffect(() => () => clearTimeout(timerRef.current), []);
-
-  if (!images || images.length === 0) {
-    return (
-      <div className="chr-img-placeholder">
-        <span className="chr-img-placeholder-glyph">✦</span>
-      </div>
-    );
-  }
-
-  const single = images.length === 1;
-
-  return (
-    <div className="chr-img-block">
-      <div className="chr-img-frame">
-        <div className="chr-img-corner chr-img-corner--tl" />
-        <div className="chr-img-corner chr-img-corner--tr" />
-        <div className="chr-img-corner chr-img-corner--bl" />
-        <div className="chr-img-corner chr-img-corner--br" />
-        <img
-          key={active}
-          src={images[active].url}
-          alt={`character view ${active + 1}`}
-          className={`chr-img-main ${fading ? "chr-img-fade-out" : "chr-img-fade-in"}`}
-        />
-        <div className="chr-img-reflection" />
-      </div>
-
-      {!single && (
-        <div className="chr-img-switcher">
-          {images.map((_, i) => (
-            <button
-              key={i}
-              className={`chr-switch-btn ${i === active ? "chr-switch-btn--active" : ""}`}
-              onClick={() => switchTo(i)}
-              aria-label={IMAGE_LABELS[i] ?? `View ${i + 1}`}
-            >
-              <span className="chr-switch-label">
-                {IMAGE_LABELS[i] ?? `View ${i + 1}`}
-              </span>
-              <span className="chr-switch-glow" />
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
+// Components
+import AbilityCard from "../components/Character/AbilityCard";
+import RelChip from "../components/Character/RelChip";
+import ImageSwitcher from "../components/Character/ImageSwitcher";
 
 // ─── Role badge ───────────────────────────────────────────────────────────────
 
@@ -120,82 +53,6 @@ function SectionCard({ title, ornamentColor, children }) {
   );
 }
 
-// ─── Ability card ─────────────────────────────────────────────────────────────
-
-function AbilityCard({ ability }) {
-  const effects = getEffects(ability);
-  return (
-    <div className="chr-ability-card">
-      <div className="chr-ability-head">
-        <span className="chr-ability-name">{ability.skillName}</span>
-        {ability.type && (
-          <span
-            className="chr-ability-type"
-            style={{
-              "--atype-color":
-                ABILITY_TYPE_COLORS[ability.type] ?? "var(--chr-muted)",
-            }}
-          >
-            {ability.type}
-          </span>
-        )}
-      </div>
-      {effects.length > 0 && (
-        <ul className="chr-ability-effects">
-          {effects.map((e, i) => (
-            <li key={i}>{e}</li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-}
-
-// ─── Relationship chip ────────────────────────────────────────────────────────
-function RelChip({ rel }) {
-  // A populated targetId is an object with a "name" field.
-  // A raw (un-populated) ObjectId comes back as a string or an object without
-  // "name" — in both cases we fall back to null so the UI shows "Unknown".
-  const target =
-    rel.targetId && typeof rel.targetId === "object" && rel.targetId.name
-      ? rel.targetId
-      : null;
-
-  const targetSlug = target ? nameToSlug(target.name) : null;
-
-  return (
-    <Link
-      to={targetSlug ? `/wiki/characters/${targetSlug}` : "#"}
-      style={{ textDecoration: "none", color: "inherit" }}
-      className={target ? "chr-rel-chip-link" : ""}
-    >
-      <div className="chr-rel-chip">
-        {/* Avatar */}
-        {target?.image?.[0]?.url ? (
-          <img
-            src={target.image[0].url}
-            alt={target.name}
-            className="chr-rel-avatar"
-          />
-        ) : (
-          <div className="chr-rel-avatar chr-rel-avatar--placeholder">✦</div>
-        )}
-
-        {/* Info */}
-        <div className="chr-rel-info">
-          <span className="chr-rel-name">{target?.name ?? "Unknown"}</span>
-          {rel.relationType && (
-            <span className="chr-rel-type">{rel.relationType}</span>
-          )}
-          {rel.description && (
-            <span className="chr-rel-desc">{rel.description}</span>
-          )}
-        </div>
-      </div>
-    </Link>
-  );
-}
-
 // ─── Shimmer skeleton ─────────────────────────────────────────────────────────
 function Skeleton() {
   return (
@@ -209,8 +66,6 @@ function Skeleton() {
     </div>
   );
 }
-
-import { generateParticles } from "../utils/uiUtils";
 
 // ─── Floating particles ───────────────────────────────────────────────────────
 function Particles() {
@@ -238,16 +93,7 @@ function Particles() {
 // ─── Main page ────────────────────────────────────────────────────────────────
 export default function CharacterPage({ sidebarCollapsed }) {
   const { slug } = useParams();
-  const [character, setCharacter] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    getCharacterBySlug(slug)
-      .then(setCharacter)
-      .catch((e) => setError(e.message))
-      .finally(() => setLoading(false));
-  }, [slug]);
+  const { character, loading, error } = useCharacter(slug);
 
   const c = character;
   const appearance = c ? getAppearance(c.description?.appearance) : null;
@@ -390,3 +236,4 @@ export default function CharacterPage({ sidebarCollapsed }) {
     </main>
   );
 }
+
