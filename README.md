@@ -7,21 +7,29 @@ A full-stack MERN (MongoDB, Express, React, Node.js) application featuring a com
 - **Wiki Management:** Extensive information on movies, characters, categories, and soundtracks.
 - **Advanced Authentication:**
   - Secure Local login with **Argon2** password hashing.
-  - Social login integration: **Google OAuth 2.0** and **X (Twitter) OAuth 2.0** (API v2).
+  - Social login integration: **Google OAuth 2.0**, **X (Twitter) OAuth 2.0** (API v2), and **Discord OAuth 2.0**.
   - Secure session management using **JWT** (Access and Refresh tokens).
+  - Account conflict prevention (prevents hijacking local accounts via OAuth).
+- **Real-time Interaction:**
+  - **Live Online User Counter:** Real-time tracking of connected clients using **Socket.io**.
+  - Interactive UI with live indicators.
 - **Multimedia Integration:**
   - Integrated music player with shuffle history, loop mode, and progress tracking.
   - Image hosting and management via **Cloudinary**.
 - **Responsive UI:** Modern, interactive design built with React and Vanilla CSS.
-- **Robust Testing:**
-  - Backend unit and integration tests using **Jest** and **Supertest**.
-  - Frontend component testing using **Vitest** and **React Testing Library**.
+- **Robust Architecture:**
+  - **Modular Backend:** Clean separation of concerns with domain-driven modules.
+  - **Class-based Error Hierarchy:** Granular error handling with custom error classes (AuthError, WikiError, etc.).
+  - **Automated Testing:**
+    - Backend: Jest and Supertest.
+    - Frontend: Vitest and React Testing Library.
 
 ## 🛠️ Tech Stack
 
 ### Frontend
 - **Framework:** React (Vite)
 - **State Management:** Context API
+- **Real-time:** Socket.io-client
 - **Routing:** React Router DOM
 - **API Client:** Axios
 - **Testing:** Vitest, React Testing Library
@@ -30,7 +38,8 @@ A full-stack MERN (MongoDB, Express, React, Node.js) application featuring a com
 - **Runtime:** Node.js
 - **Framework:** Express
 - **Database:** MongoDB (Mongoose)
-- **Authentication:** Passport.js (Local, Google, Twitter)
+- **Real-time:** Socket.io
+- **Authentication:** Passport.js (Local, Google, Twitter, Discord)
 - **Security:** Argon2 (hashing), JWT (tokens), Helmet, CORS, Rate Limiting
 - **File Uploads:** Multer, Cloudinary
 - **Testing:** Jest, Supertest
@@ -41,7 +50,7 @@ A full-stack MERN (MongoDB, Express, React, Node.js) application featuring a com
 - Node.js (v16+)
 - MongoDB (Atlas)
 - Cloudinary Account
-- Google & X Developer Console credentials
+- Developer credentials for Google, X (Twitter), and Discord
 
 ### 1. Clone the repository
 ```bash
@@ -58,6 +67,7 @@ Create a `.env` file in the `server` directory and configure the following:
 ```env
 PORT=3000
 MONGO_URI=your_mongodb_uri
+SESSION_SECRET=your_session_secret
 JWT_ACCESS_SECRET=your_access_secret
 JWT_REFRESH_SECRET=your_refresh_secret
 JWT_ACCESS_LIFETIME=15m
@@ -79,6 +89,12 @@ X_LOCAL_CLIENT_SECRET=your_x_local_secret
 X_PROD_CLIENT_ID=your_x_prod_id
 X_PROD_CLIENT_SECRET=your_x_prod_secret
 
+# Discord OAuth
+DISCORD_CLIENT_ID=your_discord_id
+DISCORD_CLIENT_SECRET=your_discord_secret
+DISCORD_PROD_CLIENT_ID=your_discord_prod_id
+DISCORD_PROD_CLIENT_SECRET=your_discord_prod_secret
+
 FRONTEND_URL=http://localhost:5173
 NODE_ENV=development
 ```
@@ -94,7 +110,7 @@ npm install
 ### Start Backend
 ```bash
 cd server
-npm start
+npm run dev
 ```
 
 ### Start Frontend
@@ -133,14 +149,17 @@ wiki_CPK/
 │   │   └── tests/       # Frontend testing (Vitest)
 │   ├── public/          # Static assets
 ├── server/              # Express API (Node.js)
-│   ├── config/          # Passport, Database, Cloudinary config
-│   ├── controllers/     # Route request handlers
-│   ├── errors/          # Custom error classes
-│   ├── middleware/      # Global and route-specific middleware
-│   ├── models/          # Mongoose database schemas
-│   ├── routes/          # API route definitions
-│   ├── services/        # Core business logic
-│   └── tests/           # Backend testing (Jest & Supertest)
+│   ├── config/          # Configuration (Passport, Database, Cloudinary)
+│   ├── errors/          # Custom class-based error hierarchy
+│   ├── middleware/      # Global middleware (Auth, Error handling)
+│   ├── modules/         # Domain-driven modules (Auth, Wiki, Characters, etc.)
+│   │   ├── [module]/
+│   │   │   ├── [name].controller.js
+│   │   │   ├── [name].route.js
+│   │   │   ├── [name].service.js
+│   │   │   └── [name].model.js
+│   ├── tests/           # Backend testing (Jest & Supertest)
+│   └── server.js        # Entry point & Socket.io setup
 └── README.md
 ```
 
