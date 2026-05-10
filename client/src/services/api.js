@@ -6,7 +6,7 @@ export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || DEFAULT_URL;
 
 const redirectToLogin = () => {
     window.localStorage.removeItem(AUTH_TOKEN_KEY);
-    window.location.assign("/login");
+    window.location.assign("/auth");
 };
 
 const saveAccessToken = (accessToken) => {

@@ -1,4 +1,4 @@
-import { nameToSlug } from "./slugify";
+export { nameToSlug } from "./slugify";
 
 
 /**
