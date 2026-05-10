@@ -1,21 +1,20 @@
-const { CustomAPIError } = require("./custom-error");
-const BadRequestError = require("./bad-request");
-const NotFoundError = require("./not-found");
-const UnauthenticatedError = require("./unauthenticated");
-const UnauthorizedError = require("./unauthorized");
-const AuthError = require("./auth-error");
-const WikiError = require("./wiki-error");
-const ValidationError = require("./validation-error");
-const SoundtrackError = require("./soundtrack-error");
+const Errors = require("./custom-error");
+
+class UnauthenticatedError extends Errors.AuthError {
+  constructor(message) {
+    super(message || 'Unauthenticated', 401);
+  }
+}
+
+class UnauthorizedError extends Errors.AuthError {
+  constructor(message) {
+    super(message || 'Unauthorized', 403);
+  }
+}
 
 module.exports = {
-  CustomAPIError,
-  BadRequestError,
-  NotFoundError,
+  ...Errors,
   UnauthenticatedError,
   UnauthorizedError,
-  AuthError,
-  WikiError,
-  ValidationError,
-  SoundtrackError,
+  SoundtrackError: Errors.WikiError,
 };

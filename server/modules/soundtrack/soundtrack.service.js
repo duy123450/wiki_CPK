@@ -1,5 +1,5 @@
 const Soundtrack = require('./sound-track.model');
-const { WikiError, ValidationError } = require('../../errors');
+const { WikiError, ValidationError, NotFoundError } = require('../../errors');
 
 /**
  * Helper: Formats a track document including the lyrics and virtuals
@@ -51,7 +51,7 @@ const getNextTrackLogic = async (params) => {
 
     const currentTrack = await Soundtrack.findOne({ _id: currentTrackId, movie: movieId });
     if (!currentTrack) {
-        throw new WikiError('Track not found in this movie context.');
+        throw new NotFoundError('Track not found in this movie context.');
     }
 
     // 1. Mode: INFINITE (Loops the same song)

@@ -52,3 +52,7 @@ export const QUICK_LINKS = [
   { label: "Music / Âm nhạc", href: "/wiki/soundtrack" },
   { label: "Lore & World / Thế giới", href: "/wiki/lore" },
 ];
+
+export const LOGO_URL = "https://res.cloudinary.com/dvlaoxjzi/image/upload/q_auto/f_auto/v1775613442/661386943_1497013225103051_5810917340196605647_n_ta4cju.jpg";
+export const DEFAULT_AVATAR = "https://res.cloudinary.com/dvlaoxjzi/image/upload/v1775612971/default-avatar-photo-placeholder-profile-icon-vector_c0iz1k.webp";
+export const OPEN_CATEGORY_COOKIE = "cpkSidebarOpenCategory";

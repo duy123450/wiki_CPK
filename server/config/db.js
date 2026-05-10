@@ -1,8 +1,30 @@
 const mongoose = require('mongoose');
-require('dotenv')
 
-const connectDB = (url) => {
-    return mongoose.connect(url)
+class Database {
+    constructor() {
+        this.connection = null;
+    }
+
+    async connect(url) {
+        if (this.connection) return this.connection;
+        
+        try {
+            this.connection = await mongoose.connect(url);
+            return this.connection;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async disconnect() {
+        if (this.connection) {
+            await mongoose.disconnect();
+            this.connection = null;
+        }
+    }
 }
 
-module.exports = connectDB
+const db = new Database();
+
+module.exports = (url) => db.connect(url);
+module.exports.db = db;

@@ -1,49 +1,46 @@
-const { CustomAPIError, createCustomError } = require('../../errors/custom-error');
+const { CustomAPIError, AuthError, BadRequestError, NotFoundError, ValidationError, WikiError } = require('../../errors/custom-error');
 
-describe('Custom Error', () => {
-    describe('CustomAPIError class', () => {
+describe('Custom Errors Hierarchy', () => {
+    describe('CustomAPIError base class', () => {
         it('should be an instance of Error', () => {
             const error = new CustomAPIError('test error', 400);
             expect(error).toBeInstanceOf(Error);
             expect(error).toBeInstanceOf(CustomAPIError);
         });
 
-        it('should store the message', () => {
+        it('should store message and statusCode', () => {
             const error = new CustomAPIError('Something went wrong', 500);
             expect(error.message).toBe('Something went wrong');
-        });
-
-        it('should store the statusCode', () => {
-            const error = new CustomAPIError('Not found', 404);
-            expect(error.statusCode).toBe(404);
-        });
-
-        it('should work with different status codes', () => {
-            const cases = [
-                { msg: 'Bad Request', code: 400 },
-                { msg: 'Unauthorized', code: 401 },
-                { msg: 'Not Found', code: 404 },
-                { msg: 'Server Error', code: 500 },
-            ];
-
-            cases.forEach(({ msg, code }) => {
-                const error = new CustomAPIError(msg, code);
-                expect(error.message).toBe(msg);
-                expect(error.statusCode).toBe(code);
-            });
+            expect(error.statusCode).toBe(500);
+            expect(error.name).toBe('CustomAPIError');
         });
     });
 
-    describe('createCustomError()', () => {
-        it('should return a CustomAPIError instance', () => {
-            const error = createCustomError('test', 400);
+    describe('Specific error classes', () => {
+        it('AuthError should have 401 status', () => {
+            const error = new AuthError('Unauthorized');
+            expect(error.statusCode).toBe(401);
             expect(error).toBeInstanceOf(CustomAPIError);
         });
 
-        it('should set message and statusCode correctly', () => {
-            const error = createCustomError('Page not found', 404);
-            expect(error.message).toBe('Page not found');
+        it('BadRequestError should have 400 status', () => {
+            const error = new BadRequestError('Bad request');
+            expect(error.statusCode).toBe(400);
+        });
+
+        it('NotFoundError should have 404 status', () => {
+            const error = new NotFoundError('Not found');
             expect(error.statusCode).toBe(404);
+        });
+
+        it('ValidationError should have 400 status', () => {
+            const error = new ValidationError('Invalid input');
+            expect(error.statusCode).toBe(400);
+        });
+
+        it('WikiError should have 500 status', () => {
+            const error = new WikiError('Server glitch');
+            expect(error.statusCode).toBe(500);
         });
     });
 });
