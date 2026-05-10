@@ -1,14 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { fetchNextTrack } from "../services/api";
 
-let ytApiLoaded = false;
-const loadYouTubeAPI = () => {
-  if (ytApiLoaded || window.YT) return;
-  ytApiLoaded = true;
-  const tag = document.createElement("script");
-  tag.src = "https://www.youtube.com/iframe_api";
-  document.body.appendChild(tag);
-};
+import { loadYouTubeAPI } from "../utils/youtubeUtils";
 
 export default function useYouTubePlayer(tracks, movie) {
   const [currentIdx, setCurrentIdx] = useState(0);

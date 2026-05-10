@@ -142,10 +142,12 @@ wiki_CPK/
 ├── client/              # React Application (Vite)
 │   ├── src/
 │   │   ├── components/  # Reusable UI components
-│   │   ├── context/     # Global state management (Auth, etc.)
+│   │   ├── constants/   # Application constants (API endpoints, UI strings)
+│   │   ├── hooks/       # Custom React hooks
 │   │   ├── pages/       # Page components (Home, Wiki, etc.)
 │   │   ├── services/    # API call services (Axios)
 │   │   ├── styles/      # Global and component styles (CSS)
+│   │   ├── utils/       # Helper functions and utilities
 │   │   └── tests/       # Frontend testing (Vitest)
 │   ├── public/          # Static assets
 ├── server/              # Express API (Node.js)

@@ -5,23 +5,13 @@ import { getCharacters } from "../services/api";
 import { ROLE_COLORS } from "../constants";
 import "../styles/CharactersPage.css";
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-const nameToSlug = (name) =>
-  name
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
+import { nameToSlug } from "../utils/characterUtils";
+
+import { generateParticles } from "../utils/uiUtils";
 
 // ─── Floating particles ───────────────────────────────────────────────────────
 function Particles() {
-  const pts = Array.from({ length: 35 }, (_, i) => ({
-    id: i,
-    left: `${Math.random() * 100}%`,
-    top: `${Math.random() * 100}%`,
-    size: Math.random() * 2.5 + 0.8,
-    delay: `${Math.random() * 8}s`,
-    dur: `${Math.random() * 5 + 4}s`,
-  }));
+  const [pts] = useState(() => generateParticles(35));
   return (
     <div className="chrs-particles" aria-hidden="true">
       {pts.map((p) => (

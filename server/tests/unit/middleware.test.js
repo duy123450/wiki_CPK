@@ -108,7 +108,10 @@ describe('Middleware', () => {
             errorHandler(err, req, res, next);
 
             expect(res.status).toHaveBeenCalledWith(403);
-            expect(res.json).toHaveBeenCalledWith({ msg: 'Custom error message' });
+            expect(res.json).toHaveBeenCalledWith({
+              msg: "Custom error message",
+              errorType: "CustomAPIError",
+            });
         });
 
         it('should handle Mongoose ValidationError', () => {

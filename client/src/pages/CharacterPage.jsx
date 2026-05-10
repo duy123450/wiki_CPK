@@ -5,26 +5,11 @@ import { IMAGE_LABELS, ROLE_COLORS, ABILITY_TYPE_COLORS } from "../constants";
 import "../styles/CharacterPage.css";
 import { getCharacterBySlug } from "../services/api";
 
-// ─── Helper: name → slug (matches server-side logic) ────────────────────────
-const nameToSlug = (name) =>
-  name
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-// Normalize ability effects: seed has BOTH "effect" and "effects" as field names
-const getEffects = (ability) => ability.effect ?? ability.effects ?? [];
-
-// Normalize appearance: seed uses real_world / tsukuyomi_avatar
-// model schema uses realWorld / tsukuyomi — handle both
-const getAppearance = (appearance) => {
-  if (!appearance) return null;
-  return {
-    realWorld: appearance.realWorld ?? appearance.real_world ?? null,
-    tsukuyomi: appearance.tsukuyomi ?? appearance.tsukuyomi_avatar ?? null,
-  };
-};
+import {
+  nameToSlug,
+  getEffects,
+  getAppearance,
+} from "../utils/characterUtils";
 
 // ─── Image switcher ───────────────────────────────────────────────────────────
 
@@ -225,16 +210,11 @@ function Skeleton() {
   );
 }
 
+import { generateParticles } from "../utils/uiUtils";
+
 // ─── Floating particles ───────────────────────────────────────────────────────
 function Particles() {
-  const pts = Array.from({ length: 30 }, (_, i) => ({
-    id: i,
-    left: `${Math.random() * 100}%`,
-    top: `${Math.random() * 100}%`,
-    size: Math.random() * 2.5 + 0.8,
-    delay: `${Math.random() * 8}s`,
-    dur: `${Math.random() * 5 + 4}s`,
-  }));
+  const [pts] = useState(() => generateParticles(30));
   return (
     <div className="chr-particles" aria-hidden="true">
       {pts.map((p) => (

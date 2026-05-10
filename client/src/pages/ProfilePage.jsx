@@ -13,10 +13,10 @@ import {
   EyeOff,
 } from "lucide-react";
 import { uploadAvatar, updateProfile, AUTH_TOKEN_KEY } from "../services/api";
+import { DEFAULT_AVATAR } from "../constants";
+import { formatVNDate } from "../utils/dateUtils";
 import "../styles/ProfilePage.css";
 
-const DEFAULT_AVATAR =
-  "https://res.cloudinary.com/dvlaoxjzi/image/upload/v1775612971/default-avatar-photo-placeholder-profile-icon-vector_c0iz1k.webp";
 
 export default function ProfilePage({
   sidebarCollapsed,
@@ -250,13 +250,7 @@ export default function ProfilePage({
           <div className="profile-info-row">
             <span className="profile-info-label">Member since</span>
             <span className="profile-info-value">
-              {currentUser.createdAt
-                ? new Date(currentUser.createdAt).toLocaleDateString("vi-VN", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })
-                : "—"}
+              {formatVNDate(currentUser.createdAt)}
             </span>
           </div>
         </div>
