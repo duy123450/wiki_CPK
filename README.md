@@ -2,6 +2,17 @@
 
 A full-stack MERN (MongoDB, Express, React, Node.js) application featuring a comprehensive Wiki for the "Chou Kaguya Hime" series and an integrated music player using the YouTube IFrame API.
 
+## 📖 Table of Contents
+
+- [🚀 Features](#-features)
+- [🛠️ Tech Stack](#️-tech-stack)
+- [📦 Installation](#-installation)
+- [🏃 Running the Application](#-running-the-application)
+- [🧪 Testing](#-testing)
+- [📂 Project Structure](#-project-structure)
+- [📜 License](#-license)
+
+
 ## 🚀 Features
 
 - **Wiki Management:** Extensive information on movies, characters, categories, and soundtracks.
@@ -10,6 +21,7 @@ A full-stack MERN (MongoDB, Express, React, Node.js) application featuring a com
   - Social login integration: **Google OAuth 2.0**, **X (Twitter) OAuth 2.0** (API v2), and **Discord OAuth 2.0**.
   - Secure session management using **JWT** (Access and Refresh tokens).
   - Account conflict prevention (prevents hijacking local accounts via OAuth).
+  - **Role-Based Access Control (RBAC):** Granular permission management for sensitive routes.
 - **Real-time Interaction:**
   - **Live Online User Counter:** Real-time tracking of connected clients using **Socket.io**.
   - Interactive UI with live indicators.
@@ -20,6 +32,7 @@ A full-stack MERN (MongoDB, Express, React, Node.js) application featuring a com
 - **Robust Architecture:**
   - **Modular Backend:** Clean separation of concerns with domain-driven modules.
   - **Class-based Error Hierarchy:** Granular error handling with custom error classes (AuthError, WikiError, etc.).
+  - **Knowledge Graph:** Automated architecture mapping and community analysis using **Graphify**.
   - **Automated Testing:**
     - Backend: Jest and Supertest.
     - Frontend: Vitest and React Testing Library.
