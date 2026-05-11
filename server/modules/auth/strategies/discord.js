@@ -4,10 +4,10 @@ const { discordLoginUser } = require("../auth.service");
 
 const isProduction = process.env.NODE_ENV === "production";
 const discordClientId = isProduction
-  ? process.env.DISCORD_PROD_CLIENT_ID
+  ? (process.env.DISCORD_PROD_CLIENT_ID || process.env.DISCORD_CLIENT_ID)
   : process.env.DISCORD_CLIENT_ID;
 const discordClientSecret = isProduction
-  ? process.env.DISCORD_PROD_CLIENT_SECRET
+  ? (process.env.DISCORD_PROD_CLIENT_SECRET || process.env.DISCORD_CLIENT_SECRET)
   : process.env.DISCORD_CLIENT_SECRET;
 const discordCallbackURL = isProduction
   ? process.env.DISCORD_PROD_CALLBACK_URL

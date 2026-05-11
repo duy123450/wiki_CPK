@@ -4,11 +4,11 @@ const { twitterLoginUser } = require("../auth.service");
 
 const isProduction = process.env.NODE_ENV === "production";
 const clientId = isProduction
-  ? process.env.X_PROD_CLIENT_ID
-  : process.env.X_LOCAL_CLIENT_ID;
+  ? (process.env.X_PROD_CLIENT_ID || process.env.X_CLIENT_ID)
+  : (process.env.X_LOCAL_CLIENT_ID || process.env.X_CLIENT_ID);
 const clientSecret = isProduction
-  ? process.env.X_PROD_CLIENT_SECRET
-  : process.env.X_LOCAL_CLIENT_SECRET;
+  ? (process.env.X_PROD_CLIENT_SECRET || process.env.X_CLIENT_SECRET)
+  : (process.env.X_LOCAL_CLIENT_SECRET || process.env.X_CLIENT_SECRET);
 const callbackURL = isProduction
   ? process.env.X_PROD_CALLBACK_URL
   : `${process.env.FRONTEND_URL?.replace(':5173', ':3000') || 'http://localhost:3000'}/api/v1/wiki/auth/x/callback`;
