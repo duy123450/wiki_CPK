@@ -18,21 +18,21 @@ let mockPassportUser = null;
 beforeAll(async () => {
     // Spy on passport.authenticate
     jest.spyOn(passport, 'authenticate').mockImplementation((strategy, callback) => {
-      if (typeof callback === 'function') {
-        return (req, res, next) => {
-          if (mockPassportError) return callback(mockPassportError, null);
-          if (mockPassportUser) return callback(null, mockPassportUser);
-          return callback(null, { _id: 'mock-id', username: 'mock-user' });
-        };
-      }
-      return (req, res, next) => {
-        if (strategy === 'discord') {
-          return res.redirect('https://discord.com/oauth2/authorize');
+        if (typeof callback === 'function') {
+            return (req, res, next) => {
+                if (mockPassportError) return callback(mockPassportError, null);
+                if (mockPassportUser) return callback(null, mockPassportUser);
+                return callback(null, { _id: 'mock-id', username: 'mock-user' });
+            };
         }
-        next();
-      };
+        return (req, res, next) => {
+            if (strategy === 'discord') {
+                return res.redirect('https://discord.com/oauth2/authorize');
+            }
+            next();
+        };
     });
-    
+
     app = require('../../server');
 });
 
@@ -57,9 +57,9 @@ describe('Discord OAuth Integration', () => {
     describe('GET /auth/discord/callback', () => {
         it('redirects to frontend with tokens on success', async () => {
             mockPassportUser = await User.create({
-              username: 'discord_user_1234',
-              email: 'discord@example.com',
-              discordId: '12345'
+                username: 'discord_user_1234',
+                email: 'discord@example.com',
+                discordId: '12345'
             });
 
             const res = await request(app)

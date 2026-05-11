@@ -64,7 +64,7 @@ describe('discordLoginUser()', () => {
 
             const result = await discordLoginUser(buildMockProfile());
             expect(result.user.username).toBe('old_discord_user');
-            
+
             const count = await User.countDocuments({ discordId: 'discord-uid-123456' });
             expect(count).toBe(1);
         });
@@ -81,7 +81,7 @@ describe('discordLoginUser()', () => {
             await expect(discordLoginUser(buildMockProfile()))
                 .rejects
                 .toThrow('email_taken_other_method');
-            
+
             // Verify no discordId linked
             const dbUser = await User.findOne({ email: 'discorduser@example.com' });
             expect(dbUser.discordId).toBeUndefined();
