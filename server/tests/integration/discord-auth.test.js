@@ -1,5 +1,4 @@
 const request = require('supertest');
-const { connect, clearDatabase, disconnect } = require('../utils/dbHandler');
 const passport = require('../../config/passport');
 const User = require('../../modules/auth/user.model');
 
@@ -17,7 +16,6 @@ let mockPassportError = null;
 let mockPassportUser = null;
 
 beforeAll(async () => {
-    await connect();
     // Spy on passport.authenticate
     jest.spyOn(passport, 'authenticate').mockImplementation((strategy, callback) => {
       if (typeof callback === 'function') {
@@ -39,13 +37,11 @@ beforeAll(async () => {
 });
 
 afterEach(async () => {
-    await clearDatabase();
     mockPassportError = null;
     mockPassportUser = null;
 });
 
 afterAll(async () => {
-    await disconnect();
     jest.restoreAllMocks();
 });
 

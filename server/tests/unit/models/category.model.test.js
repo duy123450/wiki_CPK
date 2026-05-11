@@ -1,11 +1,6 @@
 const mongoose = require('mongoose');
-const { connect, clearDatabase, disconnect } = require('../../utils/dbHandler');
 
 const Category = require('../../../modules/wiki/models/category.model');
-
-beforeAll(async () => { await connect(); });
-afterEach(async () => { await clearDatabase(); });
-afterAll(async () => { await disconnect(); });
 
 describe('Category Model', () => {
     describe('Validations', () => {

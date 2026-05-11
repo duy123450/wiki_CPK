@@ -1,5 +1,4 @@
 const request = require('supertest');
-const { connect, clearDatabase, disconnect } = require('../utils/dbHandler');
 
 process.env.NODE_ENV = 'test';
 process.env.JWT_ACCESS_SECRET = 'test-access-secret-key-for-jest';
@@ -13,16 +12,7 @@ process.env.FRONTEND_URL = 'http://localhost:5173';
 let app;
 
 beforeAll(async () => {
-    await connect();
     app = require('../../server');
-});
-
-afterEach(async () => {
-    await clearDatabase();
-});
-
-afterAll(async () => {
-    await disconnect();
 });
 
 describe('GET /auth/google', () => {

@@ -1,4 +1,3 @@
-const { connect, clearDatabase, disconnect } = require('../utils/dbHandler');
 const User = require('../../modules/auth/user.model');
 
 process.env.JWT_ACCESS_SECRET = 'test-access-secret-key-for-jest';
@@ -15,18 +14,6 @@ const buildMockTwitterProfile = (overrides = {}) => ({
     username: 'twitteruser',
     photos: [{ value: 'https://pbs.twimg.com/profile_images/photo.jpg' }],
     ...overrides,
-});
-
-beforeAll(async () => {
-    await connect();
-});
-
-afterEach(async () => {
-    await clearDatabase();
-});
-
-afterAll(async () => {
-    await disconnect();
 });
 
 describe('twitterLoginUser()', () => {

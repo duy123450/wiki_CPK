@@ -1,4 +1,3 @@
-const { connect, clearDatabase, disconnect } = require('../utils/dbHandler');
 const User = require('../../modules/auth/user.model');
 
 process.env.JWT_ACCESS_SECRET = 'test-access-secret-key-for-jest';
@@ -15,18 +14,6 @@ const buildMockProfile = (overrides = {}) => ({
     email: 'discorduser@example.com',
     avatar: 'avatar_hash_123',
     ...overrides,
-});
-
-beforeAll(async () => {
-    await connect();
-});
-
-afterEach(async () => {
-    await clearDatabase();
-});
-
-afterAll(async () => {
-    await disconnect();
 });
 
 describe('discordLoginUser()', () => {

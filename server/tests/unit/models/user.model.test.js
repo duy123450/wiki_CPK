@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const { connect, clearDatabase, disconnect } = require('../../utils/dbHandler');
 
 process.env.JWT_ACCESS_SECRET = 'test-access-secret-key-for-jest';
 process.env.JWT_REFRESH_SECRET = 'test-refresh-secret-key-for-jest';
@@ -7,10 +6,6 @@ process.env.JWT_ACCESS_LIFETIME = '15m';
 process.env.JWT_REFRESH_LIFETIME = '30d';
 
 const User = require('../../../modules/auth/user.model');
-
-beforeAll(async () => { await connect(); });
-afterEach(async () => { await clearDatabase(); });
-afterAll(async () => { await disconnect(); });
 
 const validUser = {
     username: 'testuser',

@@ -1,6 +1,5 @@
 const request = require('supertest');
 const mongoose = require('mongoose');
-const { connect, clearDatabase, disconnect } = require('../utils/dbHandler');
 
 process.env.NODE_ENV = 'test';
 process.env.JWT_ACCESS_SECRET = 'test-access-secret-key-for-jest';
@@ -14,11 +13,8 @@ const Soundtrack = require('../../modules/soundtrack/sound-track.model');
 let app;
 
 beforeAll(async () => {
-    await connect();
     app = require('../../server');
 });
-afterEach(async () => { await clearDatabase(); });
-afterAll(async () => { await disconnect(); });
 
 const BASE = '/api/v1/wiki/soundtrack';
 

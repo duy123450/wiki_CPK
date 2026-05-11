@@ -1,11 +1,6 @@
 const mongoose = require('mongoose');
-const { connect, clearDatabase, disconnect } = require('../../utils/dbHandler');
 
 const Movie = require('../../../modules/wiki/models/movie.model');
-
-beforeAll(async () => { await connect(); });
-afterEach(async () => { await clearDatabase(); });
-afterAll(async () => { await disconnect(); });
 
 const validMovie = {
     title: 'Chou Kaguya Hime',
