@@ -198,4 +198,42 @@ describe('Middleware', () => {
             expect(res.status).toHaveBeenCalledWith(500);
         });
     });
+
+    // ── authorizePermissions ──────────────────────────────────────────────────
+    describe('authorizePermissions middleware', () => {
+        const authorizePermissions = require('../../middleware/authorization');
+        const { UnauthorizedError } = require('../../errors');
+
+        it('should call next if user has permitted role', () => {
+            const middleware = authorizePermissions('admin', 'editor');
+            const req = mockReq({ user: { role: 'admin' } });
+            const res = mockRes();
+            const next = mockNext();
+
+            middleware(req, res, next);
+
+            expect(next).toHaveBeenCalledTimes(1);
+            expect(next).toHaveBeenCalledWith(); // no args means success
+        });
+
+        it('should throw UnauthorizedError if user role is not permitted', () => {
+            const middleware = authorizePermissions('admin');
+            const req = mockReq({ user: { role: 'user' } });
+            const res = mockRes();
+            const next = mockNext();
+
+            expect(() => middleware(req, res, next)).toThrow(UnauthorizedError);
+            expect(next).not.toHaveBeenCalled();
+        });
+
+        it('should throw UnauthorizedError if req.user is undefined', () => {
+            const middleware = authorizePermissions('admin');
+            const req = mockReq(); // no user
+            const res = mockRes();
+            const next = mockNext();
+
+            expect(() => middleware(req, res, next)).toThrow(UnauthorizedError);
+            expect(next).not.toHaveBeenCalled();
+        });
+    });
 });

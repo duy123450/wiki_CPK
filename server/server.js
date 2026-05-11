@@ -23,7 +23,7 @@ const errorHandlerMiddleware = require('./middleware/error-handler')
 // Import Routers
 const wikiRouter = require('./modules/wiki/wiki.route')
 const nextTrackRouter = require('./modules/soundtrack/soundtrack.route')
-const characterRouter = require('./routes/character.route')
+const characterRouter = require('./modules/characters/character.route')
 const authRouter = require('./modules/auth/auth.route')
 
 // Allowed Origins & Options
