@@ -6,7 +6,12 @@ export default function GoogleLoginButton() {
   }
 
   return (
-    <button type="button" className="auth-google-button" onClick={handleClick}>
+    <button
+      type="button"
+      className="auth-google-button"
+      onClick={handleClick}
+      aria-label="Sign in with Google"
+    >
       <svg
         className="auth-google-icon"
         viewBox="0 0 24 24"
@@ -30,7 +35,6 @@ export default function GoogleLoginButton() {
           d="M12 4.77c1.76 0 3.35.61 4.6 1.8l3.44-3.44A11.56 11.56 0 0 0 12 0 12 12 0 0 0 1.29 6.63l4 3.09C6.23 6.88 8.88 4.77 12 4.77z"
         />
       </svg>
-      Sign in with Google
     </button>
   )
 }

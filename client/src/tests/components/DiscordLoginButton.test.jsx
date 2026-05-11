@@ -10,7 +10,7 @@ vi.mock('@/services/api', () => ({
 describe('DiscordLoginButton', () => {
     it('renders correctly', () => {
         render(<DiscordLoginButton />)
-        expect(screen.getByText(/Sign in with Discord/i)).toBeInTheDocument()
+        expect(screen.getByRole('button', { name: /Sign in with Discord/i })).toBeInTheDocument()
     })
 
     it('triggers redirect to backend OAuth endpoint on click', () => {
