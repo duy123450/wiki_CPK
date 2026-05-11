@@ -3,8 +3,12 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import TwitterLoginButton from "@/components/TwitterLoginButton";
 
-vi.mock("@/services/api", () => ({
+const { getTwitterLoginUrl } = vi.hoisted(() => ({
   getTwitterLoginUrl: vi.fn(() => "http://localhost:3000/api/v1/wiki/auth/x"),
+}));
+
+vi.mock("@/services/api", () => ({
+  getTwitterLoginUrl,
 }));
 
 describe("TwitterLoginButton", () => {
@@ -35,16 +39,6 @@ describe("TwitterLoginButton", () => {
   });
 
   it("uses Twitter API endpoint URL", () => {
-    const { getTwitterLoginUrl } = vi.hoisted(() => ({
-      getTwitterLoginUrl: vi.fn(
-        () => "http://localhost:3000/api/v1/wiki/auth/x",
-      ),
-    }));
-
-    vi.doMock("@/services/api", () => ({
-      getTwitterLoginUrl,
-    }));
-
     render(<TwitterLoginButton />);
     expect(
       screen.getByRole("button", { name: "Sign in with X" }),

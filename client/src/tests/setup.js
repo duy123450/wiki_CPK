@@ -1,4 +1,7 @@
-import '@testing-library/jest-dom'
+// ── Lazy-load jest-dom matchers only for jsdom ────────────────────────────
+if (typeof document !== 'undefined') {
+    import('@testing-library/jest-dom')
+}
 
 // ── Mock browser APIs not available in jsdom ────────────────────────────────
 
@@ -14,8 +17,8 @@ class MockIntersectionObserver {
         // Immediately trigger as intersecting for test simplicity
         this._callback([{ isIntersecting: true }])
     }
-    unobserve() {}
-    disconnect() {}
+    unobserve() { }
+    disconnect() { }
 }
 window.IntersectionObserver = MockIntersectionObserver
 

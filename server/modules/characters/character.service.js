@@ -1,5 +1,5 @@
 const Character = require('./character.model');
-const { WikiError, ValidationError } = require('../../errors');
+const { NotFoundError, ValidationError } = require('../../errors');
 const { sortByCanonicalOrder } = require('./character.constants');
 const {
     nameToSlug,
@@ -58,7 +58,7 @@ const fetchCharacterBySlug = async (slug) => {
     }
 
     if (!character) {
-        throw new WikiError(`No character found with slug: ${slug}`);
+        throw new NotFoundError(`No character found with slug: ${slug}`);
     }
 
     return formatCharacter(character.toJSON ? character.toJSON() : character);
