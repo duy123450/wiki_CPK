@@ -35,7 +35,8 @@ const fetchTracksByMovie = async (movieId) => {
     if (!movieId) {
         throw new ValidationError('movieId query parameter is required.');
     }
-    const tracks = await Soundtrack.find({ movie: movieId }).sort({ trackNumber: 1 });
+    const safeMovieId = String(movieId);
+    const tracks = await Soundtrack.find({ movie: safeMovieId }).sort({ trackNumber: 1 });
     return tracks.map(formatTrack);
 };
 
@@ -49,7 +50,10 @@ const getNextTrackLogic = async (params) => {
         throw new ValidationError('currentTrackId, mode, and movieId are required.');
     }
 
-    const currentTrack = await Soundtrack.findOne({ _id: currentTrackId, movie: movieId });
+    const safeTrackId = String(currentTrackId);
+    const safeMovieId = String(movieId);
+
+    const currentTrack = await Soundtrack.findOne({ _id: safeTrackId, movie: safeMovieId });
     if (!currentTrack) {
         throw new NotFoundError('Track not found in this movie context.');
     }

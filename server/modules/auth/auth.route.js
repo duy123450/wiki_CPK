@@ -65,9 +65,16 @@ const requireDiscordOAuthConfig = (req, res, next) => {
   return next();
 };
 
+const rateLimit = require("express-rate-limit");
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // Limit each IP to 5 requests per windowMs
+  message: { msg: "Too many authentication attempts, please try again after 15 minutes" }
+});
+
 router.post("/register", register);
-router.post("/login", login);
-router.post("/refresh", refresh);
+router.post("/login", authLimiter, login);
+router.post("/refresh", authLimiter, refresh);
 router.get(
   "/google",
   requireGoogleOAuthConfig,

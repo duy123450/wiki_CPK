@@ -51,7 +51,9 @@ const fetchCharacterBySlug = async (slug) => {
         .populate(populateConfig);
 
     if (!character) {
-        const namePattern = slug.replace(/-/g, '[\\s\\-]');
+        // Escape special regex characters except hyphens
+        const escapedSlug = slug.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const namePattern = escapedSlug.replace(/-/g, '[\\s\\-]');
         character = await Character.findOne({
             name: { $regex: new RegExp(`^${namePattern}$`, 'i') },
         }).populate(populateConfig);
