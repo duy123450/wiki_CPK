@@ -10,6 +10,7 @@ vi.mock('@/services/api', () => ({
     registerUser: vi.fn(),
     uploadAvatar: vi.fn(),
     getCurrentUser: vi.fn(),
+    refreshAccessToken: vi.fn(),
 }))
 
 const defaultProps = {
@@ -48,12 +49,20 @@ describe('AuthPage — Discord OAuth Scenarios', () => {
         })
     })
 
-    it('successfully processes login when accessToken and user are present', async () => {
+    it('successfully processes login when oauth=success is present', async () => {
         const user = { id: '123', username: 'discord_user', email: 'discord@test.com' }
         const onAuthSuccess = vi.fn()
+        const token = 'token123'
+        
+        const { refreshAccessToken } = await import('@/services/api')
+        refreshAccessToken.mockResolvedValueOnce({
+            user,
+            accessToken: token,
+            token,
+        })
         
         render(
-            <MemoryRouter initialEntries={[`/auth?accessToken=token123&user=${encodeURIComponent(JSON.stringify(user))}`]}>
+            <MemoryRouter initialEntries={[`/auth?oauth=success`]}>
                 <AuthPage {...defaultProps} onAuthSuccess={onAuthSuccess} />
             </MemoryRouter>
         )
@@ -61,8 +70,8 @@ describe('AuthPage — Discord OAuth Scenarios', () => {
         await waitFor(() => {
             expect(onAuthSuccess).toHaveBeenCalledWith({
                 user,
-                accessToken: 'token123',
-                token: 'token123',
+                accessToken: token,
+                token,
             })
         })
     })

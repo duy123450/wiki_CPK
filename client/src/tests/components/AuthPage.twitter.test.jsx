@@ -8,6 +8,7 @@ vi.mock("@/services/api", () => ({
   loginUser: vi.fn(),
   registerUser: vi.fn(),
   uploadAvatar: vi.fn(),
+  refreshAccessToken: vi.fn(),
 }));
 
 const defaultProps = {
@@ -42,7 +43,14 @@ describe("AuthPage — Twitter OAuth Integration", () => {
     };
     const mockToken = "twitter-access-token-xyz";
 
-    const route = `/auth?accessToken=${encodeURIComponent(mockToken)}&user=${encodeURIComponent(JSON.stringify(mockUser))}`;
+    const { refreshAccessToken } = await import("@/services/api");
+    refreshAccessToken.mockResolvedValueOnce({
+      user: mockUser,
+      accessToken: mockToken,
+      token: mockToken,
+    });
+
+    const route = `/auth?oauth=success`;
     renderAuthWithRoute(route);
 
     await waitFor(() => {
@@ -65,16 +73,16 @@ describe("AuthPage — Twitter OAuth Integration", () => {
     });
   });
 
-  it("should handle malformed user data gracefully", async () => {
-    const mockToken = "valid-token";
-    const invalidUserData = "not-valid-json";
+  it("should handle refresh failure gracefully", async () => {
+    const { refreshAccessToken } = await import("@/services/api");
+    refreshAccessToken.mockRejectedValueOnce(new Error("Failed"));
 
-    const route = `/auth?accessToken=${encodeURIComponent(mockToken)}&user=${encodeURIComponent(invalidUserData)}`;
+    const route = `/auth?oauth=success`;
     renderAuthWithRoute(route);
 
     await waitFor(() => {
       expect(
-        screen.getByText("Sign-in failed. Please try again."),
+        screen.getByText("Sign-in failed or expired. Please try again."),
       ).toBeInTheDocument();
     });
   });
@@ -121,7 +129,14 @@ describe("AuthPage — Twitter OAuth Integration", () => {
     };
     const mockToken = "twitter-token";
 
-    const route = `/auth?accessToken=${encodeURIComponent(mockToken)}&user=${encodeURIComponent(JSON.stringify(mockUser))}`;
+    const { refreshAccessToken } = await import("@/services/api");
+    refreshAccessToken.mockResolvedValueOnce({
+      user: mockUser,
+      accessToken: mockToken,
+      token: mockToken,
+    });
+
+    const route = `/auth?oauth=success`;
     renderAuthWithRoute(route);
 
     await waitFor(() => {
@@ -135,19 +150,8 @@ describe("AuthPage — Twitter OAuth Integration", () => {
     });
   });
 
-  it("should handle missing accessToken gracefully", async () => {
-    const mockUser = { id: "123", username: "test" };
-    const route = `/auth?user=${encodeURIComponent(JSON.stringify(mockUser))}`;
-    renderAuthWithRoute(route);
-
-    await waitFor(() => {
-      expect(defaultProps.onAuthSuccess).not.toHaveBeenCalled();
-    });
-  });
-
-  it("should handle missing user data gracefully", async () => {
-    const mockToken = "valid-token";
-    const route = `/auth?accessToken=${encodeURIComponent(mockToken)}`;
+  it("should not call onAuthSuccess if oauth != success", async () => {
+    const route = `/auth`;
     renderAuthWithRoute(route);
 
     await waitFor(() => {

@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
-import { loginUser, registerUser, uploadAvatar } from "../services/api";
+import { loginUser, registerUser, uploadAvatar, refreshAccessToken } from "../services/api";
 import GoogleLoginButton from "../components/GoogleLoginButton";
 import TwitterLoginButton from "../components/TwitterLoginButton";
 import DiscordLoginButton from "../components/DiscordLoginButton";
@@ -31,25 +31,27 @@ export default function AuthPage({
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const accessToken = searchParams.get("accessToken");
-  const oauthUser = searchParams.get("user");
+  const oauthSuccess = searchParams.get("oauth") === "success";
   const googleError = searchParams.get("googleError");
   const twitterError = searchParams.get("twitterError");
   const discordError = searchParams.get("discordError");
   const socialError = searchParams.get("error");
 
   useEffect(() => {
-    if (accessToken && oauthUser) {
-      try {
-        onAuthSuccess({
-          user: JSON.parse(oauthUser),
-          accessToken,
-          token: accessToken,
+    if (oauthSuccess) {
+      refreshAccessToken()
+        .then((data) => {
+          onAuthSuccess({
+            user: data.user,
+            accessToken: data.accessToken,
+            token: data.accessToken,
+          });
+          navigate("/auth", { replace: true });
+        })
+        .catch(() => {
+          setError("Sign-in failed or expired. Please try again.");
+          navigate("/auth", { replace: true });
         });
-        navigate("/auth", { replace: true });
-      } catch {
-        setError("Sign-in failed. Please try again.");
-      }
       return;
     }
 
@@ -74,12 +76,11 @@ export default function AuthPage({
       navigate("/auth", { replace: true });
     }
   }, [
-    accessToken,
+    oauthSuccess,
     googleError,
     twitterError,
     discordError,
     socialError,
-    oauthUser,
     navigate,
     onAuthSuccess,
   ]);

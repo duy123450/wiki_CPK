@@ -10,6 +10,7 @@ vi.mock('@/services/api', () => ({
     loginUser: vi.fn(),
     registerUser: vi.fn(),
     uploadAvatar: vi.fn(),
+    refreshAccessToken: vi.fn(),
 }))
 
 import { loginUser, registerUser } from '@/services/api'
@@ -178,15 +179,23 @@ describe('AuthPage — Register Mode', () => {
 })
 
 describe('AuthPage — Google OAuth Callback', () => {
-    it('calls onAuthSuccess when Google callback access token is present', async () => {
+    it('calls onAuthSuccess when oauth=success is present', async () => {
         const user = { id: 'user-1', username: 'googleuser', email: 'google@test.com' }
         const onAuthSuccess = vi.fn()
+        const token = 'google-access-token'
+        
+        const { refreshAccessToken } = await import('@/services/api')
+        refreshAccessToken.mockResolvedValueOnce({
+            user,
+            accessToken: token,
+            token,
+        })
 
         renderAuth(
             { onAuthSuccess },
             {
                 initialEntries: [
-                    `/auth?accessToken=google-access-token&user=${encodeURIComponent(JSON.stringify(user))}`,
+                    `/auth?oauth=success`,
                 ],
             }
         )
@@ -194,8 +203,8 @@ describe('AuthPage — Google OAuth Callback', () => {
         await waitFor(() => {
             expect(onAuthSuccess).toHaveBeenCalledWith({
                 user,
-                accessToken: 'google-access-token',
-                token: 'google-access-token',
+                accessToken: token,
+                token,
             })
         })
     })

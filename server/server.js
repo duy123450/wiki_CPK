@@ -27,12 +27,15 @@ const characterRouter = require('./modules/characters/character.route')
 const authRouter = require('./modules/auth/auth.route')
 
 // Allowed Origins & Options
-const allowedOrigins = [
-    'http://localhost:5173',
-    'http://localhost:5174',
-    'http://localhost:3000',
-    process.env.FRONTEND_URL
-]
+const isProd = process.env.NODE_ENV === 'production';
+const allowedOrigins = isProd 
+    ? [process.env.FRONTEND_URL]
+    : [
+        'http://localhost:5173',
+        'http://localhost:5174',
+        'http://localhost:3000',
+        process.env.FRONTEND_URL
+    ].filter(Boolean);
 
 const corsOptions = {
     origin: function (origin, callback) {
@@ -70,6 +73,11 @@ app.use(express.json({ limit: '10kb' }))
 app.use(cookieParser())
 app.use(cors(corsOptions))
 app.use(helmet())
+if (process.env.NODE_ENV === 'production' && !process.env.SESSION_SECRET) {
+    console.error('FATAL ERROR: SESSION_SECRET is not defined in production.');
+    process.exit(1);
+}
+
 app.use(session({
     secret: process.env.SESSION_SECRET || 'your-secret-key',
     resave: false,

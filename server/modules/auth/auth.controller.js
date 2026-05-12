@@ -26,19 +26,17 @@ const login = async (req, res) => {
 
 const googleLoginCallback = async (req, res) => {
   const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
-  const { refreshToken, accessToken, user } = req.user;
+  const { refreshToken } = req.user;
   res.cookie("refreshToken", refreshToken, refreshCookieOptions);
-  const userPayload = encodeURIComponent(JSON.stringify(user));
-  res.redirect(`${frontendUrl}/auth?accessToken=${encodeURIComponent(accessToken)}&user=${userPayload}`);
+  res.redirect(`${frontendUrl}/auth?oauth=success`);
 };
 
 const twitterLoginCallback = async (req, res) => {
   try {
     const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
-    const { refreshToken, accessToken, user } = req.user;
+    const { refreshToken } = req.user;
     res.cookie("refreshToken", refreshToken, refreshCookieOptions);
-    const userPayload = encodeURIComponent(JSON.stringify(user));
-    res.redirect(`${frontendUrl}/auth?accessToken=${encodeURIComponent(accessToken)}&user=${userPayload}`);
+    res.redirect(`${frontendUrl}/auth?oauth=success`);
   } catch (error) {
     const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
     res.redirect(`${frontendUrl}/auth?twitterError=1&msg=${encodeURIComponent(error.message)}`);
@@ -48,10 +46,9 @@ const twitterLoginCallback = async (req, res) => {
 const discordLoginCallback = async (req, res) => {
   try {
     const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
-    const { refreshToken, accessToken, user } = req.user;
+    const { refreshToken } = req.user;
     res.cookie("refreshToken", refreshToken, refreshCookieOptions);
-    const userPayload = encodeURIComponent(JSON.stringify(user));
-    res.redirect(`${frontendUrl}/auth?accessToken=${encodeURIComponent(accessToken)}&user=${userPayload}`);
+    res.redirect(`${frontendUrl}/auth?oauth=success`);
   } catch (error) {
     const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
     res.redirect(`${frontendUrl}/auth?discordError=1&msg=${encodeURIComponent(error.message)}`);
