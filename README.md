@@ -153,9 +153,11 @@ wiki_CPK/
 ├── client/              # React Application (Vite)
 │   ├── src/
 │   │   ├── components/  # Reusable UI components
+│   │   ├── config/      # Frontend configuration (Env)
 │   │   ├── constants/   # Application constants (API endpoints, UI strings)
 │   │   ├── hooks/       # Custom React hooks
 │   │   ├── pages/       # Page components (Home, Wiki, etc.)
+│   │   ├── schemas/     # Zod validation schemas (Forms)
 │   │   ├── services/    # API call services (Axios)
 │   │   ├── styles/      # Global and component styles (CSS)
 │   │   ├── utils/       # Helper functions and utilities
