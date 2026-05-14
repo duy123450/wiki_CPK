@@ -4,6 +4,8 @@ const { upload } = require("../../config/cloudinary");
 const passport = require("../../config/passport");
 const authController = require("./auth.controller");
 const authenticateUser = require("../../middleware/authentication");
+const validateRequest = require("../../middleware/validateRequest");
+const { registerSchema, loginSchema, updateProfileSchema } = require("../../schemas/auth.schemas");
 
 const {
   register,
@@ -68,12 +70,12 @@ const requireDiscordOAuthConfig = (req, res, next) => {
 const rateLimit = require("express-rate-limit");
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // Limit each IP to 5 requests per windowMs
+  max: process.env.NODE_ENV === "test" ? 1000 : 5, // Limit each IP to 5 requests per windowMs
   message: { msg: "Too many authentication attempts, please try again after 15 minutes" }
 });
 
-router.post("/register", register);
-router.post("/login", authLimiter, login);
+router.post("/register", validateRequest(registerSchema), register);
+router.post("/login", authLimiter, validateRequest(loginSchema), login);
 router.post("/refresh", authLimiter, refresh);
 router.get(
   "/google",
@@ -133,6 +135,6 @@ router.get(
 );
 router.get("/me", authenticateUser, getCurrentUser);
 router.put("/avatar", authenticateUser, upload.single("avatar"), updateAvatar);
-router.put("/profile", authenticateUser, updateProfile);
+router.put("/profile", authenticateUser, validateRequest(updateProfileSchema), updateProfile);
 
 module.exports = router;

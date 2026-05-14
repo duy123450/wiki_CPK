@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { getCharacters } from "../services/api";
+import useMovieInfo from "../hooks/useMovieInfo";
 import { ROLE_COLORS } from "../constants";
 import "../styles/CharactersPage.css";
 
@@ -243,6 +244,10 @@ function Pagination({ current, total, onChange }) {
 const LIMIT = 12;
 
 export default function CharactersPage({ sidebarCollapsed }) {
+  const { data: movie } = useMovieInfo();
+  const headerTitle = movie?.title ?? "超かぐや姫";
+  const headerSub = movie?.tagline ?? "";
+
   const [characters, setCharacters] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -319,10 +324,8 @@ export default function CharactersPage({ sidebarCollapsed }) {
           <span className="chrs-eyebrow-dot" />
           Fan Wiki · Characters
         </div>
-        <h1 className="chrs-header-title">登場人物</h1>
-        <p className="chrs-header-sub">
-          The souls who walk between the real world and Tsukuyomi
-        </p>
+        <h1 className="chrs-header-title">{headerTitle}</h1>
+        {headerSub && <p className="chrs-header-sub">{headerSub}</p>}
         <div className="chrs-header-rule" />
       </header>
 

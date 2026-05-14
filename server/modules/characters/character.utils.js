@@ -25,7 +25,10 @@ const buildCharacterFilter = (query) => {
     const filter = {};
     if (query.movieId) filter.movie = String(query.movieId);
     if (query.role) filter.role = String(query.role);
-    if (query.search) filter.$text = { $search: String(query.search) };
+    if (query.search) {
+        const escaped = String(query.search).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        filter.name = { $regex: escaped, $options: 'i' };
+    }
     return filter;
 };
 

@@ -1,17 +1,15 @@
 const { CustomAPIError } = require('../errors')
 
 const errorHandlerMiddleware = (err, req, res, next) => {
-    // Error logging removed for cleaner output
-
     // 1. Set default values for generic server errors
     let customError = {
         statusCode: err.statusCode || 500,
         msg: err.message || 'Something went wrong, please try again later',
     };
 
-    // 2. Domain-Specific Errors
-    if (err instanceof CustomAPIError) {
-        return res.status(err.statusCode).json({ 
+    // 2. Domain-Specific Errors (CustomAPIError or any error with a statusCode)
+    if (err instanceof CustomAPIError || err.statusCode) {
+        return res.status(err.statusCode || 400).json({ 
             msg: err.message,
             errorType: err.constructor.name 
         })
@@ -26,7 +24,7 @@ const errorHandlerMiddleware = (err, req, res, next) => {
     }
 
     // 4. Mongoose: Handling Validation Errors (e.g., required field missing)
-    if (err.name === 'ValidationError') {
+    if (err.name === 'ValidationError' && err.errors) {
         customError.msg = Object.values(err.errors).map((item) => item.message).join(', ')
         customError.statusCode = 400
     }

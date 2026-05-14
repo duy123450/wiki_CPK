@@ -107,8 +107,6 @@ export default function HeroPage() {
 
             <h1 className="hero-title">{title}</h1>
 
-            <hr className="hero-rule" />
-
             {tagline && <p className="hero-tagline">"{tagline}"</p>}
 
             {(releaseDate || studio) && (

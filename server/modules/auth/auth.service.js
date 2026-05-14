@@ -28,10 +28,6 @@ const buildTokenResponse = async (user) => {
 const registerUser = async (userData) => {
     const { username, email, password } = userData;
 
-    if (!username || !email || !password) {
-        throw new ValidationError("Username, email, and password are required");
-    }
-
     const existingUser = await User.findOne({
         $or: [{ email: email.toLowerCase() }, { username: username.trim() }],
     });
@@ -50,9 +46,6 @@ const registerUser = async (userData) => {
 };
 
 const loginUser = async (identifier, password) => {
-    if (!identifier || !password) {
-        throw new ValidationError("Email/username and password are required");
-    }
 
     const isEmail = identifier.includes("@");
     const query = isEmail
@@ -104,9 +97,6 @@ const updateUserProfile = async (userId, updates) => {
 
     if (username && username.trim() !== user.username) {
         const trimmed = username.trim();
-        if (trimmed.length < 3 || trimmed.length > 20) {
-            throw new ValidationError("Username must be 3-20 characters");
-        }
         const taken = await User.findOne({ username: trimmed, _id: { $ne: userId } });
         if (taken) throw new ValidationError("Username already taken");
         user.username = trimmed;
@@ -120,14 +110,8 @@ const updateUserProfile = async (userId, updates) => {
     }
 
     if (newPassword) {
-        if (!currentPassword) {
-            throw new ValidationError("Current password is required to set a new one");
-        }
         const isMatch = await user.comparePassword(currentPassword);
         if (!isMatch) throw new AuthError("Current password is incorrect");
-        if (newPassword.length < 6) {
-            throw new ValidationError("New password must be at least 6 characters");
-        }
         user.password = newPassword;
     }
 

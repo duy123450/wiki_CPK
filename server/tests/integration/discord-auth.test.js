@@ -66,8 +66,7 @@ describe('Discord OAuth Integration', () => {
                 .get('/api/v1/wiki/auth/discord/callback');
 
             expect(res.status).toBe(302);
-            expect(res.headers.location).toContain('accessToken=');
-            expect(res.headers.location).toContain('user=');
+            expect(res.headers.location).toContain('oauth=success');
         });
 
         it('redirects with social_conflict if email conflict occurs', async () => {

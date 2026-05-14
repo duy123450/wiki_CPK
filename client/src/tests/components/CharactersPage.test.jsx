@@ -9,6 +9,15 @@ vi.mock('@/services/api', () => ({
     getCharacters: vi.fn(),
 }))
 
+// Mock useMovieInfo hook
+vi.mock('@/hooks/useMovieInfo', () => ({
+    default: vi.fn(() => ({
+        data: { title: '超かぐや姫', tagline: 'A tale of the moon' },
+        loading: false,
+        error: null,
+    })),
+}))
+
 import { getCharacters } from '@/services/api'
 
 const mockCharacters = [
@@ -50,9 +59,9 @@ beforeEach(() => {
 })
 
 describe('CharactersPage', () => {
-    it('shows header title', async () => {
+    it('shows header title from movie data', async () => {
         renderPage()
-        expect(screen.getByText('登場人物')).toBeInTheDocument()
+        expect(screen.getByText('超かぐや姫')).toBeInTheDocument()
     })
 
     it('renders character cards after loading', async () => {
