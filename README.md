@@ -30,6 +30,8 @@ A full-stack MERN (MongoDB, Express, React, Node.js) application featuring a com
   - Image hosting and management via **Cloudinary**.
 - **Responsive UI:** Modern, interactive design built with React and Vanilla CSS.
 - **Robust Architecture:**
+  - **Environment & Data Validation:** Comprehensive schema validation using **Zod** for environment variables and API request payloads.
+  - **Security Hardening:** Implementation of request rate limiting, input sanitization (ReDoS/NoSQL Injection prevention), and file size constraints.
   - **Modular Backend:** Clean separation of concerns with domain-driven modules.
   - **Class-based Error Hierarchy:** Granular error handling with custom error classes (AuthError, WikiError, etc.).
   - **Knowledge Graph:** Automated architecture mapping and community analysis using **Graphify**.
@@ -51,9 +53,10 @@ A full-stack MERN (MongoDB, Express, React, Node.js) application featuring a com
 - **Runtime:** Node.js
 - **Framework:** Express
 - **Database:** MongoDB (Mongoose)
+- **Validation:** Zod (Environment & Request schemas)
 - **Real-time:** Socket.io
 - **Authentication:** Passport.js (Local, Google, Twitter, Discord)
-- **Security:** Argon2 (hashing), JWT (tokens), Helmet, CORS, Rate Limiting
+- **Security:** Argon2 (hashing), JWT (tokens), Helmet, CORS, Rate Limiting, Input Sanitization
 - **File Uploads:** Multer, Cloudinary
 - **Testing:** Jest, Supertest
 
@@ -87,26 +90,21 @@ JWT_ACCESS_LIFETIME=15m
 JWT_REFRESH_LIFETIME=30d
 
 # Cloudinary
-CLOUDINARY_CLOUD_NAME=your_cloud_name
-CLOUDINARY_API_KEY=your_api_key
-CLOUDINARY_API_SECRET=your_api_secret
+CLOUD_NAME=your_cloud_name
+API_KEY=your_api_key
+API_SECRET=your_api_secret
 
 # Google OAuth
 GOOGLE_CLIENT_ID=your_google_id
 GOOGLE_CLIENT_SECRET=your_google_secret
-GOOGLE_CALLBACK_URL=http://localhost:3000/api/v1/wiki/auth/google/callback
 
 # X (Twitter) OAuth
 X_LOCAL_CLIENT_ID=your_x_local_id
 X_LOCAL_CLIENT_SECRET=your_x_local_secret
-X_PROD_CLIENT_ID=your_x_prod_id
-X_PROD_CLIENT_SECRET=your_x_prod_secret
 
 # Discord OAuth
 DISCORD_CLIENT_ID=your_discord_id
 DISCORD_CLIENT_SECRET=your_discord_secret
-DISCORD_PROD_CLIENT_ID=your_discord_prod_id
-DISCORD_PROD_CLIENT_SECRET=your_discord_prod_secret
 
 FRONTEND_URL=http://localhost:5173
 NODE_ENV=development
@@ -164,15 +162,16 @@ wiki_CPK/
 │   │   └── tests/       # Frontend testing (Vitest)
 │   ├── public/          # Static assets
 ├── server/              # Express API (Node.js)
-│   ├── config/          # Configuration (Passport, Database, Cloudinary)
+│   ├── config/          # Configuration (Passport, Database, Cloudinary, Env)
 │   ├── errors/          # Custom class-based error hierarchy
-│   ├── middleware/      # Global middleware (Auth, Error handling)
+│   ├── middleware/      # Global middleware (Auth, Error handling, Rate limiting)
 │   ├── modules/         # Domain-driven modules (Auth, Wiki, Characters, etc.)
 │   │   ├── [module]/
 │   │   │   ├── [name].controller.js
 │   │   │   ├── [name].route.js
 │   │   │   ├── [name].service.js
 │   │   │   └── [name].model.js
+│   ├── schemas/         # Zod validation schemas
 │   ├── tests/           # Backend testing (Jest & Supertest)
 │   └── server.js        # Entry point & Socket.io setup
 └── README.md
