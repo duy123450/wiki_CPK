@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const argon2 = require('argon2');
 const jwt = require('jsonwebtoken');
-require('dotenv').config();
+const envConfig = require("../../config/env.config");
 
 const UserSchema = new mongoose.Schema({
     username: {
@@ -78,22 +78,23 @@ UserSchema.pre('save', async function () {
 
 // Compare password
 UserSchema.methods.comparePassword = async function (candidatePassword) {
+    if (!this.password) return false;
     return await argon2.verify(this.password, candidatePassword);
 };
 
 UserSchema.methods.createAccessToken = function () {
     return jwt.sign(
         { userId: this._id, name: this.username, role: this.role },
-        process.env.JWT_ACCESS_SECRET,
-        { expiresIn: process.env.JWT_ACCESS_LIFETIME || '15m' }
+        envConfig.JWT_ACCESS_SECRET,
+        { expiresIn: envConfig.JWT_ACCESS_LIFETIME || '15m' }
     );
 };
 
 UserSchema.methods.createRefreshToken = function () {
     return jwt.sign(
         { userId: this._id },
-        process.env.JWT_REFRESH_SECRET,
-        { expiresIn: process.env.JWT_REFRESH_LIFETIME || '30d' }
+        envConfig.JWT_REFRESH_SECRET,
+        { expiresIn: envConfig.JWT_REFRESH_LIFETIME || '30d' }
     );
 };
 

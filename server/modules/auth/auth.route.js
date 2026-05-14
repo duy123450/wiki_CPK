@@ -1,4 +1,5 @@
 const express = require("express");
+const envConfig = require("../../config/env.config");
 const router = express.Router();
 const { upload } = require("../../config/cloudinary");
 const passport = require("../../config/passport");
@@ -70,7 +71,7 @@ const requireDiscordOAuthConfig = (req, res, next) => {
 const rateLimit = require("express-rate-limit");
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: process.env.NODE_ENV === "test" ? 1000 : 5, // Limit each IP to 5 requests per windowMs
+  max: envConfig.NODE_ENV === "test" ? 1000 : 5, // Limit each IP to 5 requests per windowMs
   message: { msg: "Too many authentication attempts, please try again after 15 minutes" }
 });
 
@@ -88,7 +89,7 @@ router.get(
   "/google/callback",
   requireGoogleOAuthConfig,
   passport.authenticate("google", {
-    failureRedirect: `${process.env.FRONTEND_URL || "http://localhost:5173"}/auth?googleError=1`,
+    failureRedirect: `${envConfig.FRONTEND_URL || "http://localhost:5173"}/auth?googleError=1`,
   }),
   googleLoginCallback,
 );
@@ -103,7 +104,7 @@ router.get(
   "/x/callback",
   requireTwitterOAuthConfig,
   passport.authenticate("twitter", {
-    failureRedirect: `${process.env.FRONTEND_URL || "http://localhost:5173"}/auth?twitterError=1`,
+    failureRedirect: `${envConfig.FRONTEND_URL || "http://localhost:5173"}/auth?twitterError=1`,
   }),
   twitterLoginCallback,
 );
@@ -116,7 +117,7 @@ router.get(
   "/discord/callback",
   requireDiscordOAuthConfig,
   (req, res, next) => {
-    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+    const frontendUrl = envConfig.FRONTEND_URL || "http://localhost:5173";
     passport.authenticate("discord", (err, user) => {
       if (err) {
         if (err.message === "email_taken_other_method") {

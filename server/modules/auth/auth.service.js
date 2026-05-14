@@ -1,4 +1,5 @@
 const User = require("./user.model");
+const envConfig = require("../../config/env.config");
 const { AuthError, ValidationError, NotFoundError } = require("../../errors");
 
 const buildAuthResponse = (user) => ({
@@ -244,7 +245,7 @@ const refreshAccessToken = async (refreshToken) => {
     const jwt = require("jsonwebtoken");
     let payload;
     try {
-        payload = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+        payload = jwt.verify(refreshToken, envConfig.JWT_REFRESH_SECRET);
     } catch {
         throw new AuthError("Refresh token is invalid");
     }

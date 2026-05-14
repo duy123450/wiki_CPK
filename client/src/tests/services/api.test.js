@@ -149,8 +149,8 @@ describe('getCharacterBySlug', () => {
 
 describe('registerUser', () => {
     it('posts to /auth/register', async () => {
-        const payload = { username: 'test', email: 'test@test.com', password: '123456' }
-        const response = { user: { username: 'test' }, token: 'abc' }
+        const payload = { username: 'testuser', email: 'test@test.com', password: 'password123', confirmPassword: 'password123' }
+        const response = { user: { username: 'testuser' }, token: 'abc' }
         mockAxiosInstance.post.mockResolvedValueOnce({ data: response })
         const result = await api.registerUser(payload)
         expect(mockAxiosInstance.post).toHaveBeenCalledWith('/auth/register', payload)
@@ -160,8 +160,8 @@ describe('registerUser', () => {
 
 describe('loginUser', () => {
     it('posts to /auth/login', async () => {
-        const payload = { identifier: 'test', password: '123456' }
-        const response = { user: { username: 'test' }, token: 'abc' }
+        const payload = { identifier: 'testuser', password: 'password123' }
+        const response = { user: { username: 'testuser' }, token: 'abc' }
         mockAxiosInstance.post.mockResolvedValueOnce({ data: response })
         const result = await api.loginUser(payload)
         expect(mockAxiosInstance.post).toHaveBeenCalledWith('/auth/login', payload)
@@ -211,7 +211,7 @@ describe('uploadAvatar', () => {
 
 describe('updateProfile', () => {
     it('puts to /auth/profile', async () => {
-        const payload = { username: 'newname' }
+        const payload = { username: 'newname', email: 'test@test.com' }
         const response = { user: { username: 'newname' }, token: 'new-token' }
         mockAxiosInstance.put.mockResolvedValueOnce({ data: response })
         const result = await api.updateProfile(payload)

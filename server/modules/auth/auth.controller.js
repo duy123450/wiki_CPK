@@ -1,4 +1,5 @@
 const authService = require("./auth.service");
+const envConfig = require("../../config/env.config");
 
 const refreshCookieOptions = {
   httpOnly: true,
@@ -25,7 +26,7 @@ const login = async (req, res) => {
 };
 
 const googleLoginCallback = async (req, res) => {
-  const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+  const frontendUrl = envConfig.FRONTEND_URL || "http://localhost:5173";
   const { refreshToken } = req.user;
   res.cookie("refreshToken", refreshToken, refreshCookieOptions);
   res.redirect(`${frontendUrl}/auth?oauth=success`);
@@ -33,24 +34,24 @@ const googleLoginCallback = async (req, res) => {
 
 const twitterLoginCallback = async (req, res) => {
   try {
-    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+    const frontendUrl = envConfig.FRONTEND_URL || "http://localhost:5173";
     const { refreshToken } = req.user;
     res.cookie("refreshToken", refreshToken, refreshCookieOptions);
     res.redirect(`${frontendUrl}/auth?oauth=success`);
   } catch (error) {
-    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+    const frontendUrl = envConfig.FRONTEND_URL || "http://localhost:5173";
     res.redirect(`${frontendUrl}/auth?twitterError=1&msg=${encodeURIComponent(error.message)}`);
   }
 };
 
 const discordLoginCallback = async (req, res) => {
   try {
-    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+    const frontendUrl = envConfig.FRONTEND_URL || "http://localhost:5173";
     const { refreshToken } = req.user;
     res.cookie("refreshToken", refreshToken, refreshCookieOptions);
     res.redirect(`${frontendUrl}/auth?oauth=success`);
   } catch (error) {
-    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+    const frontendUrl = envConfig.FRONTEND_URL || "http://localhost:5173";
     res.redirect(`${frontendUrl}/auth?discordError=1&msg=${encodeURIComponent(error.message)}`);
   }
 };

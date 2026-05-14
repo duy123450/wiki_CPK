@@ -9,4 +9,5 @@ export const SEG_DIST = 55;
 export const SPARKLES = ["✦", "⋆", "✧", "·", "✩", "꩜"];
 
 /** @type {string} LocalStorage key for dragon cursor toggle */
-export const DRAGON_ENABLED_KEY = import.meta.env.VITE_DRAGON_ENABLED_KEY || "cpkDragonCursorEnabled";
+import { envConfig } from "../config/env.config";
+export const DRAGON_ENABLED_KEY = envConfig.VITE_DRAGON_ENABLED_KEY || "cpkDragonCursorEnabled";

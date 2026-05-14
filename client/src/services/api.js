@@ -1,8 +1,12 @@
 import axios from "axios";
-import { AUTH_TOKEN_KEY as DEFAULT_TOKEN, API_BASE_URL as DEFAULT_URL, ACCESS_TOKEN_UPDATED_EVENT } from "../constants";
+import { ACCESS_TOKEN_UPDATED_EVENT } from "../constants";
+import { envConfig } from "../config/env.config";
+import { validateData } from "../utils/api-validator";
+import { loginSchema, registerSchema } from "../schemas/authSchemas";
+import { profileSchema as updateProfileSchema } from "../schemas/profileSchemas";
 
-export const AUTH_TOKEN_KEY = import.meta.env.VITE_AUTH_TOKEN_KEY || DEFAULT_TOKEN;
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || DEFAULT_URL;
+export const AUTH_TOKEN_KEY = envConfig.VITE_AUTH_TOKEN_KEY;
+export const API_BASE_URL = envConfig.VITE_API_BASE_URL;
 
 const redirectToLogin = () => {
     window.localStorage.removeItem(AUTH_TOKEN_KEY);
@@ -110,11 +114,15 @@ export const getCharacterBySlug = (slug) =>
 
 // ─── Authentication ─────────────────────────────────────────────────────────
 
-export const registerUser = (payload) =>
-    api.post("/auth/register", payload).then((res) => res.data);
+export const registerUser = (payload) => {
+    const validated = validateData(registerSchema, payload, "Register");
+    return api.post("/auth/register", validated).then((res) => res.data);
+};
 
-export const loginUser = (payload) =>
-    api.post("/auth/login", payload).then((res) => res.data);
+export const loginUser = (payload) => {
+    const validated = validateData(loginSchema, payload, "Login");
+    return api.post("/auth/login", validated).then((res) => res.data);
+};
 
 export const getCurrentUser = () =>
     api.get("/auth/me").then((res) => res.data.user);
@@ -136,7 +144,8 @@ export const uploadAvatar = async (file) => {
 };
 
 export const updateProfile = async (payload) => {
-    const res = await api.put("/auth/profile", payload);
+    const validated = validateData(updateProfileSchema, payload, "Profile Update");
+    const res = await api.put("/auth/profile", validated);
     return res.data; // { user, token }
 };
 

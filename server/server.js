@@ -1,4 +1,5 @@
 require('dotenv').config()
+const envConfig = require('./config/env.config')
 const express = require('express')
 const app = express()
 const http = require('http')
@@ -27,14 +28,14 @@ const characterRouter = require('./modules/characters/character.route')
 const authRouter = require('./modules/auth/auth.route')
 
 // Allowed Origins & Options
-const isProd = process.env.NODE_ENV === 'production';
+const isProd = envConfig.NODE_ENV === 'production';
 const allowedOrigins = isProd 
-    ? [process.env.FRONTEND_URL]
+    ? [envConfig.FRONTEND_URL]
     : [
         'http://localhost:5173',
         'http://localhost:5174',
         'http://localhost:3000',
-        process.env.FRONTEND_URL
+        envConfig.FRONTEND_URL
     ].filter(Boolean);
 
 const corsOptions = {
@@ -73,17 +74,17 @@ app.use(express.json({ limit: '10kb' }))
 app.use(cookieParser())
 app.use(cors(corsOptions))
 app.use(helmet())
-if (process.env.NODE_ENV === 'production' && !process.env.SESSION_SECRET) {
+if (envConfig.NODE_ENV === 'production' && !envConfig.SESSION_SECRET) {
     console.error('FATAL ERROR: SESSION_SECRET is not defined in production.');
     process.exit(1);
 }
 
 app.use(session({
-    secret: process.env.SESSION_SECRET || 'your-secret-key',
+    secret: envConfig.SESSION_SECRET || 'your-secret-key',
     resave: false,
     saveUninitialized: false,
     cookie: {
-        secure: process.env.NODE_ENV === 'production',
+        secure: envConfig.NODE_ENV === 'production',
         httpOnly: true,
         maxAge: 1000 * 60 * 60 * 24
     }
@@ -102,11 +103,11 @@ app.use(notFoundMiddleware)
 app.use(errorHandlerMiddleware)
 
 // 4. Connect Database
-const port = process.env.PORT || 3000
+const port = envConfig.PORT || 3000
 
 const start = async () => {
     try {
-        await connectDB(process.env.MONGO_URI)
+        await connectDB(envConfig.MONGO_URI)
         server.listen(port, () => {
             console.log(`Server is listening on port ${port}...`)
         })
@@ -116,7 +117,7 @@ const start = async () => {
     }
 }
 
-if (process.env.NODE_ENV !== 'test') {
+if (envConfig.NODE_ENV !== 'test') {
     start()
 }
 

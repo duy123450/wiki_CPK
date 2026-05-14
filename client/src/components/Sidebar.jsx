@@ -16,7 +16,9 @@ import { getSidebar } from "../services/api";
 import LiveUserCount from "./LiveUserCount";
 import "../styles/Sidebar.css";
 
-const OPEN_CATEGORY_COOKIE = import.meta.env.VITE_OPEN_CATEGORY_COOKIE || DEFAULT_COOKIE;
+import { envConfig } from "../config/env.config";
+
+const OPEN_CATEGORY_COOKIE = envConfig.VITE_OPEN_CATEGORY_COOKIE || DEFAULT_COOKIE;
 
 function getCookie(name) {
   const cookies = document.cookie ? document.cookie.split("; ") : [];
