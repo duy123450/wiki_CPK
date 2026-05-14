@@ -102,7 +102,7 @@ describe('ProfilePage — Signed In', () => {
         expect(saveBtn).not.toBeDisabled()
     })
 
-    it('shows error toast when new passwords do not match', async () => {
+    it('shows error when new passwords do not match', async () => {
         const user = userEvent.setup()
         renderProfile()
 
@@ -166,5 +166,21 @@ describe('ProfilePage — Signed In', () => {
         renderProfile()
         const link = screen.getByText('Back to Wiki').closest('a')
         expect(link).toHaveAttribute('href', '/')
+    })
+
+    it('shows zod validation error for short username', async () => {
+        const user = userEvent.setup()
+        renderProfile()
+
+        const usernameInput = screen.getByDisplayValue('testuser')
+        await user.clear(usernameInput)
+        await user.type(usernameInput, 'ab')
+
+        await user.click(screen.getByText('Save Changes'))
+
+        await waitFor(() => {
+            expect(screen.getByText('Username must be at least 3 characters')).toBeInTheDocument()
+        })
+        expect(updateProfile).not.toHaveBeenCalled()
     })
 })

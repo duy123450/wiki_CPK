@@ -1,13 +1,14 @@
 import { useEffect, useState, useRef } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff } from "lucide-react";
 import { loginUser, registerUser, uploadAvatar, refreshAccessToken } from "../services/api";
 import GoogleLoginButton from "../components/GoogleLoginButton";
 import TwitterLoginButton from "../components/TwitterLoginButton";
 import DiscordLoginButton from "../components/DiscordLoginButton";
+import { loginSchema, registerSchema } from "../schemas/authSchemas";
 import "../styles/AuthPage.css";
-
-import { INITIAL_FORM } from "../constants/auth.constants";
 
 export default function AuthPage({
   sidebarCollapsed,
@@ -17,7 +18,6 @@ export default function AuthPage({
   onLogout,
 }) {
   const [mode, setMode] = useState("login");
-  const [form, setForm] = useState(INITIAL_FORM);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
@@ -36,6 +36,20 @@ export default function AuthPage({
   const twitterError = searchParams.get("twitterError");
   const discordError = searchParams.get("discordError");
   const socialError = searchParams.get("error");
+
+  // ── react-hook-form setup ───────────────────────────────────────────────────
+  const {
+    register,
+    handleSubmit: rhfHandleSubmit,
+    reset,
+    formState: { errors: fieldErrors },
+  } = useForm({
+    resolver: zodResolver(mode === "register" ? registerSchema : loginSchema),
+    defaultValues:
+      mode === "register"
+        ? { username: "", email: "", password: "", confirmPassword: "" }
+        : { identifier: "", password: "" },
+  });
 
   useEffect(() => {
     if (oauthSuccess) {
@@ -85,12 +99,13 @@ export default function AuthPage({
     onAuthSuccess,
   ]);
 
-  const updateField = (field) => (e) =>
-    setForm((prev) => ({ ...prev, [field]: e.target.value }));
-
   const switchMode = (next) => {
     setMode(next);
-    setForm(INITIAL_FORM);
+    reset(
+      next === "register"
+        ? { username: "", email: "", password: "", confirmPassword: "" }
+        : { identifier: "", password: "" },
+    );
     setError("");
     setAvatarPreview(null);
     setPendingAvatarFile(null);
@@ -130,8 +145,7 @@ export default function AuthPage({
   };
 
   // ── Form submit ────────────────────────────────────────────────────────────
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const onSubmit = async (formData) => {
     setSubmitting(true);
     setError("");
 
@@ -139,20 +153,15 @@ export default function AuthPage({
       let response; // { user, token }
 
       if (mode === "register") {
-        if (form.password !== form.confirmPassword) {
-          setError("Passwords do not match");
-          setSubmitting(false);
-          return;
-        }
         response = await registerUser({
-          username: form.username,
-          email: form.email, // ← correct key; backend expects "email" not "identifier"
-          password: form.password,
+          username: formData.username,
+          email: formData.email,
+          password: formData.password,
         });
       } else {
         response = await loginUser({
-          identifier: form.identifier,
-          password: form.password,
+          identifier: formData.identifier,
+          password: formData.password,
         });
       }
 
@@ -285,7 +294,7 @@ export default function AuthPage({
           </button>
         </div>
 
-        <form className="auth-form" onSubmit={handleSubmit}>
+        <form className="auth-form" onSubmit={rhfHandleSubmit(onSubmit)}>
           {mode === "register" && (
             <>
               {/* Avatar picker shown only during registration */}
@@ -324,12 +333,12 @@ export default function AuthPage({
                 <span>Username</span>
                 <input
                   type="text"
-                  value={form.username}
-                  onChange={updateField("username")}
-                  minLength={3}
-                  maxLength={20}
-                  required
+                  {...register("username")}
+                  autoComplete="username"
                 />
+                {fieldErrors.username && (
+                  <span className="auth-field-error">{fieldErrors.username.message}</span>
+                )}
               </label>
             </>
           )}
@@ -338,13 +347,15 @@ export default function AuthPage({
             <span>{mode === "register" ? "Email" : "Email or Username"}</span>
             <input
               type={mode === "register" ? "email" : "text"}
-              value={mode === "register" ? form.email : form.identifier}
-              onChange={updateField(
-                mode === "register" ? "email" : "identifier",
-              )}
+              {...register(mode === "register" ? "email" : "identifier")}
               autoComplete={mode === "register" ? "email" : "username"}
-              required
             />
+            {mode === "register" && fieldErrors.email && (
+              <span className="auth-field-error">{fieldErrors.email.message}</span>
+            )}
+            {mode === "login" && fieldErrors.identifier && (
+              <span className="auth-field-error">{fieldErrors.identifier.message}</span>
+            )}
           </label>
 
           <label className="auth-field">
@@ -352,10 +363,7 @@ export default function AuthPage({
             <div className="auth-input-wrapper">
               <input
                 type={showPassword ? "text" : "password"}
-                value={form.password}
-                onChange={updateField("password")}
-                minLength={6}
-                required
+                {...register("password")}
               />
               <button
                 type="button"
@@ -366,6 +374,9 @@ export default function AuthPage({
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
+            {fieldErrors.password && (
+              <span className="auth-field-error">{fieldErrors.password.message}</span>
+            )}
           </label>
 
           {mode === "register" && (
@@ -374,10 +385,7 @@ export default function AuthPage({
               <div className="auth-input-wrapper">
                 <input
                   type={showConfirmPassword ? "text" : "password"}
-                  value={form.confirmPassword}
-                  onChange={updateField("confirmPassword")}
-                  minLength={6}
-                  required
+                  {...register("confirmPassword")}
                 />
                 <button
                   type="button"
@@ -394,6 +402,9 @@ export default function AuthPage({
                   )}
                 </button>
               </div>
+              {fieldErrors.confirmPassword && (
+                <span className="auth-field-error">{fieldErrors.confirmPassword.message}</span>
+              )}
             </label>
           )}
 

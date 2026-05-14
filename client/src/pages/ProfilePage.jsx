@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   User,
   Mail,
@@ -15,6 +17,7 @@ import {
 import { uploadAvatar, updateProfile, AUTH_TOKEN_KEY } from "../services/api";
 import { DEFAULT_AVATAR } from "../constants";
 import { formatVNDate } from "../utils/dateUtils";
+import { profileSchema } from "../schemas/profileSchemas";
 import "../styles/ProfilePage.css";
 
 
@@ -28,17 +31,27 @@ export default function ProfilePage({
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
 
-  // ── Form state ──────────────────────────────────────────────────────────────
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  // ── react-hook-form setup ──────────────────────────────────────────────────
+  const {
+    register,
+    handleSubmit: rhfHandleSubmit,
+    reset,
+    formState: { errors: fieldErrors, isDirty },
+  } = useForm({
+    resolver: zodResolver(profileSchema),
+    defaultValues: {
+      username: currentUser?.username || "",
+      email: currentUser?.email || "",
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
+    },
+  });
 
+  // ── Non-form state ─────────────────────────────────────────────────────────
   const [saving, setSaving] = useState(false);
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState(null);
-
   const [toast, setToast] = useState(null); // { type: 'success'|'error', msg }
 
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
@@ -48,10 +61,15 @@ export default function ProfilePage({
   // ── Sync form when user data changes ────────────────────────────────────────
   useEffect(() => {
     if (currentUser) {
-      setUsername(currentUser.username || "");
-      setEmail(currentUser.email || "");
+      reset({
+        username: currentUser.username || "",
+        email: currentUser.email || "",
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
     }
-  }, [currentUser]);
+  }, [currentUser, reset]);
 
   // ── Auto-dismiss toast ──────────────────────────────────────────────────────
   useEffect(() => {
@@ -105,27 +123,19 @@ export default function ProfilePage({
   };
 
   // ── Profile save ────────────────────────────────────────────────────────────
-  const handleSaveProfile = async (e) => {
-    e.preventDefault();
-
-    // Client-side validation
-    if (newPassword && newPassword !== confirmPassword) {
-      setToast({ type: "error", msg: "New passwords do not match" });
-      return;
-    }
-
+  const onSubmit = async (formData) => {
     const payload = {};
 
     // Only send changed fields
-    if (username.trim() !== currentUser.username) {
-      payload.username = username.trim();
+    if (formData.username.trim() !== currentUser.username) {
+      payload.username = formData.username.trim();
     }
-    if (email.trim().toLowerCase() !== currentUser.email) {
-      payload.email = email.trim();
+    if (formData.email.trim().toLowerCase() !== currentUser.email) {
+      payload.email = formData.email.trim();
     }
-    if (newPassword) {
-      payload.currentPassword = currentPassword;
-      payload.newPassword = newPassword;
+    if (formData.newPassword) {
+      payload.currentPassword = formData.currentPassword;
+      payload.newPassword = formData.newPassword;
     }
 
     // Nothing changed
@@ -142,9 +152,6 @@ export default function ProfilePage({
         window.localStorage.setItem(AUTH_TOKEN_KEY, data.token);
       }
       onProfileUpdate(data.user, data.token);
-      setCurrentPassword("");
-      setNewPassword("");
-      setConfirmPassword("");
       setToast({ type: "success", msg: "Profile updated successfully!" });
     } catch (err) {
       setToast({
@@ -156,12 +163,20 @@ export default function ProfilePage({
     }
   };
 
-  const avatarSrc = avatarPreview || currentUser.avatar?.url || DEFAULT_AVATAR;
+  const handleReset = () => {
+    reset({
+      username: currentUser.username,
+      email: currentUser.email,
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
+    });
+    setShowCurrentPassword(false);
+    setShowNewPassword(false);
+    setShowConfirmPassword(false);
+  };
 
-  const hasChanges =
-    username.trim() !== currentUser.username ||
-    email.trim().toLowerCase() !== currentUser.email ||
-    newPassword.length > 0;
+  const avatarSrc = avatarPreview || currentUser.avatar?.url || DEFAULT_AVATAR;
 
   return (
     <section
@@ -256,7 +271,7 @@ export default function ProfilePage({
         </div>
 
         {/* Editable profile form */}
-        <form className="profile-card" onSubmit={handleSaveProfile}>
+        <form className="profile-card" onSubmit={rhfHandleSubmit(onSubmit)}>
           <h2 className="profile-card-title">
             <User size={14} />
             Edit Profile
@@ -267,12 +282,12 @@ export default function ProfilePage({
             <input
               type="text"
               className="profile-field-input"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              minLength={3}
-              maxLength={20}
+              {...register("username")}
               disabled={saving}
             />
+            {fieldErrors.username && (
+              <p className="profile-field-error">{fieldErrors.username.message}</p>
+            )}
             <p className="profile-field-hint">3–20 characters</p>
           </div>
 
@@ -281,10 +296,12 @@ export default function ProfilePage({
             <input
               type="email"
               className="profile-field-input"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              {...register("email")}
               disabled={saving}
             />
+            {fieldErrors.email && (
+              <p className="profile-field-error">{fieldErrors.email.message}</p>
+            )}
           </div>
 
           <div className="profile-divider" />
@@ -303,8 +320,7 @@ export default function ProfilePage({
               <input
                 type={showCurrentPassword ? "text" : "password"}
                 className="profile-field-input"
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
+                {...register("currentPassword")}
                 placeholder="Required to change password"
                 disabled={saving}
               />
@@ -317,6 +333,9 @@ export default function ProfilePage({
                 {showCurrentPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
+            {fieldErrors.currentPassword && (
+              <p className="profile-field-error">{fieldErrors.currentPassword.message}</p>
+            )}
           </div>
 
           <div className="profile-field">
@@ -325,10 +344,8 @@ export default function ProfilePage({
               <input
                 type={showNewPassword ? "text" : "password"}
                 className="profile-field-input"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
+                {...register("newPassword")}
                 placeholder="Minimum 6 characters"
-                minLength={6}
                 disabled={saving}
               />
               <button
@@ -340,6 +357,9 @@ export default function ProfilePage({
                 {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
+            {fieldErrors.newPassword && (
+              <p className="profile-field-error">{fieldErrors.newPassword.message}</p>
+            )}
           </div>
 
           <div className="profile-field">
@@ -348,8 +368,7 @@ export default function ProfilePage({
               <input
                 type={showConfirmPassword ? "text" : "password"}
                 className="profile-field-input"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
+                {...register("confirmPassword")}
                 placeholder="Re-enter new password"
                 disabled={saving}
               />
@@ -362,29 +381,23 @@ export default function ProfilePage({
                 {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
+            {fieldErrors.confirmPassword && (
+              <p className="profile-field-error">{fieldErrors.confirmPassword.message}</p>
+            )}
           </div>
 
           <div className="profile-actions">
             <button
               type="submit"
               className="profile-btn profile-btn--primary"
-              disabled={saving || !hasChanges}
+              disabled={saving || !isDirty}
             >
               {saving ? "Saving…" : "Save Changes"}
             </button>
             <button
               type="button"
               className="profile-btn profile-btn--ghost"
-              onClick={() => {
-                setUsername(currentUser.username);
-                setEmail(currentUser.email);
-                setCurrentPassword("");
-                setNewPassword("");
-                setConfirmPassword("");
-                setShowCurrentPassword(false);
-                setShowNewPassword(false);
-                setShowConfirmPassword(false);
-              }}
+              onClick={handleReset}
               disabled={saving}
             >
               Reset

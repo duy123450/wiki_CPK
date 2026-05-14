@@ -176,6 +176,24 @@ describe('AuthPage — Register Mode', () => {
             expect(defaultProps.onAuthSuccess).toHaveBeenCalledWith(response)
         })
     })
+
+    it('shows zod validation errors for empty required fields', async () => {
+        const user = userEvent.setup()
+        renderAuth()
+
+        const registerTab = screen.getAllByRole('button').find(
+            (btn) => btn.textContent === 'Register' && btn.classList.contains('auth-tab')
+        )
+        await user.click(registerTab)
+
+        // Submit without filling any fields
+        await user.click(screen.getByRole('button', { name: 'Create Account' }))
+
+        await waitFor(() => {
+            expect(screen.getByText('Username must be at least 3 characters')).toBeInTheDocument()
+        })
+        expect(registerUser).not.toHaveBeenCalled()
+    })
 })
 
 describe('AuthPage — Google OAuth Callback', () => {
