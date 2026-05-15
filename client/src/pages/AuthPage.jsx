@@ -7,6 +7,7 @@ import { loginUser, registerUser, uploadAvatar, refreshAccessToken } from "../se
 import GoogleLoginButton from "../components/GoogleLoginButton";
 import TwitterLoginButton from "../components/TwitterLoginButton";
 import DiscordLoginButton from "../components/DiscordLoginButton";
+import GithubLoginButton from "../components/GithubLoginButton";
 import { loginSchema, registerSchema } from "../schemas/authSchemas";
 import "../styles/AuthPage.css";
 
@@ -433,6 +434,7 @@ export default function AuthPage({
             <GoogleLoginButton />
             <TwitterLoginButton />
             <DiscordLoginButton />
+            <GithubLoginButton />
           </div>
         </form>
       </div>

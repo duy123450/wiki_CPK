@@ -56,6 +56,18 @@ const discordLoginCallback = async (req, res) => {
   }
 };
 
+const githubLoginCallback = async (req, res) => {
+  try {
+    const frontendUrl = envConfig.FRONTEND_URL || "http://localhost:5173";
+    const { refreshToken } = req.user;
+    res.cookie("refreshToken", refreshToken, refreshCookieOptions);
+    res.redirect(`${frontendUrl}/auth?oauth=success`);
+  } catch (error) {
+    const frontendUrl = envConfig.FRONTEND_URL || "http://localhost:5173";
+    res.redirect(`${frontendUrl}/auth?githubError=1&msg=${encodeURIComponent(error.message)}`);
+  }
+};
+
 const refresh = async (req, res) => {
   const result = await authService.refreshAccessToken(req.cookies?.refreshToken);
   res.status(200).json(result);
@@ -83,6 +95,7 @@ module.exports = {
   googleLoginCallback,
   twitterLoginCallback,
   discordLoginCallback,
+  githubLoginCallback,
   refresh,
   getCurrentUser,
   updateAvatar,

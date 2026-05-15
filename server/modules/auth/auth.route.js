@@ -14,6 +14,7 @@ const {
   googleLoginCallback,
   twitterLoginCallback,
   discordLoginCallback,
+  githubLoginCallback,
   refresh,
   getCurrentUser,
   updateAvatar,
@@ -62,6 +63,24 @@ const requireDiscordOAuthConfig = (req, res, next) => {
   if (!clientId || !clientSecret) {
     return res.status(500).json({
       msg: "Discord OAuth is not configured. Set DISCORD_CLIENT_ID and DISCORD_CLIENT_SECRET in server/.env.",
+    });
+  }
+
+  return next();
+};
+
+const requireGitHubOAuthConfig = (req, res, next) => {
+  const isProduction = process.env.NODE_ENV === "production";
+  const clientId = isProduction
+    ? process.env.GITHUB_PROD_CLIENT_ID
+    : process.env.GITHUB_LOCAL_CLIENT_ID;
+  const clientSecret = isProduction
+    ? process.env.GITHUB_PROD_CLIENT_SECRET
+    : process.env.GITHUB_LOCAL_CLIENT_SECRET;
+
+  if (!clientId || !clientSecret) {
+    return res.status(500).json({
+      msg: "GitHub OAuth is not configured. Set GITHUB_CLIENT_ID and GITHUB_CLIENT_SECRET in server/.env.",
     });
   }
 
@@ -133,6 +152,32 @@ router.get(
     })(req, res, next);
   },
   discordLoginCallback,
+);
+router.get(
+  "/github",
+  requireGitHubOAuthConfig,
+  passport.authenticate("github", { scope: ['user:email'], session: false }),
+);
+router.get(
+  "/github/callback",
+  requireGitHubOAuthConfig,
+  (req, res, next) => {
+    const frontendUrl = envConfig.FRONTEND_URL || "http://localhost:5173";
+    passport.authenticate("github", { session: false }, (err, user) => {
+      if (err) {
+        if (err.message === "email_taken_other_method") {
+          return res.redirect(`${frontendUrl}/auth?error=social_conflict`);
+        }
+        return res.redirect(`${frontendUrl}/auth?githubError=1&msg=${encodeURIComponent(err.message)}`);
+      }
+      if (!user) {
+        return res.redirect(`${frontendUrl}/auth?githubError=1`);
+      }
+      req.user = user;
+      next();
+    })(req, res, next);
+  },
+  githubLoginCallback,
 );
 router.get("/me", authenticateUser, getCurrentUser);
 router.put("/avatar", authenticateUser, upload.single("avatar"), updateAvatar);

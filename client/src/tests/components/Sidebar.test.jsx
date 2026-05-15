@@ -84,12 +84,14 @@ describe('Sidebar — Loading & Data', () => {
     })
 
     it('handles API error gracefully', async () => {
+        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
         getSidebar.mockRejectedValueOnce(new Error('Network error'))
         renderSidebar()
 
         await waitFor(() => {
             expect(screen.getByText('No categories found')).toBeInTheDocument()
         })
+        consoleSpy.mockRestore()
     })
 })
 

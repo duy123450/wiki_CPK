@@ -237,6 +237,45 @@ const discordLoginUser = async (profile) => {
     return buildTokenResponse(user);
 };
 
+const githubLoginUser = async (profile) => {
+    if (!profile?.id) {
+        throw new ValidationError("GitHub profile is required");
+    }
+
+    const githubId = profile.id;
+    const email = profile.emails?.[0]?.value?.toLowerCase();
+    const username = profile.username || profile.displayName || "github_user";
+    const picture = profile.photos?.[0]?.value;
+
+    let user = await User.findOne({ githubId });
+
+    if (user) {
+        return buildTokenResponse(user);
+    }
+
+    if (email) {
+        const existingByEmail = await User.findOne({ email });
+        if (existingByEmail) {
+            throw new AuthError("email_taken_other_method", 409);
+        }
+    }
+
+    const suffix = "_" + githubId.slice(-4);
+    const baseName = username.replace(/\s+/g, "_").slice(0, 20 - suffix.length);
+    
+    user = await User.create({
+        username: baseName + suffix,
+        email: email || `${baseName.toLowerCase()}_${githubId}@github.local`,
+        githubId,
+        avatar: {
+            url: picture || undefined,
+            public_id: "github-avatar",
+        },
+    });
+
+    return buildTokenResponse(user);
+};
+
 const refreshAccessToken = async (refreshToken) => {
     if (!refreshToken) {
         throw new AuthError("Refresh token is required");
@@ -273,5 +312,6 @@ module.exports = {
     googleLoginUser,
     twitterLoginUser,
     discordLoginUser,
+    githubLoginUser,
     refreshAccessToken,
 };

@@ -6,6 +6,7 @@ require("../modules/auth/strategies/jwt");
 require("../modules/auth/strategies/google");
 require("../modules/auth/strategies/twitter");
 require("../modules/auth/strategies/discord");
+require("../modules/auth/strategies/github");
 
 // Session serialization
 passport.serializeUser((user, done) => {
