@@ -6,6 +6,8 @@ import HeroPage from '@/pages/HeroPage'
 // Mock API
 vi.mock('@/services/api', () => ({
     getMovieInfo: vi.fn(),
+    fetchMovieInfo: vi.fn(() => new Promise(() => {})),
+    fetchSoundtracks: vi.fn(() => new Promise(() => {})),
 }))
 
 import { getMovieInfo } from '@/services/api'
@@ -104,5 +106,6 @@ describe('HeroPage', () => {
             const stars = container.querySelector('.hero-stars')
             expect(stars).toHaveAttribute('aria-hidden', 'true')
         })
+        await screen.findByText('Test')
     })
 })

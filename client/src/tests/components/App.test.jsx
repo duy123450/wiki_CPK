@@ -32,8 +32,8 @@ beforeEach(() => {
     getMovieInfo.mockResolvedValue({ title: 'Test', details: {} })
     getSidebar.mockResolvedValue([])
     getCharacters.mockResolvedValue({ characters: [], pagination: { total: 0, totalPages: 1 } })
-    fetchMovieInfo.mockResolvedValue({ movie: { _id: '1', title: 'Test' } })
-    fetchSoundtracks.mockResolvedValue({ tracks: [] })
+    fetchMovieInfo.mockReturnValue(new Promise(() => {}))
+    fetchSoundtracks.mockReturnValue(new Promise(() => {}))
 })
 
 // We need to render App inside its own Router since App uses BrowserRouter internally
@@ -47,6 +47,7 @@ describe('App', () => {
         await waitFor(() => {
             expect(screen.getByText('Fan Wiki')).toBeInTheDocument()
         })
+        await screen.findByText('Explore Wiki')
     })
 
     it('renders hero page content on default route', async () => {
@@ -64,11 +65,13 @@ describe('App', () => {
         await waitFor(() => {
             expect(screen.getByText('超かぐや姫')).toBeInTheDocument()
         })
+        await screen.findByText('Explore Wiki')
     })
 
-    it('renders sidebar Navigation label', () => {
+    it('renders sidebar Navigation label', async () => {
         render(<App />)
         expect(screen.getByText('Navigation')).toBeInTheDocument()
+        await screen.findByText('Explore Wiki')
     })
 
     it('restores user from localStorage token', async () => {

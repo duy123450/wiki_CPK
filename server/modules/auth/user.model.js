@@ -73,7 +73,10 @@ const UserSchema = new mongoose.Schema({
 // Hash password with Argon2
 UserSchema.pre('save', async function () {
     if (!this.isModified('password')) return;
-    this.password = await argon2.hash(this.password);
+    const hashOptions = process.env.NODE_ENV === 'test' 
+        ? { timeCost: 1, memoryCost: 8, parallelism: 1 } 
+        : {};
+    this.password = await argon2.hash(this.password, hashOptions);
 });
 
 // Compare password

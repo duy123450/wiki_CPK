@@ -62,6 +62,7 @@ describe('CharactersPage', () => {
     it('shows header title from movie data', async () => {
         renderPage()
         expect(screen.getByText('超かぐや姫')).toBeInTheDocument()
+        await screen.findByText('Kaguya')
     })
 
     it('renders character cards after loading', async () => {
@@ -133,11 +134,13 @@ describe('CharactersPage — Filter Bar', () => {
         renderPage()
         const searchInput = screen.getByPlaceholderText('Search characters…')
         expect(searchInput).toBeInTheDocument()
+        await screen.findByText('Kaguya')
     })
 
     it('renders role filter pills', async () => {
         renderPage()
         expect(screen.getByText('All')).toBeInTheDocument()
+        await screen.findByText('Kaguya')
         // "Protagonist" appears both as a filter pill and as a role badge on a card
         const protagonistElements = screen.getAllByText('Protagonist')
         expect(protagonistElements.length).toBeGreaterThanOrEqual(1)

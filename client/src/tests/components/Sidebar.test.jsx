@@ -28,8 +28,8 @@ const renderSidebar = (overrides = {}) =>
 
 beforeEach(() => {
     vi.clearAllMocks()
-    // Default: resolve with empty
-    getSidebar.mockResolvedValue([])
+    // Return unresolved promise by default to prevent state update after basic tests end
+    getSidebar.mockReturnValue(new Promise(() => {}))
 })
 
 describe('Sidebar — Basic Rendering', () => {
