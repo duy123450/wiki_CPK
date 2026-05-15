@@ -47,19 +47,15 @@ if (clientId && clientSecret) {
       params = {};
     }
     try {
-      const response = await fetch('https://api.twitter.com/2/users/me?user.fields=profile_image_url', {
+      const axios = require('axios');
+      const response = await axios.get('https://api.twitter.com/2/users/me?user.fields=profile_image_url', {
         headers: {
           'Authorization': `Bearer ${accessToken}`
         }
       });
       
-      const text = await response.text();
-      
-      if (!response.ok) {
-        return done(new Error(`Twitter API error: ${text}`));
-      }
-      
-      const data = JSON.parse(text);
+      const data = response.data;
+      const text = JSON.stringify(data);
       
       const profile = {
         provider: 'twitter',
