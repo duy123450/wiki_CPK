@@ -321,14 +321,6 @@ export default function Playlist() {
                 {activeTab === "lyrics" ? (
                   <div className="pl-panel-lyrics-wrap">
                     <div className="pl-full-lyrics">
-                      {currentTrack.lyrics?.romaji && (
-                        <div className="pl-lyric-section">
-                          <h3>Romaji</h3>
-                          <p className="pl-lyric-text">
-                            {currentTrack.lyrics.romaji}
-                          </p>
-                        </div>
-                      )}
                       {currentTrack.lyrics?.translation && (
                         <div className="pl-lyric-section">
                           <h3>Translation</h3>
@@ -337,8 +329,7 @@ export default function Playlist() {
                           </p>
                         </div>
                       )}
-                      {!currentTrack.lyrics?.romaji &&
-                        !currentTrack.lyrics?.translation && (
+                      {!currentTrack.lyrics?.translation && (
                           <div className="pl-no-lyrics">
                             No lyrics available for this track.
                           </div>
@@ -358,9 +349,9 @@ export default function Playlist() {
                     {activeLine && (
                       <div className="pl-karaoke-sub">
                         <div className="pl-karaoke-line">{activeLine.line}</div>
-                        {activeLine.lineRomaji && (
+                        {activeLine.lineTranslation && (
                           <div className="pl-karaoke-romaji">
-                            {activeLine.lineRomaji}
+                            {activeLine.lineTranslation}
                           </div>
                         )}
                       </div>

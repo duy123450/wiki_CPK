@@ -19,7 +19,6 @@ const formatTrack = (track) => {
         embedUrl: track.embedUrl,
         coverImage: track.coverImage?.url ?? null,
         lyrics: {
-            romaji: track.lyrics?.romaji ?? "",
             translation: track.lyrics?.translation ?? "",
             synced: track.lyrics?.synced ?? []
         },
@@ -42,9 +41,8 @@ describe('Soundtrack Helpers', () => {
             embedUrl: 'https://www.youtube.com/embed/abc123?start=0&end=240&autoplay=1',
             coverImage: { url: 'https://img.com/cover.jpg', public_id: 'cover1' },
             lyrics: {
-                romaji: 'kashi',
                 translation: 'lyrics',
-                synced: [{ time: 0, line: '歌詞', lineRomaji: 'kashi' }],
+                synced: [{ time: 0, line: 'kashi', lineTranslation: 'lyrics' }],
             },
             movie: 'movie1',
         };
@@ -94,27 +92,24 @@ describe('Soundtrack Helpers', () => {
 
         it('should correctly map lyrics fields', () => {
             const result = formatTrack(fullTrack);
-            expect(result.lyrics.romaji).toBe('kashi');
             expect(result.lyrics.translation).toBe('lyrics');
             expect(result.lyrics.synced).toHaveLength(1);
             expect(result.lyrics.synced[0]).toEqual({
-                time: 0, line: '歌詞', lineRomaji: 'kashi'
+                time: 0, line: 'kashi', lineTranslation: 'lyrics'
             });
         });
 
         it('should default lyrics to empty strings/array when missing', () => {
             const track = { ...fullTrack, lyrics: undefined };
             const result = formatTrack(track);
-            expect(result.lyrics.romaji).toBe('');
             expect(result.lyrics.translation).toBe('');
             expect(result.lyrics.synced).toEqual([]);
         });
 
         it('should default partial lyrics to empty strings', () => {
-            const track = { ...fullTrack, lyrics: { romaji: 'kashi only' } };
+            const track = { ...fullTrack, lyrics: { translation: 'trans only' } };
             const result = formatTrack(track);
-            expect(result.lyrics.romaji).toBe('kashi only');
-            expect(result.lyrics.translation).toBe('');
+            expect(result.lyrics.translation).toBe('trans only');
             expect(result.lyrics.synced).toEqual([]);
         });
     });

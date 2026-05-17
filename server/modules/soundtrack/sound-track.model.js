@@ -1,13 +1,13 @@
 const mongoose = require('mongoose');
 
 const LyricSchema = new mongoose.Schema({
-    romaji: { type: String, default: "" },      // Latin alphabet version
     translation: { type: String, default: "" }, // English or Vietnamese
 
-    // Synced lines for a "Karaoke" style UI
+    // Synced lines using Romaji as the primary line (in Romaji script)
     synced: [{
         time: { type: Number },        // Time in seconds from start of track
-        line: { type: String },        // The lyric line
+        line: { type: String },        // The lyric line in Romaji
+        lineTranslation: { type: String, default: "" } // The lyric line in Vietnamese or English
     }]
 }, { _id: false });
 

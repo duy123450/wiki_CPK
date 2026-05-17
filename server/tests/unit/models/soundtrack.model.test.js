@@ -106,7 +106,6 @@ describe('Soundtrack Model', () => {
 
         it('should default lyrics to empty strings', async () => {
             const track = await Soundtrack.create(validTrack());
-            expect(track.lyrics.romaji).toBe('');
             expect(track.lyrics.translation).toBe('');
             expect(track.lyrics.synced).toEqual([]);
         });
