@@ -1,5 +1,16 @@
 const mongoose = require('mongoose');
 
+const LyricSchema = new mongoose.Schema({
+    romaji: { type: String, default: "" },      // Latin alphabet version
+    translation: { type: String, default: "" }, // English or Vietnamese
+
+    // Synced lines for a "Karaoke" style UI
+    synced: [{
+        time: { type: Number },        // Time in seconds from start of track
+        line: { type: String },        // The lyric line
+    }]
+}, { _id: false });
+
 const SoundtrackSchema = new mongoose.Schema({
     // Helps display the songs in the 1, 2, 3... order of the movie/video
     trackNumber: {
@@ -58,17 +69,8 @@ const SoundtrackSchema = new mongoose.Schema({
         public_id: String
     },
     lyrics: {
-        // Static blocks for full reading
-        original: { type: String, default: "" },    // Native text
-        romaji: { type: String, default: "" },      // Latin alphabet version
-        translation: { type: String, default: "" }, // English or Vietnamese
-
-        // Synced lines for a "Karaoke" style UI
-        synced: [{
-            time: { type: Number },        // Time in seconds from start of track
-            line: { type: String },        // The lyric line
-            lineRomaji: { type: String }   // Romaji for that specific line
-        }]
+        type: LyricSchema,
+        default: () => ({})
     }
 }, { timestamps: true });
 

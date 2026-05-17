@@ -179,6 +179,7 @@ export default function Playlist() {
   const [movie, setMovie] = useState(null);
   const [tracks, setTracks] = useState([]);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [activeTab, setActiveTab] = useState("cover");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -222,6 +223,10 @@ export default function Playlist() {
   const duration = currentTrack
     ? currentTrack.endTime - currentTrack.startTime
     : 0;
+
+  const activeLine = currentTrack?.lyrics?.synced
+    ? [...currentTrack.lyrics.synced].reverse().find((l) => l.time <= currentTime)
+    : null;
 
   if (error || loading || !currentTrack) return null;
 
@@ -289,7 +294,20 @@ export default function Playlist() {
             {/* ─── PLAYER ─── */}
             <div className="pl-panel-player">
               <div className="pl-panel-header">
-                <div className="pl-panel-handle" />
+                <div className="pl-player-tabs">
+                  <button
+                    className={`pl-tab-btn ${activeTab === "cover" ? "pl-tab-btn--active" : ""}`}
+                    onClick={() => setActiveTab("cover")}
+                  >
+                    Player
+                  </button>
+                  <button
+                    className={`pl-tab-btn ${activeTab === "lyrics" ? "pl-tab-btn--active" : ""}`}
+                    onClick={() => setActiveTab("lyrics")}
+                  >
+                    Lyrics
+                  </button>
+                </div>
                 <button
                   className="pl-panel-close"
                   onClick={() => setIsExpanded(false)}
@@ -300,14 +318,55 @@ export default function Playlist() {
               </div>
 
               <div className="pl-panel-cover-wrap">
-                <img
-                  className="pl-panel-cover"
-                  src={currentTrack.coverImage || null}
-                  alt={currentTrack.title}
-                  onError={(e) => {
-                    e.target.style.display = "none";
-                  }}
-                />
+                {activeTab === "lyrics" ? (
+                  <div className="pl-panel-lyrics-wrap">
+                    <div className="pl-full-lyrics">
+                      {currentTrack.lyrics?.romaji && (
+                        <div className="pl-lyric-section">
+                          <h3>Romaji</h3>
+                          <p className="pl-lyric-text">
+                            {currentTrack.lyrics.romaji}
+                          </p>
+                        </div>
+                      )}
+                      {currentTrack.lyrics?.translation && (
+                        <div className="pl-lyric-section">
+                          <h3>Translation</h3>
+                          <p className="pl-lyric-text">
+                            {currentTrack.lyrics.translation}
+                          </p>
+                        </div>
+                      )}
+                      {!currentTrack.lyrics?.romaji &&
+                        !currentTrack.lyrics?.translation && (
+                          <div className="pl-no-lyrics">
+                            No lyrics available for this track.
+                          </div>
+                        )}
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <img
+                      className="pl-panel-cover"
+                      src={currentTrack.coverImage || null}
+                      alt={currentTrack.title}
+                      onError={(e) => {
+                        e.target.style.display = "none";
+                      }}
+                    />
+                    {activeLine && (
+                      <div className="pl-karaoke-sub">
+                        <div className="pl-karaoke-line">{activeLine.line}</div>
+                        {activeLine.lineRomaji && (
+                          <div className="pl-karaoke-romaji">
+                            {activeLine.lineRomaji}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
 
               <div className="pl-panel-meta">

@@ -274,29 +274,66 @@
     color: #fff;
 }
 
+/* ── Player Tabs ────────────────────────────────────────────────────────────── */
+.pl-player-tabs {
+    display: flex;
+    gap: 16px;
+    margin-right: auto;
+    margin-left: 12px;
+}
+
+.pl-tab-btn {
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 4px 8px;
+    position: relative;
+    transition: color 0.2s;
+}
+
+.pl-tab-btn:hover {
+    color: #ccc;
+}
+
+.pl-tab-btn--active {
+    color: #1DB954;
+}
+
+.pl-tab-btn--active::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: #1DB954;
+    border-radius: 2px;
+}
+
 /* ── Cover art ──────────────────────────────────────────────────────────────── */
 .pl-panel-cover-wrap {
     display: flex;
+    flex-direction: column;
     justify-content: center;
-    /* flex: 1 lets the cover zone grow/shrink within the player column */
+    align-items: center;
     flex: 1 1 0;
     min-height: 0;
     padding: 4px 12px;
+    position: relative;
 }
 
 .pl-panel-cover {
-    /* fill the available height, cap by width so it stays square */
-    width: auto;
+    width: 100%;
     height: 100%;
     max-width: 100%;
-    aspect-ratio: 1;
-    border-radius: 10px;
-    object-fit: cover;
-    background: #282828;
-    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.55);
+    object-fit: contain;
+    background: transparent;
+    filter: drop-shadow(0 6px 24px rgba(0, 0, 0, 0.55));
 }
 
-/* On desktop keep the old fixed-width behaviour */
 @media (min-width: 769px) {
     .pl-panel-cover-wrap {
         flex: 0 0 auto;
@@ -305,9 +342,69 @@
 
     .pl-panel-cover {
         width: 100%;
-        height: auto;
-        max-width: 200px;
+        height: 200px;
+        max-width: none;
     }
+}
+
+/* ── Lyrics & Karaoke ───────────────────────────────────────────────────────── */
+.pl-panel-lyrics-wrap {
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    padding: 0 10px;
+}
+
+.pl-full-lyrics {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding-bottom: 20px;
+}
+
+.pl-lyric-section h3 {
+    font-size: 12px;
+    color: #1DB954;
+    margin: 0 0 8px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.pl-lyric-text {
+    font-size: 14px;
+    line-height: 1.6;
+    color: #ddd;
+    margin: 0;
+    white-space: pre-wrap;
+}
+
+.pl-no-lyrics {
+    font-size: 13px;
+    color: #888;
+    text-align: center;
+    margin-top: 40px;
+}
+
+.pl-karaoke-sub {
+    margin-top: 12px;
+    text-align: center;
+    background: rgba(0, 0, 0, 0.6);
+    padding: 8px 12px;
+    border-radius: 8px;
+    max-width: 90%;
+    animation: plFadeIn 0.2s ease-out;
+}
+
+.pl-karaoke-line {
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+}
+
+.pl-karaoke-romaji {
+    font-size: 12px;
+    color: #1DB954;
+    margin-top: 2px;
 }
 
 /* ── Meta ───────────────────────────────────────────────────────────────────── */
