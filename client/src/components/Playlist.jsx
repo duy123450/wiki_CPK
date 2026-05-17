@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import "../styles/Playlist.css";
 import { fetchMovieInfo, fetchSoundtracks } from "../services/api";
 import useYouTubePlayer from "../hooks/useYouTubePlayer";
@@ -224,9 +224,32 @@ export default function Playlist() {
     ? currentTrack.endTime - currentTrack.startTime
     : 0;
 
-  const activeLine = currentTrack?.lyrics?.synced
-    ? [...currentTrack.lyrics.synced].reverse().find((l) => l.time <= currentTime)
-    : null;
+  const activeLineIdx = useMemo(() => {
+    const synced = currentTrack?.lyrics?.synced;
+    if (!synced?.length) return -1;
+    let idx = -1;
+    for (let i = 0; i < synced.length; i++) {
+      if (synced[i].time <= currentTime) idx = i;
+      else break;
+    }
+    return idx;
+  }, [currentTrack?.lyrics?.synced, currentTime]);
+
+  const VISIBLE_COUNT = 5;
+  const visibleLines = useMemo(() => {
+    const synced = currentTrack?.lyrics?.synced;
+    if (!synced?.length) return [];
+    let start = Math.max(0, activeLineIdx - 2);
+    let end = Math.min(synced.length, start + VISIBLE_COUNT);
+    if (end === synced.length) start = Math.max(0, end - VISIBLE_COUNT);
+    return synced.slice(start, end).map((l, i) => ({
+      ...l,
+      originalIdx: start + i,
+    }));
+  }, [currentTrack?.lyrics?.synced, activeLineIdx]);
+
+  // Keep activeLine for karaoke subtitle on cover tab
+  const activeLine = activeLineIdx >= 0 ? currentTrack.lyrics.synced[activeLineIdx] : null;
 
   if (error || loading || !currentTrack) return null;
 
@@ -320,21 +343,23 @@ export default function Playlist() {
               <div className="pl-panel-cover-wrap">
                 {activeTab === "lyrics" ? (
                   <div className="pl-panel-lyrics-wrap">
-                    <div className="pl-full-lyrics">
-                      {currentTrack.lyrics?.translation && (
-                        <div className="pl-lyric-section">
-                          <h3>Translation</h3>
-                          <p className="pl-lyric-text">
-                            {currentTrack.lyrics.translation}
-                          </p>
+                    {visibleLines.length > 0 ? (
+                      visibleLines.map((l) => (
+                        <div
+                          key={l.originalIdx}
+                          className={`pl-synced-line ${l.originalIdx === activeLineIdx ? "pl-synced-line--active" : ""}`}
+                        >
+                          <span className="pl-synced-text">{l.line}</span>
+                          {l.lineTranslation && (
+                            <span className="pl-synced-translation">{l.lineTranslation}</span>
+                          )}
                         </div>
-                      )}
-                      {!currentTrack.lyrics?.translation && (
-                          <div className="pl-no-lyrics">
-                            No lyrics available for this track.
-                          </div>
-                        )}
-                    </div>
+                      ))
+                    ) : (
+                      <div className="pl-no-lyrics">
+                        No lyrics available for this track.
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <>

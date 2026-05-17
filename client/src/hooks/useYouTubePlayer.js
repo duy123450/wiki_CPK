@@ -73,12 +73,12 @@ export default function useYouTubePlayer(tracks, movie) {
       const elapsed = cur - track.startTime;
       const duration = track.endTime - track.startTime;
       setProgress(Math.min(100, Math.max(0, (elapsed / duration) * 100)));
-      setCurrentTime(Math.max(0, elapsed));
+      setCurrentTime(Math.max(0, Math.round(elapsed * 100) / 100));
       if (cur >= track.endTime - 0.5) {
         clearInterval(progressInterval.current);
         handleAutoAdvance();
       }
-    }, 500);
+    }, 100);
   }, []);
 
   const handleAutoAdvance = useCallback(async () => {
