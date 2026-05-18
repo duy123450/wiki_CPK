@@ -26,8 +26,10 @@ A full-stack MERN (MongoDB, Express, React, Node.js) application featuring a com
   - **Live Online User Counter:** Real-time tracking of connected clients using **Socket.io**.
   - Interactive UI with live indicators.
 - **Multimedia Integration:**
-  - Integrated music player with shuffle history, loop mode, and progress tracking.
-  - Image hosting and management via **Cloudinary**.
+  - **Advanced Soundtrack Player:** Full-featured audio player using the YouTube IFrame API with support for background playback, track shuffle history, loop modes, and precise timeline progress.
+  - **Spotify-Style Synchronized Lyrics:** Real-time visual highlighting and auto-scrolling of Japanese/Romaji lyrics linked dynamically to current playback milliseconds.
+  - **Karaoke & Subtitle Translation Engine:** Specialized nested Mongoose `LyricSchema` supporting dual-language (JP/Romaji and Vietnamese/English translation) line-by-line synchronized rendering.
+  - **Asset Management:** High-performance image hosting, crop-prevention layouts, and secure media uploads powered by **Cloudinary**.
 - **Responsive UI:** Modern, interactive design built with React and Vanilla CSS.
 - **Robust Architecture:**
   - **Environment & Data Validation:** Comprehensive schema validation using **Zod** for environment variables and API request payloads.
@@ -43,7 +45,7 @@ A full-stack MERN (MongoDB, Express, React, Node.js) application featuring a com
 
 ### Frontend
 - **Framework:** React (Vite)
-- **State Management:** Context API
+- **State Management:** Redux Toolkit (RTK) & React Redux
 - **Real-time:** Socket.io-client
 - **Routing:** React Router DOM
 - **API Client:** Axios
@@ -155,7 +157,8 @@ wiki_CPK/
 │   │   ├── components/  # Reusable UI components
 │   │   ├── config/      # Frontend configuration (Env)
 │   │   ├── constants/   # Application constants (API endpoints, UI strings)
-│   │   ├── hooks/       # Custom React hooks
+│   │   ├── store/       # Central Redux Store, slices, & custom hooks (RTK)
+│   │   ├── hooks/       # Custom React hooks (with RTK transparent facades)
 │   │   ├── pages/       # Page components (Home, Wiki, etc.)
 │   │   ├── schemas/     # Zod validation schemas (Forms)
 │   │   ├── services/    # API call services (Axios)
