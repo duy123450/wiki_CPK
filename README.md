@@ -104,6 +104,7 @@ GOOGLE_CALLBACK_URL=http://localhost:3000/api/v1/wiki/auth/google/callback
 # X (Twitter) OAuth
 X_LOCAL_CLIENT_ID=your_x_local_id
 X_LOCAL_CLIENT_SECRET=your_x_local_secret
+X_LOCAL_CALLBACK_URL=http://127.0.0.1:3000/api/v1/wiki/auth/x/callback
 # X_PROD_CLIENT_ID=your_x_prod_client_id
 # X_PROD_CLIENT_SECRET=your_x_prod_client_secret
 # X_PROD_CALLBACK_URL=https://yourdomain.com/api/v1/wiki/auth/x/callback
