@@ -99,14 +99,30 @@ API_SECRET=your_api_secret
 # Google OAuth
 GOOGLE_CLIENT_ID=your_google_id
 GOOGLE_CLIENT_SECRET=your_google_secret
+GOOGLE_CALLBACK_URL=http://localhost:3000/api/v1/wiki/auth/google/callback
 
 # X (Twitter) OAuth
 X_LOCAL_CLIENT_ID=your_x_local_id
 X_LOCAL_CLIENT_SECRET=your_x_local_secret
+# X_PROD_CLIENT_ID=your_x_prod_client_id
+# X_PROD_CLIENT_SECRET=your_x_prod_client_secret
+# X_PROD_CALLBACK_URL=https://yourdomain.com/api/v1/wiki/auth/x/callback
 
 # Discord OAuth
 DISCORD_CLIENT_ID=your_discord_id
 DISCORD_CLIENT_SECRET=your_discord_secret
+DISCORD_LOCAL_CALLBACK_URL=http://localhost:3000/api/v1/wiki/auth/discord/callback
+# DISCORD_PROD_CLIENT_ID=your_discord_prod_client_id
+# DISCORD_PROD_CLIENT_SECRET=your_discord_prod_client_secret
+# DISCORD_PROD_CALLBACK_URL=https://yourdomain.com/api/v1/wiki/auth/discord/callback
+
+# GitHub OAuth
+GITHUB_LOCAL_CLIENT_ID=your_github_local_id
+GITHUB_LOCAL_CLIENT_SECRET=your_github_local_secret
+GITHUB_LOCAL_CALLBACK_URL=http://localhost:3000/api/v1/wiki/auth/github/callback
+# GITHUB_PROD_CLIENT_ID=your_github_prod_id
+# GITHUB_PROD_CLIENT_SECRET=your_github_prod_secret
+# GITHUB_PROD_CALLBACK_URL=https://yourdomain.com/api/v1/wiki/auth/github/callback
 
 FRONTEND_URL=http://localhost:5173
 NODE_ENV=development
@@ -116,6 +132,13 @@ NODE_ENV=development
 ```bash
 cd ../client
 npm install
+```
+Create a `.env` file in the `client` directory and configure the following:
+```env
+VITE_API_BASE_URL=http://localhost:3000/api/v1/wiki
+VITE_AUTH_TOKEN_KEY=cpkAuthToken
+VITE_DRAGON_ENABLED_KEY=cpkDragonCursorEnabled
+VITE_OPEN_CATEGORY_COOKIE=cpkSidebarOpenCategory
 ```
 
 ## 🏃 Running the Application
