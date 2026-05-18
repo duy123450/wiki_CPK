@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import { IMAGE_LABELS } from "../../constants";
+import { IMAGE_LABELS } from "../../constants/ui.constants";
 
 export default function ImageSwitcher({ images }) {
   const [active, setActive] = useState(0);

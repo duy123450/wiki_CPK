@@ -11,7 +11,7 @@ import {
   Bookmark,
   Shield,
 } from "lucide-react";
-import { ICON_MAP, LOGO_URL, DEFAULT_AVATAR, OPEN_CATEGORY_COOKIE as DEFAULT_COOKIE } from "../constants";
+import { ICON_MAP, LOGO_URL, DEFAULT_AVATAR, OPEN_CATEGORY_COOKIE as DEFAULT_COOKIE } from "../constants/ui.constants";
 import { getSidebar } from "../services/api";
 import LiveUserCount from "./LiveUserCount";
 import "../styles/Sidebar.css";

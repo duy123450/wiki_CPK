@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/purity */
 import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { ROLE_COLORS } from "../constants";
+import { ROLE_COLORS } from "../constants/ui.constants";
 import "../styles/CharacterPage.css";
 
 import { getAppearance } from "../utils/characterUtils";

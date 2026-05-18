@@ -3,7 +3,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { getCharacters } from "../services/api";
 import useMovieInfo from "../hooks/useMovieInfo";
-import { ROLE_COLORS } from "../constants";
+import { ROLE_COLORS } from "../constants/ui.constants";
 import "../styles/CharactersPage.css";
 
 import { nameToSlug } from "../utils/characterUtils";

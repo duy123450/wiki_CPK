@@ -1,0 +1,9 @@
+# Exclude build configurations and dev tools
+client/vite.config.js
+client/vitest.config.js
+client/eslint.config.js
+server/jest.config.js
+
+# Exclude test files
+client/src/tests/
+server/tests/

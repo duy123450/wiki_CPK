@@ -1,5 +1,5 @@
 import { getEffects } from "../../utils/characterUtils";
-import { ABILITY_TYPE_COLORS } from "../../constants";
+import { ABILITY_TYPE_COLORS } from "../../constants/ui.constants";
 
 export default function AbilityCard({ ability }) {
   const effects = getEffects(ability);
