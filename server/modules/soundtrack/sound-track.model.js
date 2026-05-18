@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 
 const LyricSchema = new mongoose.Schema({
+    romaji: { type: String, default: "" },      // JP
     translation: { type: String, default: "" }, // English or Vietnamese
 
     // Synced lines using Romaji as the primary line (in Romaji script)
