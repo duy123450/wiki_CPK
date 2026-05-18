@@ -1,17 +1,21 @@
-import { useEffect, useState } from "react";
-import { getMovieInfo } from "../services/api";
+import { useEffect } from "react";
+import { useAppDispatch, useAppSelector } from "../store/hooks";
+import { fetchMovie } from "../store/slices/characterSlice";
 
 export default function useMovieInfo() {
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const dispatch = useAppDispatch();
+  const data = useAppSelector((state) => state.characters.movie);
+  const status = useAppSelector((state) => state.characters.movieStatus);
+  const error = useAppSelector((state) => state.characters.movieError);
 
   useEffect(() => {
-    getMovieInfo()
-      .then((movie) => setData(movie))
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false));
-  }, []);
+    dispatch(fetchMovie());
+  }, [dispatch]);
 
-  return { data, loading, error };
+  return {
+    data,
+    loading: status === "loading" || status === "idle",
+    error,
+  };
 }
+

@@ -1,28 +1,23 @@
-import { useState, useEffect } from "react";
-import { getCharacterBySlug } from "../services/api";
+import { useEffect } from "react";
+import { useAppDispatch, useAppSelector } from "../store/hooks";
+import { fetchCharacter } from "../store/slices/characterSlice";
 
 export function useCharacter(slug) {
-  const [character, setCharacter] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const dispatch = useAppDispatch();
+  const character = useAppSelector((state) => state.characters.bySlug[slug] || null);
+  const status = useAppSelector((state) => state.characters.status[slug] || "idle");
+  const error = useAppSelector((state) => state.characters.error[slug] || null);
 
   useEffect(() => {
-    let isMounted = true;
-    setLoading(true);
-    getCharacterBySlug(slug)
-      .then((data) => {
-        if (isMounted) setCharacter(data);
-      })
-      .catch((e) => {
-        if (isMounted) setError(e.message);
-      })
-      .finally(() => {
-        if (isMounted) setLoading(false);
-      });
-    return () => {
-      isMounted = false;
-    };
-  }, [slug]);
+    if (slug) {
+      dispatch(fetchCharacter(slug));
+    }
+  }, [dispatch, slug]);
 
-  return { character, loading, error };
+  return {
+    character,
+    loading: status === "loading" || status === "idle",
+    error,
+  };
 }
+

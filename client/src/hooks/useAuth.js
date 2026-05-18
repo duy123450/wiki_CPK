@@ -1,44 +1,35 @@
-import { useCallback, useEffect, useState } from "react";
-import { AUTH_TOKEN_KEY, getCurrentUser } from "../services/api";
+import { useCallback, useEffect } from "react";
+import { useAppDispatch, useAppSelector } from "../store/hooks";
+import { 
+  restoreSession, 
+  logout, 
+  syncAvatar, 
+  syncProfile 
+} from "../store/slices/authSlice";
 
 export default function useAuth() {
-  const [authUser, setAuthUser] = useState(null);
+  const dispatch = useAppDispatch();
+  const authUser = useAppSelector((state) => state.auth.user);
 
   useEffect(() => {
-    const restoreUser = async () => {
-      const token = window.localStorage.getItem(AUTH_TOKEN_KEY);
-      if (!token) return;
-      try {
-        const user = await getCurrentUser();
-        setAuthUser(user);
-      } catch {
-        window.localStorage.removeItem(AUTH_TOKEN_KEY);
-      }
-    };
-    restoreUser();
-  }, []);
+    dispatch(restoreSession());
+  }, [dispatch]);
 
-  // Called on login / register — response is { user, token }
   const handleAuthSuccess = useCallback(({ user, token, accessToken }) => {
-    window.localStorage.setItem(AUTH_TOKEN_KEY, accessToken || token);
-    setAuthUser(user);
-  }, []);
+    dispatch(syncProfile({ user, token: accessToken || token }));
+  }, [dispatch]);
 
-  // Called when only the avatar changes — no token resave needed
   const handleAvatarUpdate = useCallback((avatar) => {
-    setAuthUser((prev) => (prev ? { ...prev, avatar } : prev));
-  }, []);
+    dispatch(syncAvatar(avatar));
+  }, [dispatch]);
 
   const handleLogout = useCallback(() => {
-    window.localStorage.removeItem(AUTH_TOKEN_KEY);
-    setAuthUser(null);
-  }, []);
+    dispatch(logout());
+  }, [dispatch]);
 
-  // Called when profile fields (username, email) are updated
   const handleProfileUpdate = useCallback((user, token) => {
-    if (token) window.localStorage.setItem(AUTH_TOKEN_KEY, token);
-    setAuthUser(user);
-  }, []);
+    dispatch(syncProfile({ user, token }));
+  }, [dispatch]);
 
   return {
     authUser,
@@ -48,3 +39,4 @@ export default function useAuth() {
     handleProfileUpdate,
   };
 }
+
