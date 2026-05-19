@@ -1,5 +1,7 @@
 /node_modules
 .env
 seed.js
+add-movie-trailers.js
 addLyrics/
+addOfficialUrls/
 server.log

@@ -32,13 +32,23 @@ const MovieSchema = new mongoose.Schema({
         studio: String,     // e.g., "A-1 Pictures"
         director: String,
         officialWebsite: String,
+        trailerUrl: [
+            {
+                url: {
+                    type: String,
+                    default: ""
+                }
+            }
+        ],
         watchUrl: {
             type: String,
-            trim: true
+            trim: true,
+            default: ""
         },
         lightNovelUrl: {
             type: String,
-            trim: true
+            trim: true,
+            default: ""
         }
     },
     // --- STATS ---

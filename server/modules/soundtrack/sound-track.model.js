@@ -34,13 +34,27 @@ const SoundtrackSchema = new mongoose.Schema({
     trackType: {
         type: String,
         // Using your specific vocal track categories
-        enum: ['Opening', 'Ending', 'Insert Song', 'BGM', 'Full Album'],
+        enum: ['Opening', 'Insert Song', 'Ending'],
         default: 'Insert Song'
     },
     youtubeId: {
         type: String,
         required: [true, 'YouTube Video ID is required']
     },
+    officialUrl: [
+        {
+            label: {
+                type: String,
+                required: [true, 'Label is required'],
+                trim: true
+            },
+            url: {
+                type: String,
+                required: [true, 'URL is required'],
+                trim: true
+            }
+        }
+    ],
     // START TIME: Where the song begins (in seconds)
     startTime: {
         type: Number,
