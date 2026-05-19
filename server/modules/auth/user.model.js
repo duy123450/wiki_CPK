@@ -55,7 +55,7 @@ const UserSchema = new mongoose.Schema({
     },
     role: {
         type: String,
-        enum: ['admin', 'editor', 'user'],
+        enum: ['admin', 'sub_admin', 'user'],
         default: 'user',
     },
     // --- FIXED AVATAR SECTION ---
