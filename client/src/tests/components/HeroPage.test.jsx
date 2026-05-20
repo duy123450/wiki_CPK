@@ -1,10 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
+import { Provider } from 'react-redux'
+import { makeStore } from '@/store'
 import HeroPage from '@/pages/HeroPage'
 
 // Mock API
 vi.mock('@/services/api', () => ({
+    AUTH_TOKEN_KEY: 'testToken',
     getMovieInfo: vi.fn(),
     fetchMovieInfo: vi.fn(() => new Promise(() => {})),
     fetchSoundtracks: vi.fn(() => new Promise(() => {})),
@@ -14,9 +17,11 @@ import { getMovieInfo } from '@/services/api'
 
 const renderHero = () =>
     render(
-        <MemoryRouter>
-            <HeroPage sidebarCollapsed={false} />
-        </MemoryRouter>
+        <Provider store={makeStore()}>
+            <MemoryRouter>
+                <HeroPage sidebarCollapsed={false} />
+            </MemoryRouter>
+        </Provider>
     )
 
 beforeEach(() => {

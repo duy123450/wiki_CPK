@@ -1,6 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
+import { Provider } from 'react-redux'
+import { makeStore } from '@/store'
 import App from '@/App'
 
 // Mock all API calls used by the app and its children
@@ -36,13 +38,13 @@ beforeEach(() => {
     fetchSoundtracks.mockReturnValue(new Promise(() => {}))
 })
 
-// We need to render App inside its own Router since App uses BrowserRouter internally
-// So we can't use MemoryRouter from outside. Instead we need to test via window.location.
-// Since App has its own <Router>, let's test it directly.
+// We need to wrap App with Provider since App uses useAuth → useAppDispatch
+// but App has its own <Router>, so Provider goes around it
+const renderApp = () => render(<Provider store={makeStore()}><App /></Provider>)
 
 describe('App', () => {
     it('renders without crashing', async () => {
-        render(<App />)
+        renderApp()
         // Should at least render the sidebar
         await waitFor(() => {
             expect(screen.getByText('Fan Wiki')).toBeInTheDocument()
@@ -51,7 +53,7 @@ describe('App', () => {
     })
 
     it('renders hero page content on default route', async () => {
-        render(<App />)
+        renderApp()
 
         await waitFor(() => {
             // HeroPage shows "Explore Wiki" link when movie data loads
@@ -60,7 +62,7 @@ describe('App', () => {
     })
 
     it('renders footer', async () => {
-        render(<App />)
+        renderApp()
 
         await waitFor(() => {
             expect(screen.getByText('超かぐや姫')).toBeInTheDocument()
@@ -69,7 +71,7 @@ describe('App', () => {
     })
 
     it('renders sidebar Navigation label', async () => {
-        render(<App />)
+        renderApp()
         expect(screen.getByText('Navigation')).toBeInTheDocument()
         await screen.findByText('Explore Wiki')
     })
@@ -82,7 +84,7 @@ describe('App', () => {
             role: 'viewer',
         })
 
-        render(<App />)
+        renderApp()
 
         await waitFor(() => {
             expect(getCurrentUser).toHaveBeenCalled()
@@ -93,7 +95,7 @@ describe('App', () => {
         window.localStorage.setItem('testToken', 'bad-token')
         getCurrentUser.mockRejectedValueOnce(new Error('invalid'))
 
-        render(<App />)
+        renderApp()
 
         await waitFor(() => {
             expect(window.localStorage.getItem('testToken')).toBeNull()
