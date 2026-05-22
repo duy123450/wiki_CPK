@@ -29,7 +29,7 @@ const authRouter = require('./modules/auth/auth.route')
 
 // Allowed Origins & Options
 const isProd = envConfig.NODE_ENV === 'production';
-const allowedOrigins = isProd 
+const allowedOrigins = isProd
     ? [envConfig.FRONTEND_URL]
     : [
         'http://localhost:5173',
@@ -65,6 +65,28 @@ io.on('connection', (socket) => {
 })
 
 // 1. Security Middleware
+app.use(helmet({
+    // 1. Force HSTS even during local development audits
+    hsts: {
+        maxAge: 31536000,
+        includeSubDomains: true,
+        preload: true,
+    },
+    // 2. Explicitly define strict CSP Directives
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: ["'self'", "'unsafe-inline'"],
+            styleSrc: ["'self'", "'unsafe-inline'"],
+            imgSrc: ["'self'", "data:", "https://res.cloudinary.com"], // Add Cloudinary or other asset hosts here
+            connectSrc: ["'self'", "ws:", "wss:"], // Allows WebSockets to handshake cleanly
+        },
+    },
+    // 3. Strictly prevent framing/clickjacking
+    frameguard: {
+        action: 'deny',
+    },
+}))
 app.set('trust proxy', 1)
 app.use(rateLimit({
     windowMs: 15 * 60 * 1000,
@@ -73,12 +95,10 @@ app.use(rateLimit({
 app.use(express.json({ limit: '10kb' }))
 app.use(cookieParser())
 app.use(cors(corsOptions))
-app.use(helmet())
 if (envConfig.NODE_ENV === 'production' && !envConfig.SESSION_SECRET) {
-    console.error('FATAL ERROR: SESSION_SECRET is not defined in production.');
-    process.exit(1);
-}
-
+    console.error('FATAL ERROR: SESSION_SECRET is not defined in production.')
+    process.exit(1)
+}   
 app.use(session({
     secret: envConfig.SESSION_SECRET || 'your-secret-key',
     resave: false,

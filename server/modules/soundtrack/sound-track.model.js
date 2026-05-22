@@ -2,13 +2,15 @@ const mongoose = require('mongoose');
 
 const LyricSchema = new mongoose.Schema({
     romaji: { type: String, default: "" },      // JP
-    translation: { type: String, default: "" }, // English or Vietnamese
+    translation: { type: String, default: "" }, //  Vietnamese
+    translator: { type: String, default: "" },  // Person who did the translation
+    source: { type: String, default: "" },      // Translation source
 
     // Synced lines using Romaji as the primary line (in Romaji script)
     synced: [{
         time: { type: Number },        // Time in seconds from start of track
         line: { type: String },        // The lyric line in Romaji
-        lineTranslation: { type: String, default: "" } // The lyric line in Vietnamese or English
+        lineTranslation: { type: String, default: "" } // The lyric line in Vietnamese
     }]
 }, { _id: false });
 
