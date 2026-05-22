@@ -1,23 +1,23 @@
-import { useEffect, useRef, useState, useCallback, useMemo } from "react";
-import "../styles/Playlist.css";
-import { fetchMovieInfo, fetchSoundtracks } from "../services/api";
-import useYouTubePlayer from "../hooks/useYouTubePlayer";
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
+import '../styles/Playlist.css'
+import { fetchMovieInfo, fetchSoundtracks } from '../services/api'
+import useYouTubePlayer from '../hooks/useYouTubePlayer'
 
 const fmtTime = (s) => {
-  s = Math.max(0, Math.floor(s));
-  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
-};
+  s = Math.max(0, Math.floor(s))
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`
+}
 
-function TipBtn({ label, onClick, className = "pl-icon-btn", children }) {
-  const [show, setShow] = useState(false);
-  const timer = useRef(null);
+function TipBtn({ label, onClick, className = 'pl-icon-btn', children }) {
+  const [show, setShow] = useState(false)
+  const timer = useRef(null)
   const startHold = () => {
-    timer.current = setTimeout(() => setShow(true), 400);
-  };
+    timer.current = setTimeout(() => setShow(true), 400)
+  }
   const endHold = () => {
-    clearTimeout(timer.current);
-    setShow(false);
-  };
+    clearTimeout(timer.current)
+    setShow(false)
+  }
   return (
     <button
       className={`${className} pl-tip-wrap`}
@@ -31,7 +31,7 @@ function TipBtn({ label, onClick, className = "pl-icon-btn", children }) {
       {children}
       {show && <span className="pl-tooltip">{label}</span>}
     </button>
-  );
+  )
 }
 
 const IconShuffle = ({ active }) => (
@@ -44,27 +44,27 @@ const IconShuffle = ({ active }) => (
     strokeLinecap="round"
     strokeLinejoin="round"
   >
-    <polyline points="16 3 21 3 21 8" stroke={active ? "#1DB954" : "#b3b3b3"} />
+    <polyline points="16 3 21 3 21 8" stroke={active ? '#1DB954' : '#b3b3b3'} />
     <line
       x1="4"
       y1="20"
       x2="21"
       y2="3"
-      stroke={active ? "#1DB954" : "#b3b3b3"}
+      stroke={active ? '#1DB954' : '#b3b3b3'}
     />
     <polyline
       points="21 16 21 21 16 21"
-      stroke={active ? "#1DB954" : "#b3b3b3"}
+      stroke={active ? '#1DB954' : '#b3b3b3'}
     />
     <line
       x1="15"
       y1="15"
       x2="21"
       y2="21"
-      stroke={active ? "#1DB954" : "#b3b3b3"}
+      stroke={active ? '#1DB954' : '#b3b3b3'}
     />
   </svg>
-);
+)
 
 const IconLoop = ({ active }) => (
   <svg
@@ -76,18 +76,18 @@ const IconLoop = ({ active }) => (
     strokeLinecap="round"
     strokeLinejoin="round"
   >
-    <polyline points="17 1 21 5 17 9" stroke={active ? "#1DB954" : "#b3b3b3"} />
+    <polyline points="17 1 21 5 17 9" stroke={active ? '#1DB954' : '#b3b3b3'} />
     <path
       d="M3 11V9a4 4 0 0 1 4-4h14"
-      stroke={active ? "#1DB954" : "#b3b3b3"}
+      stroke={active ? '#1DB954' : '#b3b3b3'}
     />
-    <polyline points="7 23 3 19 7 15" stroke={active ? "#1DB954" : "#b3b3b3"} />
+    <polyline points="7 23 3 19 7 15" stroke={active ? '#1DB954' : '#b3b3b3'} />
     <path
       d="M21 13v2a4 4 0 0 1-4 4H3"
-      stroke={active ? "#1DB954" : "#b3b3b3"}
+      stroke={active ? '#1DB954' : '#b3b3b3'}
     />
   </svg>
-);
+)
 
 const IconPrev = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
@@ -102,7 +102,7 @@ const IconPrev = () => (
       strokeLinecap="round"
     />
   </svg>
-);
+)
 
 const IconNext = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
@@ -117,20 +117,20 @@ const IconNext = () => (
       strokeLinecap="round"
     />
   </svg>
-);
+)
 
 const IconPlay = ({ size = 20 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="#121212">
     <polygon points="5 3 19 12 5 21 5 3" />
   </svg>
-);
+)
 
 const IconPause = ({ size = 20 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="#121212">
     <rect x="6" y="4" width="4" height="16" />
     <rect x="14" y="4" width="4" height="16" />
   </svg>
-);
+)
 
 const IconChevronDown = () => (
   <svg
@@ -143,7 +143,7 @@ const IconChevronDown = () => (
   >
     <polyline points="6 9 12 15 18 9" />
   </svg>
-);
+)
 
 const IconChevronUp = () => (
   <svg
@@ -156,7 +156,7 @@ const IconChevronUp = () => (
   >
     <polyline points="18 15 12 9 6 15" />
   </svg>
-);
+)
 
 const IconVolume = () => (
   <svg
@@ -173,31 +173,31 @@ const IconVolume = () => (
     <path d="M15.5 8.5a5 5 0 0 1 0 7" />
     <path d="M18.5 5.5a9 9 0 0 1 0 13" />
   </svg>
-);
+)
 
 export default function Playlist() {
-  const [movie, setMovie] = useState(null);
-  const [tracks, setTracks] = useState([]);
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [activeTab, setActiveTab] = useState("cover");
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [movie, setMovie] = useState(null)
+  const [tracks, setTracks] = useState([])
+  const [isExpanded, setIsExpanded] = useState(false)
+  const [activeTab, setActiveTab] = useState('cover')
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
     const init = async () => {
       try {
-        const { movie: movieData } = await fetchMovieInfo();
-        setMovie(movieData);
-        const { tracks: trackData } = await fetchSoundtracks(movieData._id);
-        setTracks(trackData);
+        const { movie: movieData } = await fetchMovieInfo()
+        setMovie(movieData)
+        const { tracks: trackData } = await fetchSoundtracks(movieData._id)
+        setTracks(trackData)
       } catch (err) {
-        setError(err.message);
+        setError(err.message)
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
-    };
-    init();
-  }, []);
+    }
+    init()
+  }, [])
 
   const {
     currentIdx,
@@ -217,48 +217,49 @@ export default function Playlist() {
     handleLoopToggle,
     handleVolumeChange,
     isSeekingRef,
-  } = useYouTubePlayer(tracks, movie);
+  } = useYouTubePlayer(tracks, movie)
 
-  const currentTrack = tracks[currentIdx];
+  const currentTrack = tracks[currentIdx]
   const duration = currentTrack
     ? currentTrack.endTime - currentTrack.startTime
-    : 0;
+    : 0
 
   const activeLineIdx = useMemo(() => {
-    const synced = currentTrack?.lyrics?.synced;
-    if (!synced?.length) return -1;
-    let idx = -1;
+    const synced = currentTrack?.lyrics?.synced
+    if (!synced?.length) return -1
+    let idx = -1
     for (let i = 0; i < synced.length; i++) {
-      if (synced[i].time <= currentTime) idx = i;
-      else break;
+      if (synced[i].time <= currentTime) idx = i
+      else break
     }
-    return idx;
-  }, [currentTrack?.lyrics?.synced, currentTime]);
+    return idx
+  }, [currentTrack?.lyrics?.synced, currentTime])
 
-  const VISIBLE_COUNT = 5;
+  const VISIBLE_COUNT = 5
   const visibleLines = useMemo(() => {
-    const synced = currentTrack?.lyrics?.synced;
-    if (!synced?.length) return [];
-    let start = Math.max(0, activeLineIdx - 2);
-    let end = Math.min(synced.length, start + VISIBLE_COUNT);
-    if (end === synced.length) start = Math.max(0, end - VISIBLE_COUNT);
+    const synced = currentTrack?.lyrics?.synced
+    if (!synced?.length) return []
+    let start = Math.max(0, activeLineIdx - 2)
+    let end = Math.min(synced.length, start + VISIBLE_COUNT)
+    if (end === synced.length) start = Math.max(0, end - VISIBLE_COUNT)
     return synced.slice(start, end).map((l, i) => ({
       ...l,
       originalIdx: start + i,
-    }));
-  }, [currentTrack?.lyrics?.synced, activeLineIdx]);
+    }))
+  }, [currentTrack?.lyrics?.synced, activeLineIdx])
 
   // Keep activeLine for karaoke subtitle on cover tab
-  const activeLine = activeLineIdx >= 0 ? currentTrack.lyrics.synced[activeLineIdx] : null;
+  const activeLine =
+    activeLineIdx >= 0 ? currentTrack.lyrics.synced[activeLineIdx] : null
 
-  if (error || loading || !currentTrack) return null;
+  if (error || loading || !currentTrack) return null
 
   return (
     <>
       <div
         id="yt-hidden-mount"
         style={{
-          position: "absolute",
+          position: 'absolute',
           width: 1,
           height: 1,
           opacity: 0,
@@ -282,7 +283,7 @@ export default function Playlist() {
                 src={currentTrack.coverImage || null}
                 alt={currentTrack.title}
                 onError={(e) => {
-                  e.target.style.background = "#282828";
+                  e.target.style.background = '#282828'
                 }}
               />
             </div>
@@ -293,8 +294,8 @@ export default function Playlist() {
             <button
               className="pl-sticky-play"
               onClick={(e) => {
-                e.stopPropagation();
-                handlePlayPause();
+                e.stopPropagation()
+                handlePlayPause()
               }}
             >
               {isPlaying ? <IconPause size={16} /> : <IconPlay size={16} />}
@@ -302,8 +303,8 @@ export default function Playlist() {
             <button
               className="pl-sticky-expand"
               onClick={(e) => {
-                e.stopPropagation();
-                setIsExpanded(true);
+                e.stopPropagation()
+                setIsExpanded(true)
               }}
             >
               <IconChevronUp />
@@ -319,14 +320,14 @@ export default function Playlist() {
               <div className="pl-panel-header">
                 <div className="pl-player-tabs">
                   <button
-                    className={`pl-tab-btn ${activeTab === "cover" ? "pl-tab-btn--active" : ""}`}
-                    onClick={() => setActiveTab("cover")}
+                    className={`pl-tab-btn ${activeTab === 'cover' ? 'pl-tab-btn--active' : ''}`}
+                    onClick={() => setActiveTab('cover')}
                   >
                     Player
                   </button>
                   <button
-                    className={`pl-tab-btn ${activeTab === "lyrics" ? "pl-tab-btn--active" : ""}`}
-                    onClick={() => setActiveTab("lyrics")}
+                    className={`pl-tab-btn ${activeTab === 'lyrics' ? 'pl-tab-btn--active' : ''}`}
+                    onClick={() => setActiveTab('lyrics')}
                   >
                     Lyrics
                   </button>
@@ -334,24 +335,26 @@ export default function Playlist() {
                 <button
                   className="pl-panel-close"
                   onClick={() => setIsExpanded(false)}
-                  style={{ position: "absolute", right: 12 }}
+                  style={{ position: 'absolute', right: 12 }}
                 >
                   <IconChevronDown />
                 </button>
               </div>
 
               <div className="pl-panel-cover-wrap">
-                {activeTab === "lyrics" ? (
+                {activeTab === 'lyrics' ? (
                   <div className="pl-panel-lyrics-wrap">
                     {visibleLines.length > 0 ? (
                       visibleLines.map((l) => (
                         <div
                           key={l.originalIdx}
-                          className={`pl-synced-line ${l.originalIdx === activeLineIdx ? "pl-synced-line--active" : ""}`}
+                          className={`pl-synced-line ${l.originalIdx === activeLineIdx ? 'pl-synced-line--active' : ''}`}
                         >
                           <span className="pl-synced-text">{l.line}</span>
                           {l.lineTranslation && (
-                            <span className="pl-synced-translation">{l.lineTranslation}</span>
+                            <span className="pl-synced-translation">
+                              {l.lineTranslation}
+                            </span>
                           )}
                         </div>
                       ))
@@ -368,7 +371,7 @@ export default function Playlist() {
                       src={currentTrack.coverImage || null}
                       alt={currentTrack.title}
                       onError={(e) => {
-                        e.target.style.display = "none";
+                        e.target.style.display = 'none'
                       }}
                     />
                     {activeLine && (
@@ -405,10 +408,10 @@ export default function Playlist() {
                     background: `linear-gradient(to right, #1DB954 ${progress}%, #404040 ${progress}%)`,
                   }}
                   onMouseDown={() => {
-                    isSeekingRef.current = true;
+                    isSeekingRef.current = true
                   }}
                   onTouchStart={() => {
-                    isSeekingRef.current = true;
+                    isSeekingRef.current = true
                   }}
                   onChange={handleSeekChange}
                   onMouseUp={handleSeekCommit}
@@ -468,19 +471,19 @@ export default function Playlist() {
                 {tracks.map((t, i) => (
                   <div
                     key={t._id}
-                    className={`pl-track-row ${i === currentIdx ? "pl-track-row--active" : ""}`}
+                    className={`pl-track-row ${i === currentIdx ? 'pl-track-row--active' : ''}`}
                     onClick={() => playTrackAtIndex(i)}
                   >
                     <span
-                      className={`pl-track-num ${i === currentIdx ? "pl-track-num--playing" : ""}`}
+                      className={`pl-track-num ${i === currentIdx ? 'pl-track-num--playing' : ''}`}
                     >
                       {i === currentIdx
-                        ? "▶"
-                        : String(t.trackNumber).padStart(2, "0")}
+                        ? '▶'
+                        : String(t.trackNumber).padStart(2, '0')}
                     </span>
                     <div className="pl-track-info">
                       <div
-                        className={`pl-track-title ${i === currentIdx ? "pl-track-title--active" : ""}`}
+                        className={`pl-track-title ${i === currentIdx ? 'pl-track-title--active' : ''}`}
                       >
                         {t.title}
                       </div>
@@ -497,5 +500,5 @@ export default function Playlist() {
         )}
       </div>
     </>
-  );
+  )
 }

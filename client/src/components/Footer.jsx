@@ -1,14 +1,14 @@
-import { Mail, ExternalLink } from "lucide-react";
-import "../styles/Footer.css";
+import { Mail, ExternalLink } from 'lucide-react'
+import '../styles/Footer.css'
 
-import { QUICK_LINKS } from "../constants/ui.constants";
+import { QUICK_LINKS } from '../constants/ui.constants'
 
 export default function Footer({ sidebarCollapsed }) {
-  const year = new Date().getFullYear();
+  const year = new Date().getFullYear()
 
   return (
     <footer
-      className={`cpk-footer ${sidebarCollapsed ? "sidebar-collapsed" : ""}`}
+      className={`cpk-footer ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}
     >
       <div className="footer-main">
         {/* ── Col 1: Brand ── */}
@@ -102,7 +102,7 @@ export default function Footer({ sidebarCollapsed }) {
           <div className="footer-disclaimer-lang-block">
             <p className="footer-disclaimer-lang-label">🇬🇧 English</p>
             <p className="footer-disclaimer-text">
-              This website is a{" "}
+              This website is a{' '}
               <strong>non-commercial, non-profit fan project</strong> created
               purely for educational and fan-appreciation purposes. It is not
               affiliated with, endorsed by, or connected to any official studio,
@@ -111,12 +111,12 @@ export default function Footer({ sidebarCollapsed }) {
             <p className="footer-disclaimer-text">
               All rights to <em>Chou Kaguya Hime!</em>, its characters, story,
               artwork, and all related materials remain the exclusive property
-              of their respective rights holders, including{" "}
+              of their respective rights holders, including{' '}
               <strong>FABTONE Inc.</strong> and <strong>Toy's Factory</strong>.
             </p>
             <p className="footer-disclaimer-text">
-              All music featured on this site — including works by{" "}
-              <strong>BUMP OF CHICKEN</strong>, <strong>ryo</strong>, and{" "}
+              All music featured on this site — including works by{' '}
+              <strong>BUMP OF CHICKEN</strong>, <strong>ryo</strong>, and{' '}
               <strong>TAKU INOUE</strong> — is the intellectual property of
               their respective artists, composers, and record labels. No audio
               files are hosted, stored, or distributed on this site.
@@ -130,13 +130,13 @@ export default function Footer({ sidebarCollapsed }) {
             </p>
             <p className="footer-disclaimer-text">
               If you are a rights holder and believe any content on this site
-              infringes upon your intellectual property, please contact us at{" "}
+              infringes upon your intellectual property, please contact us at{' '}
               <a
                 href="mailto:168daisuki8000@gmail.com"
                 className="footer-inline-link"
               >
                 168daisuki8000@gmail.com
-              </a>{" "}
+              </a>{' '}
               and we will address the issue promptly.
             </p>
           </div>
@@ -148,7 +148,7 @@ export default function Footer({ sidebarCollapsed }) {
           <div className="footer-disclaimer-lang-block">
             <p className="footer-disclaimer-lang-label">🇻🇳 Tiếng Việt</p>
             <p className="footer-disclaimer-text">
-              Trang web này là một{" "}
+              Trang web này là một{' '}
               <strong>dự án phi thương mại, phi lợi nhuận</strong> được tạo ra
               bởi người hâm mộ, hoàn toàn vì mục đích học tập và tôn vinh tác
               phẩm. Trang web không có bất kỳ sự liên kết, xác nhận hay hợp tác
@@ -164,7 +164,7 @@ export default function Footer({ sidebarCollapsed }) {
             </p>
             <p className="footer-disclaimer-text">
               Tất cả âm nhạc được giới thiệu trên trang này — bao gồm các tác
-              phẩm của <strong>BUMP OF CHICKEN</strong>, <strong>ryo</strong> và{" "}
+              phẩm của <strong>BUMP OF CHICKEN</strong>, <strong>ryo</strong> và{' '}
               <strong>TAKU INOUE</strong> — là tài sản sở hữu trí tuệ của các
               nghệ sĩ, nhạc sĩ và hãng đĩa tương ứng. Không có bất kỳ file âm
               thanh nào được lưu trữ hay phân phối trên trang web này.
@@ -178,13 +178,13 @@ export default function Footer({ sidebarCollapsed }) {
             <p className="footer-disclaimer-text">
               Nếu bạn là chủ sở hữu bản quyền và cho rằng nội dung trên trang
               này vi phạm quyền sở hữu trí tuệ của bạn, vui lòng liên hệ với
-              chúng tôi qua email{" "}
+              chúng tôi qua email{' '}
               <a
                 href="mailto:168daisuki8000@gmail.com"
                 className="footer-inline-link"
               >
                 168daisuki8000@gmail.com
-              </a>{" "}
+              </a>{' '}
               và chúng tôi sẽ xử lý ngay lập tức.
             </p>
           </div>
@@ -194,7 +194,7 @@ export default function Footer({ sidebarCollapsed }) {
         <p className="footer-copyright">
           © {year} Chou Kaguya Hime! Fan Wiki — All original fan content on this
           site belongs to nerfIori. All other rights reserved by their
-          respective owners. ·{" "}
+          respective owners. ·{' '}
           <span className="footer-copyright--vn">
             Mọi nội dung gốc thuộc về nerfIori. Các quyền còn lại thuộc về chủ
             sở hữu tương ứng.
@@ -202,5 +202,5 @@ export default function Footer({ sidebarCollapsed }) {
         </p>
       </div>
     </footer>
-  );
+  )
 }

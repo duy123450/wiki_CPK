@@ -4,29 +4,33 @@ import DiscordLoginButton from '@/components/DiscordLoginButton'
 import * as api from '@/services/api'
 
 vi.mock('@/services/api', () => ({
-    getDiscordLoginUrl: vi.fn(() => 'http://localhost:3000/api/v1/wiki/auth/discord'),
+  getDiscordLoginUrl: vi.fn(
+    () => 'http://localhost:3000/api/v1/wiki/auth/discord'
+  ),
 }))
 
 describe('DiscordLoginButton', () => {
-    it('renders correctly', () => {
-        render(<DiscordLoginButton />)
-        expect(screen.getByRole('button', { name: /Sign in with Discord/i })).toBeInTheDocument()
-    })
+  it('renders correctly', () => {
+    render(<DiscordLoginButton />)
+    expect(
+      screen.getByRole('button', { name: /Sign in with Discord/i })
+    ).toBeInTheDocument()
+  })
 
-    it('triggers redirect to backend OAuth endpoint on click', () => {
-        // Mock window.location.href
-        const originalLocation = window.location
-        delete window.location
-        window.location = { href: '' }
+  it('triggers redirect to backend OAuth endpoint on click', () => {
+    // Mock window.location.href
+    const originalLocation = window.location
+    delete window.location
+    window.location = { href: '' }
 
-        render(<DiscordLoginButton />)
-        const button = screen.getByRole('button')
-        
-        fireEvent.click(button)
+    render(<DiscordLoginButton />)
+    const button = screen.getByRole('button')
 
-        expect(window.location.href).toMatch(/auth\/discord/)
+    fireEvent.click(button)
 
-        // Cleanup
-        window.location = originalLocation
-    })
+    expect(window.location.href).toMatch(/auth\/discord/)
+
+    // Cleanup
+    window.location = originalLocation
+  })
 })

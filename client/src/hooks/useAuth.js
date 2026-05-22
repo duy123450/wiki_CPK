@@ -1,35 +1,44 @@
-import { useCallback, useEffect } from "react";
-import { useAppDispatch, useAppSelector } from "../store/hooks";
-import { 
-  restoreSession, 
-  logout, 
-  syncAvatar, 
-  syncProfile 
-} from "../store/slices/authSlice";
+import { useCallback, useEffect } from 'react'
+import { useAppDispatch, useAppSelector } from '../store/hooks'
+import {
+  restoreSession,
+  logout,
+  syncAvatar,
+  syncProfile,
+} from '../store/slices/authSlice'
 
 export default function useAuth() {
-  const dispatch = useAppDispatch();
-  const authUser = useAppSelector((state) => state.auth.user);
+  const dispatch = useAppDispatch()
+  const authUser = useAppSelector((state) => state.auth.user)
 
   useEffect(() => {
-    dispatch(restoreSession());
-  }, [dispatch]);
+    dispatch(restoreSession())
+  }, [dispatch])
 
-  const handleAuthSuccess = useCallback(({ user, token, accessToken }) => {
-    dispatch(syncProfile({ user, token: accessToken || token }));
-  }, [dispatch]);
+  const handleAuthSuccess = useCallback(
+    ({ user, token, accessToken }) => {
+      dispatch(syncProfile({ user, token: accessToken || token }))
+    },
+    [dispatch]
+  )
 
-  const handleAvatarUpdate = useCallback((avatar) => {
-    dispatch(syncAvatar(avatar));
-  }, [dispatch]);
+  const handleAvatarUpdate = useCallback(
+    (avatar) => {
+      dispatch(syncAvatar(avatar))
+    },
+    [dispatch]
+  )
 
   const handleLogout = useCallback(() => {
-    dispatch(logout());
-  }, [dispatch]);
+    dispatch(logout())
+  }, [dispatch])
 
-  const handleProfileUpdate = useCallback((user, token) => {
-    dispatch(syncProfile({ user, token }));
-  }, [dispatch]);
+  const handleProfileUpdate = useCallback(
+    (user, token) => {
+      dispatch(syncProfile({ user, token }))
+    },
+    [dispatch]
+  )
 
   return {
     authUser,
@@ -37,6 +46,5 @@ export default function useAuth() {
     handleAvatarUpdate,
     handleLogout,
     handleProfileUpdate,
-  };
+  }
 }
-

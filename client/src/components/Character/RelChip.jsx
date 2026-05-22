@@ -1,19 +1,19 @@
-import { Link } from "react-router-dom";
-import { nameToSlug } from "../../utils/slugify";
+import { Link } from 'react-router-dom'
+import { nameToSlug } from '../../utils/slugify'
 
 export default function RelChip({ rel }) {
   const target =
-    rel.targetId && typeof rel.targetId === "object" && rel.targetId.name
+    rel.targetId && typeof rel.targetId === 'object' && rel.targetId.name
       ? rel.targetId
-      : null;
+      : null
 
-  const targetSlug = target ? nameToSlug(target.name) : null;
+  const targetSlug = target ? nameToSlug(target.name) : null
 
   return (
     <Link
-      to={targetSlug ? `/wiki/characters/${targetSlug}` : "#"}
-      style={{ textDecoration: "none", color: "inherit" }}
-      className={target ? "chr-rel-chip-link" : ""}
+      to={targetSlug ? `/wiki/characters/${targetSlug}` : '#'}
+      style={{ textDecoration: 'none', color: 'inherit' }}
+      className={target ? 'chr-rel-chip-link' : ''}
     >
       <div className="chr-rel-chip">
         {target?.image?.[0]?.url ? (
@@ -27,7 +27,7 @@ export default function RelChip({ rel }) {
         )}
 
         <div className="chr-rel-info">
-          <span className="chr-rel-name">{target?.name ?? "Unknown"}</span>
+          <span className="chr-rel-name">{target?.name ?? 'Unknown'}</span>
           {rel.relationType && (
             <span className="chr-rel-type">{rel.relationType}</span>
           )}
@@ -37,5 +37,5 @@ export default function RelChip({ rel }) {
         </div>
       </div>
     </Link>
-  );
+  )
 }

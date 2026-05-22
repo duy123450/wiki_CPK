@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef, useCallback } from "react";
-import { createPortal } from "react-dom";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useState, useEffect, useRef, useCallback } from 'react'
+import { createPortal } from 'react-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import {
   ChevronDown,
   BookOpen,
@@ -10,29 +10,33 @@ import {
   User,
   Bookmark,
   Shield,
-} from "lucide-react";
-import { ICON_MAP, LOGO_URL, DEFAULT_AVATAR, OPEN_CATEGORY_COOKIE as DEFAULT_COOKIE } from "../constants/ui.constants";
-import { getSidebar } from "../services/api";
-import LiveUserCount from "./LiveUserCount";
-import "../styles/Sidebar.css";
+} from 'lucide-react'
+import {
+  ICON_MAP,
+  LOGO_URL,
+  DEFAULT_AVATAR,
+  OPEN_CATEGORY_COOKIE as DEFAULT_COOKIE,
+} from '../constants/ui.constants'
+import { getSidebar } from '../services/api'
+import LiveUserCount from './LiveUserCount'
+import '../styles/Sidebar.css'
 
-import { envConfig } from "../config/env.config";
+import { envConfig } from '../config/env.config'
 
-const OPEN_CATEGORY_COOKIE = envConfig.VITE_OPEN_CATEGORY_COOKIE || DEFAULT_COOKIE;
+const OPEN_CATEGORY_COOKIE =
+  envConfig.VITE_OPEN_CATEGORY_COOKIE || DEFAULT_COOKIE
 
 function getCookie(name) {
-  const cookies = document.cookie ? document.cookie.split("; ") : [];
-  const target = cookies.find((entry) => entry.startsWith(`${name}=`));
+  const cookies = document.cookie ? document.cookie.split('; ') : []
+  const target = cookies.find((entry) => entry.startsWith(`${name}=`))
   return target
-    ? decodeURIComponent(target.split("=").slice(1).join("="))
-    : null;
+    ? decodeURIComponent(target.split('=').slice(1).join('='))
+    : null
 }
 
 function setCookie(name, value, maxAgeSeconds = 60 * 60 * 24 * 30) {
-  document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=${maxAgeSeconds}; samesite=lax`;
+  document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=${maxAgeSeconds}; samesite=lax`
 }
-
-
 
 function CategoryItem({
   category,
@@ -41,13 +45,13 @@ function CategoryItem({
   isOpen,
   onToggle,
 }) {
-  const Icon = ICON_MAP[category.icon] || BookOpen;
-  const hasActivePage = category.pages?.some((p) => p.slug === activePage);
+  const Icon = ICON_MAP[category.icon] || BookOpen
+  const hasActivePage = category.pages?.some((p) => p.slug === activePage)
 
   return (
-    <div className={`category-item ${hasActivePage ? "has-active" : ""}`}>
+    <div className={`category-item ${hasActivePage ? 'has-active' : ''}`}>
       <button
-        className={`category-header ${isOpen ? "open" : ""}`}
+        className={`category-header ${isOpen ? 'open' : ''}`}
         onClick={() => onToggle(category.slug)}
         aria-expanded={isOpen}
       >
@@ -57,16 +61,16 @@ function CategoryItem({
         <span className="category-name">{category.name}</span>
         <ChevronDown
           size={12}
-          className={`chevron ${isOpen ? "rotated" : ""}`}
+          className={`chevron ${isOpen ? 'rotated' : ''}`}
         />
       </button>
 
-      <div className={`pages-list ${isOpen ? "expanded" : ""}`}>
+      <div className={`pages-list ${isOpen ? 'expanded' : ''}`}>
         <div className="pages-inner">
           {category.pages?.map((page) => (
             <button
               key={page.slug}
-              className={`page-link ${activePage === page.slug ? "active" : ""}`}
+              className={`page-link ${activePage === page.slug ? 'active' : ''}`}
               onClick={() => onPageSelect(page.slug, category.slug)}
             >
               <span className="page-dot" />
@@ -76,7 +80,7 @@ function CategoryItem({
         </div>
       </div>
     </div>
-  );
+  )
 }
 
 // Placeholder for avatar if none provided
@@ -87,117 +91,117 @@ export default function Sidebar({
   currentUser,
   onLogout,
 }) {
-  const [activePage, setActivePage] = useState("princess-kaguya");
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const [categories, setCategories] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [activePage, setActivePage] = useState('princess-kaguya')
+  const [isCollapsed, setIsCollapsed] = useState(false)
+  const [categories, setCategories] = useState([])
+  const [loading, setLoading] = useState(true)
   const [openCategorySlug, setOpenCategorySlug] = useState(() =>
-    getCookie(OPEN_CATEGORY_COOKIE),
-  );
-  const [avatarMenuOpen, setAvatarMenuOpen] = useState(false);
-  const [flyoutPos, setFlyoutPos] = useState({ top: 0, left: 0 });
-  const avatarMenuRef = useRef(null);
-  const avatarBtnRef = useRef(null);
-  const hasMountedRef = useRef(false);
-  const navigate = useNavigate();
-  const { pathname } = useLocation();
+    getCookie(OPEN_CATEGORY_COOKIE)
+  )
+  const [avatarMenuOpen, setAvatarMenuOpen] = useState(false)
+  const [flyoutPos, setFlyoutPos] = useState({ top: 0, left: 0 })
+  const avatarMenuRef = useRef(null)
+  const avatarBtnRef = useRef(null)
+  const hasMountedRef = useRef(false)
+  const navigate = useNavigate()
+  const { pathname } = useLocation()
 
   const applyCollapsedState = (collapsed) => {
-    setIsCollapsed(collapsed);
+    setIsCollapsed(collapsed)
     document.documentElement.style.setProperty(
-      "--sidebar-current-width",
-      collapsed ? "0px" : "260px",
-    );
-    onCollapseChange?.(collapsed);
-  };
+      '--sidebar-current-width',
+      collapsed ? '0px' : '260px'
+    )
+    onCollapseChange?.(collapsed)
+  }
 
   const handleCategoryToggle = (categorySlug) => {
     setOpenCategorySlug((prevSlug) => {
-      const nextSlug = prevSlug === categorySlug ? null : categorySlug;
+      const nextSlug = prevSlug === categorySlug ? null : categorySlug
 
       if (nextSlug) {
-        setCookie(OPEN_CATEGORY_COOKIE, nextSlug);
+        setCookie(OPEN_CATEGORY_COOKIE, nextSlug)
       } else {
-        setCookie(OPEN_CATEGORY_COOKIE, "");
+        setCookie(OPEN_CATEGORY_COOKIE, '')
       }
 
-      return nextSlug;
-    });
-  };
+      return nextSlug
+    })
+  }
 
   const handlePageSelect = (pageSlug, categorySlug) => {
-    setActivePage(pageSlug);
-    if (categorySlug === "characters") {
-      navigate(`/wiki/characters/${pageSlug}`);
+    setActivePage(pageSlug)
+    if (categorySlug === 'characters') {
+      navigate(`/wiki/characters/${pageSlug}`)
     } else {
-      navigate(`/wiki/${pageSlug}`);
+      navigate(`/wiki/${pageSlug}`)
     }
-  };
+  }
 
   useEffect(() => {
     const fetchSidebarData = async () => {
       try {
-        const data = await getSidebar();
-        setCategories(data || []);
+        const data = await getSidebar()
+        setCategories(data || [])
       } catch (error) {
-        console.error("Failed to fetch sidebar data:", error);
-        setCategories([]);
+        console.error('Failed to fetch sidebar data:', error)
+        setCategories([])
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
-    };
+    }
 
-    fetchSidebarData();
-  }, []);
+    fetchSidebarData()
+  }, [])
 
   useEffect(() => {
     if (!hasMountedRef.current) {
-      hasMountedRef.current = true;
-      return;
+      hasMountedRef.current = true
+      return
     }
-    applyCollapsedState(true);
-  }, [pathname]);
+    applyCollapsedState(true)
+  }, [pathname])
 
   const handleToggle = () => {
-    applyCollapsedState(!isCollapsed);
-  };
+    applyCollapsedState(!isCollapsed)
+  }
 
   const handleAuthNavigate = () => {
-    navigate("/auth");
-    applyCollapsedState(true);
-  };
+    navigate('/auth')
+    applyCollapsedState(true)
+  }
 
   const handleLogoutClick = () => {
-    onLogout?.();
-    setAvatarMenuOpen(false);
-    navigate("/auth");
-    applyCollapsedState(true);
-  };
+    onLogout?.()
+    setAvatarMenuOpen(false)
+    navigate('/auth')
+    applyCollapsedState(true)
+  }
 
   const handleAvatarMenuNavigate = (path) => {
-    setAvatarMenuOpen(false);
-    navigate(path);
-    applyCollapsedState(true);
-  };
+    setAvatarMenuOpen(false)
+    navigate(path)
+    applyCollapsedState(true)
+  }
 
   // Compute flyout position when menu opens
   const toggleAvatarMenu = useCallback(() => {
     setAvatarMenuOpen((prev) => {
-      const next = !prev;
+      const next = !prev
       if (next && avatarBtnRef.current) {
-        const rect = avatarBtnRef.current.getBoundingClientRect();
+        const rect = avatarBtnRef.current.getBoundingClientRect()
         setFlyoutPos({
           top: rect.top,
           left: rect.right + 10,
-        });
+        })
       }
-      return next;
-    });
-  }, []);
+      return next
+    })
+  }, [])
 
   // Close avatar menu on click outside
   useEffect(() => {
-    if (!avatarMenuOpen) return;
+    if (!avatarMenuOpen) return
     const handleClickOutside = (e) => {
       if (
         avatarMenuRef.current &&
@@ -205,19 +209,19 @@ export default function Sidebar({
         avatarBtnRef.current &&
         !avatarBtnRef.current.contains(e.target)
       ) {
-        setAvatarMenuOpen(false);
+        setAvatarMenuOpen(false)
       }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [avatarMenuOpen]);
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [avatarMenuOpen])
 
   return (
     <>
       <button
-        className={`sidebar-toggle ${isCollapsed ? "collapsed-btn" : ""}`}
+        className={`sidebar-toggle ${isCollapsed ? 'collapsed-btn' : ''}`}
         onClick={handleToggle}
-        title={isCollapsed ? "Open sidebar" : "Close sidebar"}
+        title={isCollapsed ? 'Open sidebar' : 'Close sidebar'}
       >
         <div className="toggle-bars">
           <span />
@@ -226,10 +230,10 @@ export default function Sidebar({
         </div>
       </button>
 
-      <aside className={`cpk-sidebar ${isCollapsed ? "collapsed" : ""}`}>
+      <aside className={`cpk-sidebar ${isCollapsed ? 'collapsed' : ''}`}>
         <button
           className="sidebar-logo"
-          onClick={() => navigate("/")}
+          onClick={() => navigate('/')}
           title="Go to home"
         >
           <div className="logo-image-wrap">
@@ -238,7 +242,7 @@ export default function Sidebar({
               alt="Cosmic Princess Kaguya"
               className="logo-img"
               onError={(e) => {
-                e.target.style.display = "none";
+                e.target.style.display = 'none'
               }}
             />
           </div>
@@ -250,18 +254,18 @@ export default function Sidebar({
         </div>
 
         {!isCollapsed && (
-          <div style={{ paddingBottom: "12px" }}>
+          <div style={{ paddingBottom: '12px' }}>
             <LiveUserCount />
           </div>
         )}
 
         <nav className="sidebar-nav">
           {loading ? (
-            <div style={{ padding: "16px", color: "#999", fontSize: "14px" }}>
+            <div style={{ padding: '16px', color: '#999', fontSize: '14px' }}>
               Loading...
             </div>
           ) : categories.length === 0 ? (
-            <div style={{ padding: "16px", color: "#999", fontSize: "14px" }}>
+            <div style={{ padding: '16px', color: '#999', fontSize: '14px' }}>
               No categories found
             </div>
           ) : (
@@ -288,7 +292,7 @@ export default function Sidebar({
               <>
                 <button
                   ref={avatarBtnRef}
-                  className={`sidebar-avatar-btn ${avatarMenuOpen ? "active" : ""}`}
+                  className={`sidebar-avatar-btn ${avatarMenuOpen ? 'active' : ''}`}
                   onClick={toggleAvatarMenu}
                   title={currentUser.username}
                 >
@@ -297,7 +301,7 @@ export default function Sidebar({
                     alt={currentUser.username}
                     className="sidebar-avatar-img"
                     onError={(e) => {
-                      e.target.src = DEFAULT_AVATAR;
+                      e.target.src = DEFAULT_AVATAR
                     }}
                   />
                   <span className="sidebar-avatar-status" />
@@ -307,7 +311,7 @@ export default function Sidebar({
                   <div
                     ref={avatarMenuRef}
                     className={`sidebar-avatar-flyout ${
-                      avatarMenuOpen ? "open" : ""
+                      avatarMenuOpen ? 'open' : ''
                     }`}
                     style={{
                       top: `${flyoutPos.top}px`,
@@ -316,23 +320,23 @@ export default function Sidebar({
                   >
                     <button
                       className="flyout-item"
-                      onClick={() => handleAvatarMenuNavigate("/profile")}
+                      onClick={() => handleAvatarMenuNavigate('/profile')}
                     >
                       <User size={14} strokeWidth={1.8} />
                       <span>Profile</span>
                     </button>
                     <button
                       className="flyout-item"
-                      onClick={() => handleAvatarMenuNavigate("/bookmarks")}
+                      onClick={() => handleAvatarMenuNavigate('/bookmarks')}
                     >
                       <Bookmark size={14} strokeWidth={1.8} />
                       <span>Bookmarks</span>
                     </button>
-                    {(currentUser.role === "admin" ||
-                      currentUser.role === "editor") && (
+                    {(currentUser.role === 'admin' ||
+                      currentUser.role === 'editor') && (
                       <button
                         className="flyout-item"
-                        onClick={() => handleAvatarMenuNavigate("/admin")}
+                        onClick={() => handleAvatarMenuNavigate('/admin')}
                       >
                         <Shield size={14} strokeWidth={1.8} />
                         <span>Admin</span>
@@ -347,7 +351,7 @@ export default function Sidebar({
                       <span>Log Out</span>
                     </button>
                   </div>,
-                  document.body,
+                  document.body
                 )}
               </>
             ) : (
@@ -363,23 +367,23 @@ export default function Sidebar({
 
           <div className="sidebar-footer-row">
             <button
-              className={`dragon-toggle-btn ${dragonCursorEnabled ? "active" : ""}`}
+              className={`dragon-toggle-btn ${dragonCursorEnabled ? 'active' : ''}`}
               onClick={() => {
                 console.log(
-                  "clicked, window.toggleDragonCursor exists?",
-                  typeof window.toggleDragonCursor,
-                );
+                  'clicked, window.toggleDragonCursor exists?',
+                  typeof window.toggleDragonCursor
+                )
                 if (
-                  typeof window !== "undefined" &&
+                  typeof window !== 'undefined' &&
                   window.toggleDragonCursor
                 ) {
-                  window.toggleDragonCursor();
+                  window.toggleDragonCursor()
                 }
               }}
               title={
                 dragonCursorEnabled
-                  ? "Disable dragon cursor"
-                  : "Enable dragon cursor"
+                  ? 'Disable dragon cursor'
+                  : 'Enable dragon cursor'
               }
               aria-pressed={dragonCursorEnabled}
             >
@@ -391,5 +395,5 @@ export default function Sidebar({
         </div>
       </aside>
     </>
-  );
+  )
 }

@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/purity */
-import { Link } from "react-router-dom";
-import "../styles/NotFoundPage.css";
+import { Link } from 'react-router-dom'
+import '../styles/NotFoundPage.css'
 
 function OrbField() {
   const orbs = Array.from({ length: 18 }, (_, i) => ({
@@ -10,7 +10,7 @@ function OrbField() {
     size: `${Math.random() * 180 + 40}px`,
     delay: `${Math.random() * 10}s`,
     duration: `${Math.random() * 8 + 8}s`,
-  }));
+  }))
 
   return (
     <div className="nf-orb-field" aria-hidden="true">
@@ -29,12 +29,12 @@ function OrbField() {
         />
       ))}
     </div>
-  );
+  )
 }
 
 export default function NotFoundPage({ sidebarCollapsed }) {
   return (
-    <main className={`nf-root ${sidebarCollapsed ? "sidebar-collapsed" : ""}`}>
+    <main className={`nf-root ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
       <OrbField />
       <div className="nf-vignette" />
 
@@ -65,5 +65,5 @@ export default function NotFoundPage({ sidebarCollapsed }) {
         </div>
       </section>
     </main>
-  );
+  )
 }

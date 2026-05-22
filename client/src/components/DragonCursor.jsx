@@ -1,14 +1,18 @@
-import { useEffect, useRef, useState } from "react";
-import "../styles/DragonCursor.css";
+import { useEffect, useRef, useState } from 'react'
+import '../styles/DragonCursor.css'
 
-import { SEG_DIST, SPARKLES, DRAGON_ENABLED_KEY } from "../constants/dragon.constants";
+import {
+  SEG_DIST,
+  SPARKLES,
+  DRAGON_ENABLED_KEY,
+} from '../constants/dragon.constants'
 
 function Sparkle({ x, y, char, color }) {
   return (
     <div className="dragon-sparkle" style={{ left: x, top: y, color }}>
       {char}
     </div>
-  );
+  )
 }
 
 function Seg({ pos, flipped, src, alt, shadow, zIndex }) {
@@ -25,19 +29,19 @@ function Seg({ pos, flipped, src, alt, shadow, zIndex }) {
     >
       <img src={src} alt={alt} />
     </div>
-  );
+  )
 }
 
 export default function DragonCursor() {
-  const animRef = useRef(null);
-  const targetRef = useRef({ x: -300, y: -300 });
+  const animRef = useRef(null)
+  const targetRef = useRef({ x: -300, y: -300 })
 
   // Read initial state from localStorage (defaults to true if not set)
   const [isEnabled, setIsEnabled] = useState(() => {
-    if (typeof window === "undefined") return true;
-    const stored = window.localStorage.getItem(DRAGON_ENABLED_KEY);
-    return stored === null ? true : stored === "true";
-  });
+    if (typeof window === 'undefined') return true
+    const stored = window.localStorage.getItem(DRAGON_ENABLED_KEY)
+    return stored === null ? true : stored === 'true'
+  })
 
   const segsRef = useRef([
     { x: -300, y: -300 },
@@ -48,105 +52,105 @@ export default function DragonCursor() {
     { x: -575, y: -300 },
     { x: -630, y: -300 },
     { x: -685, y: -300 },
-  ]);
+  ])
 
   const [renderSegs, setRenderSegs] = useState(
-    segsRef.current.map((p) => ({ ...p })),
-  );
-  const [flips, setFlips] = useState(Array(8).fill(false));
-  const flipsRef = useRef(Array(8).fill(false));
-  const [sparkles, setSparkles] = useState([]);
-  const sparkTimer = useRef(0);
+    segsRef.current.map((p) => ({ ...p }))
+  )
+  const [flips, setFlips] = useState(Array(8).fill(false))
+  const flipsRef = useRef(Array(8).fill(false))
+  const [sparkles, setSparkles] = useState([])
+  const sparkTimer = useRef(0)
 
   // Persist enabled state to localStorage
   useEffect(() => {
-    window.localStorage.setItem(DRAGON_ENABLED_KEY, isEnabled.toString());
+    window.localStorage.setItem(DRAGON_ENABLED_KEY, isEnabled.toString())
     // Dispatch custom event so Sidebar and other components stay in sync
     window.dispatchEvent(
-      new CustomEvent("dragon-cursor-toggle", {
+      new CustomEvent('dragon-cursor-toggle', {
         detail: { enabled: isEnabled },
-      }),
-    );
-  }, [isEnabled]);
+      })
+    )
+  }, [isEnabled])
 
   // Export toggle function globally so Sidebar can call it
   useEffect(() => {
     window.toggleDragonCursor = () => {
-      setIsEnabled((prev) => !prev);
-    };
+      setIsEnabled((prev) => !prev)
+    }
     return () => {
-      delete window.toggleDragonCursor;
-    };
-  }, []);
+      delete window.toggleDragonCursor
+    }
+  }, [])
 
   useEffect(() => {
     // Mouse support
     const onMove = (e) => {
-      targetRef.current = { x: e.clientX, y: e.clientY };
-    };
+      targetRef.current = { x: e.clientX, y: e.clientY }
+    }
 
     // Touch support — theo dõi ngón tay đầu tiên
     const onTouchMove = (e) => {
       // preventDefault để tránh scroll khi dragon đang active
       // Không gọi preventDefault ở đây để không chặn scroll trang
-      const touch = e.touches[0];
+      const touch = e.touches[0]
       if (touch) {
-        targetRef.current = { x: touch.clientX, y: touch.clientY };
+        targetRef.current = { x: touch.clientX, y: touch.clientY }
       }
-    };
+    }
 
     const onTouchStart = (e) => {
-      const touch = e.touches[0];
+      const touch = e.touches[0]
       if (touch) {
-        targetRef.current = { x: touch.clientX, y: touch.clientY };
+        targetRef.current = { x: touch.clientX, y: touch.clientY }
       }
-    };
+    }
 
-    window.addEventListener("mousemove", onMove);
-    window.addEventListener("touchmove", onTouchMove, { passive: true });
-    window.addEventListener("touchstart", onTouchStart, { passive: true });
+    window.addEventListener('mousemove', onMove)
+    window.addEventListener('touchmove', onTouchMove, { passive: true })
+    window.addEventListener('touchstart', onTouchStart, { passive: true })
 
     return () => {
-      window.removeEventListener("mousemove", onMove);
-      window.removeEventListener("touchmove", onTouchMove);
-      window.removeEventListener("touchstart", onTouchStart);
-    };
-  }, []);
+      window.removeEventListener('mousemove', onMove)
+      window.removeEventListener('touchmove', onTouchMove)
+      window.removeEventListener('touchstart', onTouchStart)
+    }
+  }, [])
 
   useEffect(() => {
-    const LERP_HEAD = 0.22;
+    const LERP_HEAD = 0.22
 
     const animate = () => {
-      const segs = segsRef.current;
-      const t = targetRef.current;
+      const segs = segsRef.current
+      const t = targetRef.current
 
-      segs[0].x += (t.x - segs[0].x) * LERP_HEAD;
-      segs[0].y += (t.y - segs[0].y) * LERP_HEAD;
+      segs[0].x += (t.x - segs[0].x) * LERP_HEAD
+      segs[0].y += (t.y - segs[0].y) * LERP_HEAD
 
       for (let i = 1; i < segs.length; i++) {
-        const ahead = segs[i - 1];
-        const dx = ahead.x - segs[i].x;
-        const dy = ahead.y - segs[i].y;
-        const dist = Math.sqrt(dx * dx + dy * dy) || 0.001;
+        const ahead = segs[i - 1]
+        const dx = ahead.x - segs[i].x
+        const dy = ahead.y - segs[i].y
+        const dist = Math.sqrt(dx * dx + dy * dy) || 0.001
         if (dist > SEG_DIST) {
-          const pull = (dist - SEG_DIST) / dist;
-          segs[i].x += dx * pull * 0.35;
-          segs[i].y += dy * pull * 0.35;
+          const pull = (dist - SEG_DIST) / dist
+          segs[i].x += dx * pull * 0.35
+          segs[i].y += dy * pull * 0.35
         }
       }
 
       const newFlips = segs.map((p, i) => {
-        const targetX = i === 0 ? t.x : segs[i - 1].x;
-        const dx = targetX - p.x;
-        if (Math.abs(dx) < 1) return flipsRef.current[i];
-        return dx < 0;
-      });
-      flipsRef.current = newFlips;
+        const targetX = i === 0 ? t.x : segs[i - 1].x
+        const dx = targetX - p.x
+        if (Math.abs(dx) < 1) return flipsRef.current[i]
+        return dx < 0
+      })
+      flipsRef.current = newFlips
 
-      setRenderSegs(segs.map((p) => ({ x: p.x, y: p.y })));
-      setFlips(newFlips.map((f, i) => (i === 2 || i === 4 ? !f : f)));
+      setRenderSegs(segs.map((p) => ({ x: p.x, y: p.y })))
+      setFlips(newFlips.map((f, i) => (i === 2 || i === 4 ? !f : f)))
 
-      sparkTimer.current++;
+      sparkTimer.current++
       if (sparkTimer.current % 7 === 0) {
         const colors = [
           `hsl(${Math.random() * 60 + 200},100%,80%)`,
@@ -157,31 +161,31 @@ export default function DragonCursor() {
           `hsl(${Math.random() * 60 + 10},100%,80%)`,
           `hsl(${Math.random() * 60 + 180},100%,80%)`,
           `hsl(${Math.random() * 60 + 30},100%,80%)`,
-        ];
+        ]
         const newSparks = segs.map((p, i) => ({
           id: Date.now() + Math.random() + i,
           x: p.x + (Math.random() - 0.5) * 18,
           y: p.y + (Math.random() - 0.5) * 18,
           char: SPARKLES[Math.floor(Math.random() * SPARKLES.length)],
           color: colors[i],
-        }));
-        setSparkles((s) => [...s.slice(-32), ...newSparks]);
+        }))
+        setSparkles((s) => [...s.slice(-32), ...newSparks])
         newSparks.forEach((sp) =>
           setTimeout(
             () => setSparkles((s) => s.filter((x) => x.id !== sp.id)),
-            800,
-          ),
-        );
+            800
+          )
+        )
       }
 
-      animRef.current = requestAnimationFrame(animate);
-    };
-    animRef.current = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(animRef.current);
-  }, []);
+      animRef.current = requestAnimationFrame(animate)
+    }
+    animRef.current = requestAnimationFrame(animate)
+    return () => cancelAnimationFrame(animRef.current)
+  }, [])
 
   return (
-    <div style={{ display: isEnabled ? "block" : "none" }}>
+    <div style={{ display: isEnabled ? 'block' : 'none' }}>
       {sparkles.map((sp) => (
         <Sparkle
           key={sp.id}
@@ -257,5 +261,5 @@ export default function DragonCursor() {
         zIndex={9999}
       />
     </div>
-  );
+  )
 }

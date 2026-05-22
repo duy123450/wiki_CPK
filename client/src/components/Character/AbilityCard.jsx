@@ -1,8 +1,8 @@
-import { getEffects } from "../../utils/characterUtils";
-import { ABILITY_TYPE_COLORS } from "../../constants/ui.constants";
+import { getEffects } from '../../utils/characterUtils'
+import { ABILITY_TYPE_COLORS } from '../../constants/ui.constants'
 
 export default function AbilityCard({ ability }) {
-  const effects = getEffects(ability);
+  const effects = getEffects(ability)
   return (
     <div className="chr-ability-card">
       <div className="chr-ability-head">
@@ -11,8 +11,8 @@ export default function AbilityCard({ ability }) {
           <span
             className="chr-ability-type"
             style={{
-              "--atype-color":
-                ABILITY_TYPE_COLORS[ability.type] ?? "var(--chr-muted)",
+              '--atype-color':
+                ABILITY_TYPE_COLORS[ability.type] ?? 'var(--chr-muted)',
             }}
           >
             {ability.type}
@@ -27,5 +27,5 @@ export default function AbilityCard({ ability }) {
         </ul>
       )}
     </div>
-  );
+  )
 }

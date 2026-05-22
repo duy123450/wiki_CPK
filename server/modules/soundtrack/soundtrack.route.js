@@ -1,13 +1,13 @@
-const express = require('express');
-const router = express.Router();
+const express = require('express')
+const router = express.Router()
 
-const { getNextTrack, getSoundtracks } = require('./soundtrack.controller');
+const { getNextTrack, getSoundtracks } = require('./soundtrack.controller')
 
 // GET /api/v1/wiki/soundtrack/next
 // ?currentTrackId=<id>&mode=sequential|shuffle|infinite&movieId=<id>
-router.get('/next', getNextTrack);
+router.get('/next', getNextTrack)
 
 // GET /api/v1/wiki/soundtrack?movieId=<id>
-router.get('/', getSoundtracks);
+router.get('/', getSoundtracks)
 
-module.exports = router;
+module.exports = router

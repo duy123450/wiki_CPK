@@ -1,9 +1,9 @@
 /* eslint-disable react-hooks/purity */
-import { useState } from "react";
-import { Link } from "react-router-dom";
-import useMovieInfo from "../hooks/useMovieInfo";
-import useReveal from "../hooks/useReveal";
-import "../styles/MovieOverviewPage.css";
+import { useState } from 'react'
+import { Link } from 'react-router-dom'
+import useMovieInfo from '../hooks/useMovieInfo'
+import useReveal from '../hooks/useReveal'
+import '../styles/MovieOverviewPage.css'
 
 // ─── Floating particles ───────────────────────────────────────────────────────
 function Particles() {
@@ -15,7 +15,7 @@ function Particles() {
     delay: `${Math.random() * 8}s`,
     dur: `${Math.random() * 6 + 4}s`,
     drift: Math.random() * 60 - 30,
-  }));
+  }))
   return (
     <div className="mov-particles" aria-hidden="true">
       {particles.map((p) => (
@@ -29,48 +29,48 @@ function Particles() {
             height: p.size,
             animationDelay: p.delay,
             animationDuration: p.dur,
-            "--drift": `${p.drift}px`,
+            '--drift': `${p.drift}px`,
           }}
         />
       ))}
     </div>
-  );
+  )
 }
 
 // ─── Stat card ────────────────────────────────────────────────────────────────
 function StatCard({ label, value, accent }) {
   return (
-    <div className="mov-stat" style={{ "--accent": accent }}>
-      <span className="mov-stat-value">{value || "—"}</span>
+    <div className="mov-stat" style={{ '--accent': accent }}>
+      <span className="mov-stat-value">{value || '—'}</span>
       <span className="mov-stat-label">{label}</span>
     </div>
-  );
+  )
 }
 
 // ─── Scroll reveal hook (imported from hooks/useReveal) ──────────────────────
 
-function Reveal({ children, delay = 0, className = "" }) {
-  const [ref, visible] = useReveal();
+function Reveal({ children, delay = 0, className = '' }) {
+  const [ref, visible] = useReveal()
   return (
     <div
       ref={ref}
-      className={`mov-reveal ${visible ? "mov-reveal--visible" : ""} ${className}`}
+      className={`mov-reveal ${visible ? 'mov-reveal--visible' : ''} ${className}`}
       style={{ transitionDelay: `${delay}ms` }}
     >
       {children}
     </div>
-  );
+  )
 }
 
 // ─── Shimmer ──────────────────────────────────────────────────────────────────
 function Shimmer({ w, h }) {
-  return <div className="mov-shimmer" style={{ width: w, height: h }} />;
+  return <div className="mov-shimmer" style={{ width: w, height: h }} />
 }
 
 // ─── Rating ring ──────────────────────────────────────────────────────────────
 function RatingRing({ rating }) {
-  const pct = (rating / 10) * 100;
-  const circ = 2 * Math.PI * 44;
+  const pct = (rating / 10) * 100
+  const circ = 2 * Math.PI * 44
   return (
     <div className="mov-rating-ring">
       <svg width="110" height="110" viewBox="0 0 110 110">
@@ -86,43 +86,43 @@ function RatingRing({ rating }) {
         />
       </svg>
       <div className="mov-rating-inner">
-        <span className="mov-rating-num">{rating?.toFixed(1) ?? "—"}</span>
+        <span className="mov-rating-num">{rating?.toFixed(1) ?? '—'}</span>
         <span className="mov-rating-denom">/10</span>
       </div>
     </div>
-  );
+  )
 }
 
 // ─── Format runtime ───────────────────────────────────────────────────────────
 function formatRuntime(minutes) {
-  if (!minutes) return null;
-  const mins = parseInt(minutes, 10);
-  if (isNaN(mins)) return minutes;
-  const hours = Math.floor(mins / 60);
-  const remainingMins = mins % 60;
-  if (hours === 0) return `${remainingMins}m`;
-  if (remainingMins === 0) return `${hours}h`;
-  return `${hours}h ${remainingMins}m`;
+  if (!minutes) return null
+  const mins = parseInt(minutes, 10)
+  if (isNaN(mins)) return minutes
+  const hours = Math.floor(mins / 60)
+  const remainingMins = mins % 60
+  if (hours === 0) return `${remainingMins}m`
+  if (remainingMins === 0) return `${hours}h`
+  return `${hours}h ${remainingMins}m`
 }
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 export default function MovieOverviewPage({ sidebarCollapsed }) {
-  const { data: movie, loading, error } = useMovieInfo();
-  const [imgLoaded, setImgLoaded] = useState(false);
+  const { data: movie, loading, error } = useMovieInfo()
+  const [imgLoaded, setImgLoaded] = useState(false)
 
   const releaseYear = movie?.details?.releaseDate
     ? new Date(movie.details.releaseDate).getFullYear()
-    : null;
+    : null
   const releaseFormatted = movie?.details?.releaseDate
-    ? new Date(movie.details.releaseDate).toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
+    ? new Date(movie.details.releaseDate).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
       })
-    : null;
+    : null
 
   return (
-    <main className={`mov-root ${sidebarCollapsed ? "sidebar-collapsed" : ""}`}>
+    <main className={`mov-root ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
       <Particles />
 
       {/* ── Hero banner ─────────────────────────────────────────────────── */}
@@ -132,7 +132,7 @@ export default function MovieOverviewPage({ sidebarCollapsed }) {
             <img
               src={movie.poster[2].url}
               alt=""
-              className={`mov-hero-bg-img ${imgLoaded ? "loaded" : ""}`}
+              className={`mov-hero-bg-img ${imgLoaded ? 'loaded' : ''}`}
               onLoad={() => setImgLoaded(true)}
               aria-hidden="true"
             />
@@ -262,7 +262,7 @@ export default function MovieOverviewPage({ sidebarCollapsed }) {
                 </div>
               ) : (
                 <p className="mov-synopsis">
-                  {movie?.synopsis ?? "No synopsis available."}
+                  {movie?.synopsis ?? 'No synopsis available.'}
                 </p>
               )}
             </div>
@@ -296,19 +296,19 @@ export default function MovieOverviewPage({ sidebarCollapsed }) {
             ) : (
               <dl className="mov-details-grid">
                 {[
-                  ["Title", movie?.title],
-                  ["Tagline", movie?.tagline],
-                  ["Release Date", releaseFormatted],
-                  ["Runtime", movie?.details?.runtime],
-                  ["Studio", movie?.details?.studio],
-                  ["Director", movie?.details?.director],
-                  ["Official Website", movie?.details?.officialWebsite],
+                  ['Title', movie?.title],
+                  ['Tagline', movie?.tagline],
+                  ['Release Date', releaseFormatted],
+                  ['Runtime', movie?.details?.runtime],
+                  ['Studio', movie?.details?.studio],
+                  ['Director', movie?.details?.director],
+                  ['Official Website', movie?.details?.officialWebsite],
                 ].map(([label, val]) =>
                   val ? (
                     <div key={label} className="mov-detail-row">
                       <dt className="mov-detail-label">{label}</dt>
                       <dd className="mov-detail-value">
-                        {label === "Official Website" ? (
+                        {label === 'Official Website' ? (
                           <a
                             href={val}
                             target="_blank"
@@ -317,14 +317,14 @@ export default function MovieOverviewPage({ sidebarCollapsed }) {
                           >
                             {val} ↗
                           </a>
-                        ) : label === "Runtime" ? (
+                        ) : label === 'Runtime' ? (
                           formatRuntime(val)
                         ) : (
                           val
                         )}
                       </dd>
                     </div>
-                  ) : null,
+                  ) : null
                 )}
               </dl>
             )}
@@ -341,22 +341,22 @@ export default function MovieOverviewPage({ sidebarCollapsed }) {
             <div className="mov-explore-cards">
               {[
                 {
-                  href: "/wiki/characters",
-                  label: "Characters",
-                  kana: "人物",
-                  icon: "✦",
+                  href: '/wiki/characters',
+                  label: 'Characters',
+                  kana: '人物',
+                  icon: '✦',
                 },
                 {
-                  href: "/wiki/soundtrack",
-                  label: "Soundtrack",
-                  kana: "音楽",
-                  icon: "♪",
+                  href: '/wiki/soundtrack',
+                  label: 'Soundtrack',
+                  kana: '音楽',
+                  icon: '♪',
                 },
                 {
-                  href: "/wiki/lore",
-                  label: "Lore & World",
-                  kana: "世界観",
-                  icon: "⋆",
+                  href: '/wiki/lore',
+                  label: 'Lore & World',
+                  kana: '世界観',
+                  icon: '⋆',
                 },
               ].map((card) => (
                 <a
@@ -375,5 +375,5 @@ export default function MovieOverviewPage({ sidebarCollapsed }) {
         </Reveal>
       </div>
     </main>
-  );
+  )
 }

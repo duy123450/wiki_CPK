@@ -1,34 +1,37 @@
-const mongoose = require('mongoose');
+const mongoose = require('mongoose')
 
-const CategorySchema = new mongoose.Schema({
+const CategorySchema = new mongoose.Schema(
+  {
     name: {
-        type: String,
-        required: [true, 'Category name is required'],
-        unique: true,
-        trim: true
+      type: String,
+      required: [true, 'Category name is required'],
+      unique: true,
+      trim: true,
     },
     icon: {
-        type: String, // e.g., "user", "music", "video" (for Lucide-react icons)
-        default: 'file-text'
+      type: String, // e.g., "user", "music", "video" (for Lucide-react icons)
+      default: 'file-text',
     },
     order: {
-        type: Number,
-        default: 0 // Helps you sort which category appears first
+      type: Number,
+      default: 0, // Helps you sort which category appears first
     },
     slug: {
-        type: String,
-        unique: true,
-        lowercase: true
-    }
-}, { timestamps: true });
+      type: String,
+      unique: true,
+      lowercase: true,
+    },
+  },
+  { timestamps: true }
+)
 
 CategorySchema.pre('validate', function () {
-    if (this.name && !this.slug) {
-        this.slug = this.name
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/g, '-')
-            .replace(/(^-|-$)/g, '');
-    }
-});
+  if (this.name && !this.slug) {
+    this.slug = this.name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '')
+  }
+})
 
-module.exports = mongoose.model('Category', CategorySchema);
+module.exports = mongoose.model('Category', CategorySchema)

@@ -1,12 +1,16 @@
-const express = require("express");
-const envConfig = require("../../config/env.config");
-const router = express.Router();
-const { upload } = require("../../config/cloudinary");
-const passport = require("../../config/passport");
-const authController = require("./auth.controller");
-const authenticateUser = require("../../middleware/authentication");
-const validateRequest = require("../../middleware/validateRequest");
-const { registerSchema, loginSchema, updateProfileSchema } = require("../../schemas/auth.schemas");
+const express = require('express')
+const envConfig = require('../../config/env.config')
+const router = express.Router()
+const { upload } = require('../../config/cloudinary')
+const passport = require('../../config/passport')
+const authController = require('./auth.controller')
+const authenticateUser = require('../../middleware/authentication')
+const validateRequest = require('../../middleware/validateRequest')
+const {
+  registerSchema,
+  loginSchema,
+  updateProfileSchema,
+} = require('../../schemas/auth.schemas')
 
 const {
   register,
@@ -19,168 +23,180 @@ const {
   getCurrentUser,
   updateAvatar,
   updateProfile,
-} = authController;
+} = authController
 
 const requireGoogleOAuthConfig = (req, res, next) => {
   if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
     return res.status(500).json({
-      msg: "Google OAuth is not configured. Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in server/.env.",
-    });
+      msg: 'Google OAuth is not configured. Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in server/.env.',
+    })
   }
 
-  return next();
-};
+  return next()
+}
 
 const requireTwitterOAuthConfig = (req, res, next) => {
-  const isProduction = process.env.NODE_ENV === "production";
+  const isProduction = process.env.NODE_ENV === 'production'
   const clientId = isProduction
-    ? (process.env.X_PROD_CLIENT_ID || process.env.X_CLIENT_ID)
-    : (process.env.X_LOCAL_CLIENT_ID || process.env.X_CLIENT_ID);
+    ? process.env.X_PROD_CLIENT_ID || process.env.X_CLIENT_ID
+    : process.env.X_LOCAL_CLIENT_ID || process.env.X_CLIENT_ID
   const clientSecret = isProduction
-    ? (process.env.X_PROD_CLIENT_SECRET || process.env.X_CLIENT_SECRET)
-    : (process.env.X_LOCAL_CLIENT_SECRET || process.env.X_CLIENT_SECRET);
+    ? process.env.X_PROD_CLIENT_SECRET || process.env.X_CLIENT_SECRET
+    : process.env.X_LOCAL_CLIENT_SECRET || process.env.X_CLIENT_SECRET
 
   if (!clientId || !clientSecret) {
     return res.status(500).json({
       msg: isProduction
-        ? "Twitter OAuth is not configured. Set X_PROD_CLIENT_ID and X_PROD_CLIENT_SECRET in server/.env."
-        : "Twitter OAuth is not configured. Set X_LOCAL_CLIENT_ID and X_LOCAL_CLIENT_SECRET in server/.env.",
-    });
+        ? 'Twitter OAuth is not configured. Set X_PROD_CLIENT_ID and X_PROD_CLIENT_SECRET in server/.env.'
+        : 'Twitter OAuth is not configured. Set X_LOCAL_CLIENT_ID and X_LOCAL_CLIENT_SECRET in server/.env.',
+    })
   }
 
-  return next();
-};
+  return next()
+}
 
 const requireDiscordOAuthConfig = (req, res, next) => {
-  const isProduction = process.env.NODE_ENV === "production";
+  const isProduction = process.env.NODE_ENV === 'production'
   const clientId = isProduction
-    ? (process.env.DISCORD_PROD_CLIENT_ID || process.env.DISCORD_CLIENT_ID)
-    : process.env.DISCORD_CLIENT_ID;
+    ? process.env.DISCORD_PROD_CLIENT_ID || process.env.DISCORD_CLIENT_ID
+    : process.env.DISCORD_CLIENT_ID
   const clientSecret = isProduction
-    ? (process.env.DISCORD_PROD_CLIENT_SECRET || process.env.DISCORD_CLIENT_SECRET)
-    : process.env.DISCORD_CLIENT_SECRET;
+    ? process.env.DISCORD_PROD_CLIENT_SECRET ||
+      process.env.DISCORD_CLIENT_SECRET
+    : process.env.DISCORD_CLIENT_SECRET
 
   if (!clientId || !clientSecret) {
     return res.status(500).json({
-      msg: "Discord OAuth is not configured. Set DISCORD_CLIENT_ID and DISCORD_CLIENT_SECRET in server/.env.",
-    });
+      msg: 'Discord OAuth is not configured. Set DISCORD_CLIENT_ID and DISCORD_CLIENT_SECRET in server/.env.',
+    })
   }
 
-  return next();
-};
+  return next()
+}
 
 const requireGitHubOAuthConfig = (req, res, next) => {
-  const isProduction = process.env.NODE_ENV === "production";
+  const isProduction = process.env.NODE_ENV === 'production'
   const clientId = isProduction
     ? process.env.GITHUB_PROD_CLIENT_ID
-    : process.env.GITHUB_LOCAL_CLIENT_ID;
+    : process.env.GITHUB_LOCAL_CLIENT_ID
   const clientSecret = isProduction
     ? process.env.GITHUB_PROD_CLIENT_SECRET
-    : process.env.GITHUB_LOCAL_CLIENT_SECRET;
+    : process.env.GITHUB_LOCAL_CLIENT_SECRET
 
   if (!clientId || !clientSecret) {
     return res.status(500).json({
-      msg: "GitHub OAuth is not configured. Set GITHUB_CLIENT_ID and GITHUB_CLIENT_SECRET in server/.env.",
-    });
+      msg: 'GitHub OAuth is not configured. Set GITHUB_CLIENT_ID and GITHUB_CLIENT_SECRET in server/.env.',
+    })
   }
 
-  return next();
-};
+  return next()
+}
 
-const rateLimit = require("express-rate-limit");
+const rateLimit = require('express-rate-limit')
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: envConfig.NODE_ENV === "test" ? 1000 : 5, // Limit each IP to 5 requests per windowMs
-  message: { msg: "Too many authentication attempts, please try again after 15 minutes" }
-});
+  max: envConfig.NODE_ENV === 'test' ? 1000 : 5, // Limit each IP to 5 requests per windowMs
+  message: {
+    msg: 'Too many authentication attempts, please try again after 15 minutes',
+  },
+})
 
-router.post("/register", validateRequest(registerSchema), register);
-router.post("/login", authLimiter, validateRequest(loginSchema), login);
-router.post("/refresh", authLimiter, refresh);
+router.post('/register', validateRequest(registerSchema), register)
+router.post('/login', authLimiter, validateRequest(loginSchema), login)
+router.post('/refresh', authLimiter, refresh)
 router.get(
-  "/google",
+  '/google',
   requireGoogleOAuthConfig,
-  passport.authenticate("google", {
-    scope: ["profile", "email"],
-  }),
-);
+  passport.authenticate('google', {
+    scope: ['profile', 'email'],
+  })
+)
 router.get(
-  "/google/callback",
+  '/google/callback',
   requireGoogleOAuthConfig,
-  passport.authenticate("google", {
-    failureRedirect: `${envConfig.FRONTEND_URL || "http://localhost:5173"}/auth?googleError=1`,
+  passport.authenticate('google', {
+    failureRedirect: `${envConfig.FRONTEND_URL || 'http://localhost:5173'}/auth?googleError=1`,
   }),
-  googleLoginCallback,
-);
+  googleLoginCallback
+)
 router.get(
-  "/x",
+  '/x',
   requireTwitterOAuthConfig,
-  passport.authenticate("twitter", {
+  passport.authenticate('twitter', {
     scope: ['tweet.read', 'users.read'],
-  }),
-);
+  })
+)
 router.get(
-  "/x/callback",
+  '/x/callback',
   requireTwitterOAuthConfig,
-  passport.authenticate("twitter", {
-    failureRedirect: `${envConfig.FRONTEND_URL || "http://localhost:5173"}/auth?twitterError=1`,
+  passport.authenticate('twitter', {
+    failureRedirect: `${envConfig.FRONTEND_URL || 'http://localhost:5173'}/auth?twitterError=1`,
   }),
-  twitterLoginCallback,
-);
+  twitterLoginCallback
+)
 router.get(
-  "/discord",
+  '/discord',
   requireDiscordOAuthConfig,
-  passport.authenticate("discord"),
-);
+  passport.authenticate('discord')
+)
 router.get(
-  "/discord/callback",
+  '/discord/callback',
   requireDiscordOAuthConfig,
   (req, res, next) => {
-    const frontendUrl = envConfig.FRONTEND_URL || "http://localhost:5173";
-    passport.authenticate("discord", (err, user) => {
+    const frontendUrl = envConfig.FRONTEND_URL || 'http://localhost:5173'
+    passport.authenticate('discord', (err, user) => {
       if (err) {
-        if (err.message === "email_taken_other_method") {
-          return res.redirect(`${frontendUrl}/auth?error=social_conflict`);
+        if (err.message === 'email_taken_other_method') {
+          return res.redirect(`${frontendUrl}/auth?error=social_conflict`)
         }
-        return res.redirect(`${frontendUrl}/auth?discordError=1&msg=${encodeURIComponent(err.message)}`);
+        return res.redirect(
+          `${frontendUrl}/auth?discordError=1&msg=${encodeURIComponent(err.message)}`
+        )
       }
       if (!user) {
-        return res.redirect(`${frontendUrl}/auth?discordError=1`);
+        return res.redirect(`${frontendUrl}/auth?discordError=1`)
       }
-      req.user = user;
-      next();
-    })(req, res, next);
+      req.user = user
+      next()
+    })(req, res, next)
   },
-  discordLoginCallback,
-);
+  discordLoginCallback
+)
 router.get(
-  "/github",
+  '/github',
   requireGitHubOAuthConfig,
-  passport.authenticate("github", { scope: ['user:email'], session: false }),
-);
+  passport.authenticate('github', { scope: ['user:email'], session: false })
+)
 router.get(
-  "/github/callback",
+  '/github/callback',
   requireGitHubOAuthConfig,
   (req, res, next) => {
-    const frontendUrl = envConfig.FRONTEND_URL || "http://localhost:5173";
-    passport.authenticate("github", { session: false }, (err, user) => {
+    const frontendUrl = envConfig.FRONTEND_URL || 'http://localhost:5173'
+    passport.authenticate('github', { session: false }, (err, user) => {
       if (err) {
-        if (err.message === "email_taken_other_method") {
-          return res.redirect(`${frontendUrl}/auth?error=social_conflict`);
+        if (err.message === 'email_taken_other_method') {
+          return res.redirect(`${frontendUrl}/auth?error=social_conflict`)
         }
-        return res.redirect(`${frontendUrl}/auth?githubError=1&msg=${encodeURIComponent(err.message)}`);
+        return res.redirect(
+          `${frontendUrl}/auth?githubError=1&msg=${encodeURIComponent(err.message)}`
+        )
       }
       if (!user) {
-        return res.redirect(`${frontendUrl}/auth?githubError=1`);
+        return res.redirect(`${frontendUrl}/auth?githubError=1`)
       }
-      req.user = user;
-      next();
-    })(req, res, next);
+      req.user = user
+      next()
+    })(req, res, next)
   },
-  githubLoginCallback,
-);
-router.get("/me", authenticateUser, getCurrentUser);
-router.put("/avatar", authenticateUser, upload.single("avatar"), updateAvatar);
-router.put("/profile", authenticateUser, validateRequest(updateProfileSchema), updateProfile);
+  githubLoginCallback
+)
+router.get('/me', authenticateUser, getCurrentUser)
+router.put('/avatar', authenticateUser, upload.single('avatar'), updateAvatar)
+router.put(
+  '/profile',
+  authenticateUser,
+  validateRequest(updateProfileSchema),
+  updateProfile
+)
 
-module.exports = router;
+module.exports = router

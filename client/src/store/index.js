@@ -1,6 +1,6 @@
-import { configureStore } from "@reduxjs/toolkit";
-import authReducer from "./slices/authSlice";
-import characterReducer from "./slices/characterSlice";
+import { configureStore } from '@reduxjs/toolkit'
+import authReducer from './slices/authSlice'
+import characterReducer from './slices/characterSlice'
 
 export const makeStore = () =>
   configureStore({
@@ -12,6 +12,6 @@ export const makeStore = () =>
       getDefaultMiddleware({
         serializableCheck: false,
       }),
-  });
+  })
 
-export const store = makeStore();
+export const store = makeStore()

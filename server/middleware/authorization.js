@@ -1,14 +1,12 @@
-const { UnauthorizedError } = require("../errors");
+const { UnauthorizedError } = require('../errors')
 
 const authorizePermissions = (...roles) => {
   return (req, res, next) => {
     if (!req.user || !roles.includes(req.user.role)) {
-      throw new UnauthorizedError(
-        "Unauthorized to access this route"
-      );
+      throw new UnauthorizedError('Unauthorized to access this route')
     }
-    next();
-  };
-};
+    next()
+  }
+}
 
-module.exports = authorizePermissions;
+module.exports = authorizePermissions

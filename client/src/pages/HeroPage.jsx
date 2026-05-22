@@ -1,14 +1,14 @@
 /* eslint-disable react-hooks/purity */
-import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
-import useMovieInfo from "../hooks/useMovieInfo";
-import "../styles/HeroPage.css";
+import { useEffect, useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
+import useMovieInfo from '../hooks/useMovieInfo'
+import '../styles/HeroPage.css'
 
-import { generateStars } from "../utils/uiUtils";
+import { generateStars } from '../utils/uiUtils'
 
 // ─── stars ────────────────────────────────────────────────────────────────────
 function Stars() {
-  const [stars] = useState(() => generateStars(60));
+  const [stars] = useState(() => generateStars(60))
 
   return (
     <div className="hero-stars" aria-hidden="true">
@@ -27,7 +27,7 @@ function Stars() {
         />
       ))}
     </div>
-  );
+  )
 }
 
 // ─── shimmer ──────────────────────────────────────────────────────────────────
@@ -38,32 +38,32 @@ function Shimmer() {
       <div className="shimmer-bar w-40" />
       <div className="shimmer-bar w-52" />
     </div>
-  );
+  )
 }
 
 // ─── main ─────────────────────────────────────────────────────────────────────
 export default function HeroPage() {
-  const { data: movie, loading, error } = useMovieInfo();
-  const videoRef = useRef(null);
-  const [videoReady, setVideoReady] = useState(false);
+  const { data: movie, loading, error } = useMovieInfo()
+  const videoRef = useRef(null)
+  const [videoReady, setVideoReady] = useState(false)
 
   const videoSrc = Array.isArray(movie?.heroVideo)
     ? movie.heroVideo[0]?.url
-    : movie?.heroVideo?.url;
-  const title = movie?.title ?? "超かぐや姫";
-  const tagline = movie?.tagline ?? "A tale of the moon and a heart's desire";
+    : movie?.heroVideo?.url
+  const title = movie?.title ?? '超かぐや姫'
+  const tagline = movie?.tagline ?? "A tale of the moon and a heart's desire"
   const releaseDate = movie?.details?.releaseDate
     ? new Date(movie.details.releaseDate).getFullYear()
-    : null;
-  const studio = movie?.details?.studio ?? null;
+    : null
+  const studio = movie?.details?.studio ?? null
 
   useEffect(() => {
-    const video = videoRef.current;
-    if (!video || !videoSrc) return;
-    video.muted = true;
-    video.load();
-    video.play().catch(() => {});
-  }, [videoSrc]);
+    const video = videoRef.current
+    if (!video || !videoSrc) return
+    video.muted = true
+    video.load()
+    video.play().catch(() => {})
+  }, [videoSrc])
 
   return (
     <section className="hero-root">
@@ -72,7 +72,7 @@ export default function HeroPage() {
         <div className="hero-video-wrap">
           <video
             ref={videoRef}
-            className={`hero-video${videoReady ? " ready" : ""}`}
+            className={`hero-video${videoReady ? ' ready' : ''}`}
             src={videoSrc}
             autoPlay
             loop
@@ -120,10 +120,7 @@ export default function HeroPage() {
             )}
 
             <div className="hero-actions">
-              <Link
-                to="/wiki/characters"
-                className="hero-btn hero-btn-primary"
-              >
+              <Link to="/wiki/characters" className="hero-btn hero-btn-primary">
                 Explore Wiki
               </Link>
               <Link
@@ -143,5 +140,5 @@ export default function HeroPage() {
         <span className="hero-scroll-text">Scroll</span>
       </div>
     </section>
-  );
+  )
 }

@@ -1,9 +1,9 @@
-import { Navigate } from "react-router-dom";
+import { Navigate } from 'react-router-dom'
 
 export default function ProtectedRoute({ currentUser, children }) {
   if (!currentUser) {
-    return <Navigate to="/auth" replace />;
+    return <Navigate to="/auth" replace />
   }
 
-  return children;
+  return children
 }

@@ -6,211 +6,211 @@ import Sidebar from '@/components/Sidebar'
 
 // Mock API
 vi.mock('@/services/api', () => ({
-    getSidebar: vi.fn(),
+  getSidebar: vi.fn(),
 }))
 
 import { getSidebar } from '@/services/api'
 
 const defaultProps = {
-    onCollapseChange: vi.fn(),
-    onDragonCursorToggle: vi.fn(),
-    dragonCursorEnabled: true,
-    currentUser: null,
-    onLogout: vi.fn(),
+  onCollapseChange: vi.fn(),
+  onDragonCursorToggle: vi.fn(),
+  dragonCursorEnabled: true,
+  currentUser: null,
+  onLogout: vi.fn(),
 }
 
 const renderSidebar = (overrides = {}) =>
-    render(
-        <MemoryRouter>
-            <Sidebar {...defaultProps} {...overrides} />
-        </MemoryRouter>
-    )
+  render(
+    <MemoryRouter>
+      <Sidebar {...defaultProps} {...overrides} />
+    </MemoryRouter>
+  )
 
 beforeEach(() => {
-    vi.clearAllMocks()
-    // Return unresolved promise by default to prevent state update after basic tests end
-    getSidebar.mockReturnValue(new Promise(() => {}))
+  vi.clearAllMocks()
+  // Return unresolved promise by default to prevent state update after basic tests end
+  getSidebar.mockReturnValue(new Promise(() => {}))
 })
 
 describe('Sidebar — Basic Rendering', () => {
-    it('renders "Fan Wiki" text', async () => {
-        renderSidebar()
-        expect(screen.getByText('Fan Wiki')).toBeInTheDocument()
-    })
+  it('renders "Fan Wiki" text', async () => {
+    renderSidebar()
+    expect(screen.getByText('Fan Wiki')).toBeInTheDocument()
+  })
 
-    it('renders "Navigation" label', () => {
-        renderSidebar()
-        expect(screen.getByText('Navigation')).toBeInTheDocument()
-    })
+  it('renders "Navigation" label', () => {
+    renderSidebar()
+    expect(screen.getByText('Navigation')).toBeInTheDocument()
+  })
 
-    it('renders CPK Wiki footer text', () => {
-        renderSidebar()
-        expect(screen.getByText('CPK Wiki')).toBeInTheDocument()
-    })
+  it('renders CPK Wiki footer text', () => {
+    renderSidebar()
+    expect(screen.getByText('CPK Wiki')).toBeInTheDocument()
+  })
 
-    it('renders logo image', () => {
-        renderSidebar()
-        const logo = screen.getByAltText('Cosmic Princess Kaguya')
-        expect(logo).toBeInTheDocument()
-    })
+  it('renders logo image', () => {
+    renderSidebar()
+    const logo = screen.getByAltText('Cosmic Princess Kaguya')
+    expect(logo).toBeInTheDocument()
+  })
 })
 
 describe('Sidebar — Loading & Data', () => {
-    it('shows "No categories found" when API returns empty', async () => {
-        getSidebar.mockResolvedValueOnce([])
-        renderSidebar()
+  it('shows "No categories found" when API returns empty', async () => {
+    getSidebar.mockResolvedValueOnce([])
+    renderSidebar()
 
-        await waitFor(() => {
-            expect(screen.getByText('No categories found')).toBeInTheDocument()
-        })
+    await waitFor(() => {
+      expect(screen.getByText('No categories found')).toBeInTheDocument()
     })
+  })
 
-    it('renders categories after fetch', async () => {
-        getSidebar.mockResolvedValueOnce([
-            {
-                _id: '1',
-                name: 'Characters',
-                slug: 'characters',
-                icon: 'users',
-                pages: [{ slug: 'kaguya', title: 'Kaguya' }],
-            },
-        ])
+  it('renders categories after fetch', async () => {
+    getSidebar.mockResolvedValueOnce([
+      {
+        _id: '1',
+        name: 'Characters',
+        slug: 'characters',
+        icon: 'users',
+        pages: [{ slug: 'kaguya', title: 'Kaguya' }],
+      },
+    ])
 
-        renderSidebar()
+    renderSidebar()
 
-        await waitFor(() => {
-            expect(screen.getByText('Characters')).toBeInTheDocument()
-        })
+    await waitFor(() => {
+      expect(screen.getByText('Characters')).toBeInTheDocument()
     })
+  })
 
-    it('handles API error gracefully', async () => {
-        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
-        getSidebar.mockRejectedValueOnce(new Error('Network error'))
-        renderSidebar()
+  it('handles API error gracefully', async () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    getSidebar.mockRejectedValueOnce(new Error('Network error'))
+    renderSidebar()
 
-        await waitFor(() => {
-            expect(screen.getByText('No categories found')).toBeInTheDocument()
-        })
-        consoleSpy.mockRestore()
+    await waitFor(() => {
+      expect(screen.getByText('No categories found')).toBeInTheDocument()
     })
+    consoleSpy.mockRestore()
+  })
 })
 
 describe('Sidebar — Toggle', () => {
-    it('toggle button collapses sidebar', async () => {
-        const user = userEvent.setup()
-        const { container } = renderSidebar()
+  it('toggle button collapses sidebar', async () => {
+    const user = userEvent.setup()
+    const { container } = renderSidebar()
 
-        const toggleBtn = screen.getByTitle('Close sidebar')
-        await user.click(toggleBtn)
+    const toggleBtn = screen.getByTitle('Close sidebar')
+    await user.click(toggleBtn)
 
-        expect(container.querySelector('.cpk-sidebar')).toHaveClass('collapsed')
-    })
+    expect(container.querySelector('.cpk-sidebar')).toHaveClass('collapsed')
+  })
 })
 
 describe('Sidebar — Category Interaction', () => {
-    it('expands category on click', async () => {
-        const user = userEvent.setup()
-        getSidebar.mockResolvedValueOnce([
-            {
-                _id: '1',
-                name: 'Characters',
-                slug: 'characters',
-                icon: 'users',
-                pages: [
-                    { slug: 'kaguya', title: 'Kaguya' },
-                    { slug: 'iroha', title: 'Iroha' },
-                ],
-            },
-        ])
+  it('expands category on click', async () => {
+    const user = userEvent.setup()
+    getSidebar.mockResolvedValueOnce([
+      {
+        _id: '1',
+        name: 'Characters',
+        slug: 'characters',
+        icon: 'users',
+        pages: [
+          { slug: 'kaguya', title: 'Kaguya' },
+          { slug: 'iroha', title: 'Iroha' },
+        ],
+      },
+    ])
 
-        renderSidebar()
+    renderSidebar()
 
-        await waitFor(() => {
-            expect(screen.getByText('Characters')).toBeInTheDocument()
-        })
-
-        const categoryBtn = screen.getByText('Characters').closest('button')
-        await user.click(categoryBtn)
-
-        expect(screen.getByText('Kaguya')).toBeInTheDocument()
-        expect(screen.getByText('Iroha')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText('Characters')).toBeInTheDocument()
     })
+
+    const categoryBtn = screen.getByText('Characters').closest('button')
+    await user.click(categoryBtn)
+
+    expect(screen.getByText('Kaguya')).toBeInTheDocument()
+    expect(screen.getByText('Iroha')).toBeInTheDocument()
+  })
 })
 
 describe('Sidebar — Auth State', () => {
-    it('shows login button when no user', () => {
-        renderSidebar({ currentUser: null })
-        const loginBtn = screen.getByTitle('Login / Register')
-        expect(loginBtn).toBeInTheDocument()
+  it('shows login button when no user', () => {
+    renderSidebar({ currentUser: null })
+    const loginBtn = screen.getByTitle('Login / Register')
+    expect(loginBtn).toBeInTheDocument()
+  })
+
+  it('shows avatar when user is logged in', () => {
+    const currentUser = {
+      username: 'testuser',
+      avatar: { url: 'http://img.com/a.png' },
+      role: 'viewer',
+    }
+    renderSidebar({ currentUser })
+    const avatarBtn = screen.getByTitle('testuser')
+    expect(avatarBtn).toBeInTheDocument()
+  })
+
+  it('shows avatar flyout with Profile and Log Out on click', async () => {
+    const user = userEvent.setup()
+    const currentUser = {
+      username: 'testuser',
+      avatar: { url: 'http://img.com/a.png' },
+      role: 'viewer',
+    }
+    renderSidebar({ currentUser })
+
+    await user.click(screen.getByTitle('testuser'))
+
+    await waitFor(() => {
+      expect(screen.getByText('Profile')).toBeInTheDocument()
+      expect(screen.getByText('Log Out')).toBeInTheDocument()
     })
+  })
 
-    it('shows avatar when user is logged in', () => {
-        const currentUser = {
-            username: 'testuser',
-            avatar: { url: 'http://img.com/a.png' },
-            role: 'viewer',
-        }
-        renderSidebar({ currentUser })
-        const avatarBtn = screen.getByTitle('testuser')
-        expect(avatarBtn).toBeInTheDocument()
+  it('shows Admin option for admin users', async () => {
+    const user = userEvent.setup()
+    const currentUser = {
+      username: 'admin',
+      avatar: { url: 'http://img.com/a.png' },
+      role: 'admin',
+    }
+    renderSidebar({ currentUser })
+
+    await user.click(screen.getByTitle('admin'))
+
+    await waitFor(() => {
+      expect(screen.getByText('Admin')).toBeInTheDocument()
     })
+  })
 
-    it('shows avatar flyout with Profile and Log Out on click', async () => {
-        const user = userEvent.setup()
-        const currentUser = {
-            username: 'testuser',
-            avatar: { url: 'http://img.com/a.png' },
-            role: 'viewer',
-        }
-        renderSidebar({ currentUser })
+  it('does NOT show Admin option for viewer users', async () => {
+    const user = userEvent.setup()
+    const currentUser = {
+      username: 'viewer',
+      avatar: { url: 'http://img.com/a.png' },
+      role: 'viewer',
+    }
+    renderSidebar({ currentUser })
 
-        await user.click(screen.getByTitle('testuser'))
+    await user.click(screen.getByTitle('viewer'))
 
-        await waitFor(() => {
-            expect(screen.getByText('Profile')).toBeInTheDocument()
-            expect(screen.getByText('Log Out')).toBeInTheDocument()
-        })
+    await waitFor(() => {
+      expect(screen.getByText('Profile')).toBeInTheDocument()
+      expect(screen.queryByText('Admin')).not.toBeInTheDocument()
     })
-
-    it('shows Admin option for admin users', async () => {
-        const user = userEvent.setup()
-        const currentUser = {
-            username: 'admin',
-            avatar: { url: 'http://img.com/a.png' },
-            role: 'admin',
-        }
-        renderSidebar({ currentUser })
-
-        await user.click(screen.getByTitle('admin'))
-
-        await waitFor(() => {
-            expect(screen.getByText('Admin')).toBeInTheDocument()
-        })
-    })
-
-    it('does NOT show Admin option for viewer users', async () => {
-        const user = userEvent.setup()
-        const currentUser = {
-            username: 'viewer',
-            avatar: { url: 'http://img.com/a.png' },
-            role: 'viewer',
-        }
-        renderSidebar({ currentUser })
-
-        await user.click(screen.getByTitle('viewer'))
-
-        await waitFor(() => {
-            expect(screen.getByText('Profile')).toBeInTheDocument()
-            expect(screen.queryByText('Admin')).not.toBeInTheDocument()
-        })
-    })
+  })
 })
 
 describe('Sidebar — Dragon Cursor Toggle', () => {
-    it('renders dragon cursor toggle button', () => {
-        renderSidebar()
-        const btn = screen.getByTitle('Disable dragon cursor')
-        expect(btn).toBeInTheDocument()
-        expect(btn).toHaveAttribute('aria-pressed', 'true')
-    })
+  it('renders dragon cursor toggle button', () => {
+    renderSidebar()
+    const btn = screen.getByTitle('Disable dragon cursor')
+    expect(btn).toBeInTheDocument()
+    expect(btn).toHaveAttribute('aria-pressed', 'true')
+  })
 })

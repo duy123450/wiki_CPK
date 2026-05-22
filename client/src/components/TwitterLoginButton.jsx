@@ -1,9 +1,9 @@
-import { getTwitterLoginUrl } from "../services/api";
+import { getTwitterLoginUrl } from '../services/api'
 
 export default function TwitterLoginButton() {
   const handleClick = () => {
-    window.location.href = getTwitterLoginUrl();
-  };
+    window.location.href = getTwitterLoginUrl()
+  }
 
   return (
     <button
@@ -24,5 +24,5 @@ export default function TwitterLoginButton() {
         />
       </svg>
     </button>
-  );
+  )
 }

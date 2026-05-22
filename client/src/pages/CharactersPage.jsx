@@ -1,18 +1,18 @@
 /* eslint-disable react-hooks/purity */
-import { useEffect, useRef, useState, useCallback } from "react";
-import { Link } from "react-router-dom";
-import { getCharacters } from "../services/api";
-import useMovieInfo from "../hooks/useMovieInfo";
-import { ROLE_COLORS } from "../constants/ui.constants";
-import "../styles/CharactersPage.css";
+import { useEffect, useRef, useState, useCallback } from 'react'
+import { Link } from 'react-router-dom'
+import { getCharacters } from '../services/api'
+import useMovieInfo from '../hooks/useMovieInfo'
+import { ROLE_COLORS } from '../constants/ui.constants'
+import '../styles/CharactersPage.css'
 
-import { nameToSlug } from "../utils/characterUtils";
+import { nameToSlug } from '../utils/characterUtils'
 
-import { generateParticles } from "../utils/uiUtils";
+import { generateParticles } from '../utils/uiUtils'
 
 // ─── Floating particles ───────────────────────────────────────────────────────
 function Particles() {
-  const [pts] = useState(() => generateParticles(35));
+  const [pts] = useState(() => generateParticles(35))
   return (
     <div className="chrs-particles" aria-hidden="true">
       {pts.map((p) => (
@@ -30,7 +30,7 @@ function Particles() {
         />
       ))}
     </div>
-  );
+  )
 }
 
 // ─── Role badge ───────────────────────────────────────────────────────────────
@@ -39,17 +39,17 @@ function RoleBadge({ role }) {
   return (
     <span
       className="chrs-role-badge"
-      style={{ "--badge-color": ROLE_COLORS[role] ?? "var(--wiki-purple)" }}
+      style={{ '--badge-color': ROLE_COLORS[role] ?? 'var(--wiki-purple)' }}
     >
       {role}
     </span>
-  );
+  )
 }
 
 // ─── Character card ───────────────────────────────────────────────────────────
 function CharacterCard({ character, index }) {
-  const slug = character.slug ?? nameToSlug(character.name);
-  const coverUrl = character.image?.[0]?.url;
+  const slug = character.slug ?? nameToSlug(character.name)
+  const coverUrl = character.image?.[0]?.url
 
   return (
     <Link
@@ -96,7 +96,7 @@ function CharacterCard({ character, index }) {
         </span>
       </div>
     </Link>
-  );
+  )
 }
 
 // ─── Skeleton card ────────────────────────────────────────────────────────────
@@ -112,11 +112,11 @@ function SkeletonCard() {
         <div className="chrs-skeleton-bar w-3/4" />
       </div>
     </div>
-  );
+  )
 }
 
 // ─── Filter / search bar ──────────────────────────────────────────────────────
-const ROLES = ["All", "Protagonist", "Supporting", "Antagonist", "Cameo"];
+const ROLES = ['All', 'Protagonist', 'Supporting', 'Antagonist', 'Cameo']
 
 function FilterBar({ search, onSearch, role, onRole, total, showing }) {
   return (
@@ -148,7 +148,7 @@ function FilterBar({ search, onSearch, role, onRole, total, showing }) {
         {search && (
           <button
             className="chrs-search-clear"
-            onClick={() => onSearch("")}
+            onClick={() => onSearch('')}
             aria-label="Clear search"
           >
             ✕
@@ -161,11 +161,11 @@ function FilterBar({ search, onSearch, role, onRole, total, showing }) {
         {ROLES.map((r) => (
           <button
             key={r}
-            className={`chrs-role-pill ${role === r ? "chrs-role-pill--active" : ""}`}
+            className={`chrs-role-pill ${role === r ? 'chrs-role-pill--active' : ''}`}
             onClick={() => onRole(r)}
             style={
-              role === r && r !== "All"
-                ? { "--pill-color": ROLE_COLORS[r] ?? "var(--chrs-purple)" }
+              role === r && r !== 'All'
+                ? { '--pill-color': ROLE_COLORS[r] ?? 'var(--chrs-purple)' }
                 : {}
             }
           >
@@ -176,28 +176,28 @@ function FilterBar({ search, onSearch, role, onRole, total, showing }) {
 
       {/* Count */}
       <p className="chrs-count">
-        Showing <strong>{showing}</strong> of <strong>{total}</strong>{" "}
+        Showing <strong>{showing}</strong> of <strong>{total}</strong>{' '}
         characters
       </p>
     </div>
-  );
+  )
 }
 
 // ─── Pagination ───────────────────────────────────────────────────────────────
 function Pagination({ current, total, onChange }) {
-  if (total <= 1) return null;
+  if (total <= 1) return null
 
-  const pages = Array.from({ length: total }, (_, i) => i + 1);
+  const pages = Array.from({ length: total }, (_, i) => i + 1)
   const visible = pages.filter(
-    (p) => p === 1 || p === total || Math.abs(p - current) <= 1,
-  );
+    (p) => p === 1 || p === total || Math.abs(p - current) <= 1
+  )
 
-  const rendered = [];
-  let prev = null;
+  const rendered = []
+  let prev = null
   for (const p of visible) {
-    if (prev !== null && p - prev > 1) rendered.push("…");
-    rendered.push(p);
-    prev = p;
+    if (prev !== null && p - prev > 1) rendered.push('…')
+    rendered.push(p)
+    prev = p
   }
 
   return (
@@ -212,20 +212,20 @@ function Pagination({ current, total, onChange }) {
       </button>
 
       {rendered.map((item, i) =>
-        item === "…" ? (
+        item === '…' ? (
           <span key={`ellipsis-${i}`} className="chrs-page-ellipsis">
             …
           </span>
         ) : (
           <button
             key={item}
-            className={`chrs-page-btn ${item === current ? "chrs-page-btn--active" : ""}`}
+            className={`chrs-page-btn ${item === current ? 'chrs-page-btn--active' : ''}`}
             onClick={() => onChange(item)}
-            aria-current={item === current ? "page" : undefined}
+            aria-current={item === current ? 'page' : undefined}
           >
             {item}
           </button>
-        ),
+        )
       )}
 
       <button
@@ -237,84 +237,84 @@ function Pagination({ current, total, onChange }) {
         →
       </button>
     </nav>
-  );
+  )
 }
 
 // ─── Main page ────────────────────────────────────────────────────────────────
-const LIMIT = 12;
+const LIMIT = 12
 
 export default function CharactersPage({ sidebarCollapsed }) {
-  const { data: movie } = useMovieInfo();
-  const headerTitle = movie?.title ?? "超かぐや姫";
-  const headerSub = movie?.tagline ?? "";
+  const { data: movie } = useMovieInfo()
+  const headerTitle = movie?.title ?? '超かぐや姫'
+  const headerSub = movie?.tagline ?? ''
 
-  const [characters, setCharacters] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [search, setSearch] = useState("");
-  const [role, setRole] = useState("All");
-  const [page, setPage] = useState(1);
-  const [pagination, setPagination] = useState({ total: 0, totalPages: 1 });
+  const [characters, setCharacters] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const [search, setSearch] = useState('')
+  const [role, setRole] = useState('All')
+  const [page, setPage] = useState(1)
+  const [pagination, setPagination] = useState({ total: 0, totalPages: 1 })
 
-  const debounceRef = useRef(null);
+  const debounceRef = useRef(null)
 
   const load = useCallback(async (p, s, r) => {
-    setLoading(true);
-    setError(null);
+    setLoading(true)
+    setError(null)
     try {
-      const params = { page: p, limit: LIMIT };
-      if (s) params.search = s;
-      if (r && r !== "All") params.role = r;
+      const params = { page: p, limit: LIMIT }
+      if (s) params.search = s
+      if (r && r !== 'All') params.role = r
 
-      const data = await getCharacters(params);
-      setCharacters(data.characters ?? []);
-      setPagination(data.pagination ?? { total: 0, totalPages: 1 });
+      const data = await getCharacters(params)
+      setCharacters(data.characters ?? [])
+      setPagination(data.pagination ?? { total: 0, totalPages: 1 })
     } catch (err) {
-      setError(err.message);
+      setError(err.message)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  }, []);
+  }, [])
 
   // Initial load
   useEffect(() => {
-    load(1, "", "All");
-  }, [load]);
+    load(1, '', 'All')
+  }, [load])
 
   // Debounced search
   const handleSearch = useCallback(
     (val) => {
-      setSearch(val);
-      clearTimeout(debounceRef.current);
+      setSearch(val)
+      clearTimeout(debounceRef.current)
       debounceRef.current = setTimeout(() => {
-        setPage(1);
-        load(1, val, role);
-      }, 350);
+        setPage(1)
+        load(1, val, role)
+      }, 350)
     },
-    [load, role],
-  );
+    [load, role]
+  )
 
   const handleRole = useCallback(
     (r) => {
-      setRole(r);
-      setPage(1);
-      load(1, search, r);
+      setRole(r)
+      setPage(1)
+      load(1, search, r)
     },
-    [load, search],
-  );
+    [load, search]
+  )
 
   const handlePage = useCallback(
     (p) => {
-      setPage(p);
-      load(p, search, role);
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      setPage(p)
+      load(p, search, role)
+      window.scrollTo({ top: 0, behavior: 'smooth' })
     },
-    [load, search, role],
-  );
+    [load, search, role]
+  )
 
   return (
     <main
-      className={`chrs-root ${sidebarCollapsed ? "sidebar-collapsed" : ""}`}
+      className={`chrs-root ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}
     >
       <Particles />
 
@@ -353,21 +353,21 @@ export default function CharactersPage({ sidebarCollapsed }) {
         </div>
       ) : (
         <>
-          <div className={`chrs-grid ${loading ? "chrs-grid--loading" : ""}`}>
+          <div className={`chrs-grid ${loading ? 'chrs-grid--loading' : ''}`}>
             {loading ? (
               Array.from({ length: LIMIT }, (_, i) => <SkeletonCard key={i} />)
             ) : characters.length === 0 ? (
               <div className="chrs-empty">
                 <span className="chrs-empty-glyph">◈</span>
                 <p>No characters found.</p>
-                {(search || role !== "All") && (
+                {(search || role !== 'All') && (
                   <button
                     className="chrs-retry-btn"
                     onClick={() => {
-                      setSearch("");
-                      setRole("All");
-                      setPage(1);
-                      load(1, "", "All");
+                      setSearch('')
+                      setRole('All')
+                      setPage(1)
+                      load(1, '', 'All')
                     }}
                   >
                     Clear filters
@@ -391,5 +391,5 @@ export default function CharactersPage({ sidebarCollapsed }) {
         </>
       )}
     </main>
-  );
+  )
 }

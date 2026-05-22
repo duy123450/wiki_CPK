@@ -1,15 +1,20 @@
-import { useEffect, useState, useRef } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff } from "lucide-react";
-import { loginUser, registerUser, uploadAvatar, refreshAccessToken } from "../services/api";
-import GoogleLoginButton from "../components/GoogleLoginButton";
-import TwitterLoginButton from "../components/TwitterLoginButton";
-import DiscordLoginButton from "../components/DiscordLoginButton";
-import GithubLoginButton from "../components/GithubLoginButton";
-import { loginSchema, registerSchema } from "../schemas/authSchemas";
-import "../styles/AuthPage.css";
+import { useEffect, useState, useRef } from 'react'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { Eye, EyeOff } from 'lucide-react'
+import {
+  loginUser,
+  registerUser,
+  uploadAvatar,
+  refreshAccessToken,
+} from '../services/api'
+import GoogleLoginButton from '../components/GoogleLoginButton'
+import TwitterLoginButton from '../components/TwitterLoginButton'
+import DiscordLoginButton from '../components/DiscordLoginButton'
+import GithubLoginButton from '../components/GithubLoginButton'
+import { loginSchema, registerSchema } from '../schemas/authSchemas'
+import '../styles/AuthPage.css'
 
 export default function AuthPage({
   sidebarCollapsed,
@@ -18,25 +23,25 @@ export default function AuthPage({
   onAvatarUpdate, // (avatar) — called when only the avatar changes
   onLogout,
 }) {
-  const [mode, setMode] = useState("login");
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState("");
+  const [mode, setMode] = useState('login')
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState('')
 
-  const [avatarUploading, setAvatarUploading] = useState(false);
-  const [avatarError, setAvatarError] = useState("");
-  const [avatarPreview, setAvatarPreview] = useState(null);
-  const [pendingAvatarFile, setPendingAvatarFile] = useState(null);
-  const fileInputRef = useRef(null);
+  const [avatarUploading, setAvatarUploading] = useState(false)
+  const [avatarError, setAvatarError] = useState('')
+  const [avatarPreview, setAvatarPreview] = useState(null)
+  const [pendingAvatarFile, setPendingAvatarFile] = useState(null)
+  const fileInputRef = useRef(null)
 
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
-  const oauthSuccess = searchParams.get("oauth") === "success";
-  const googleError = searchParams.get("googleError");
-  const twitterError = searchParams.get("twitterError");
-  const discordError = searchParams.get("discordError");
-  const socialError = searchParams.get("error");
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [searchParams] = useSearchParams()
+  const navigate = useNavigate()
+  const oauthSuccess = searchParams.get('oauth') === 'success'
+  const googleError = searchParams.get('googleError')
+  const twitterError = searchParams.get('twitterError')
+  const discordError = searchParams.get('discordError')
+  const socialError = searchParams.get('error')
 
   // ── react-hook-form setup ───────────────────────────────────────────────────
   const {
@@ -45,12 +50,12 @@ export default function AuthPage({
     reset,
     formState: { errors: fieldErrors },
   } = useForm({
-    resolver: zodResolver(mode === "register" ? registerSchema : loginSchema),
+    resolver: zodResolver(mode === 'register' ? registerSchema : loginSchema),
     defaultValues:
-      mode === "register"
-        ? { username: "", email: "", password: "", confirmPassword: "" }
-        : { identifier: "", password: "" },
-  });
+      mode === 'register'
+        ? { username: '', email: '', password: '', confirmPassword: '' }
+        : { identifier: '', password: '' },
+  })
 
   useEffect(() => {
     if (oauthSuccess) {
@@ -60,35 +65,37 @@ export default function AuthPage({
             user: data.user,
             accessToken: data.accessToken,
             token: data.accessToken,
-          });
-          navigate("/auth", { replace: true });
+          })
+          navigate('/auth', { replace: true })
         })
         .catch(() => {
-          setError("Sign-in failed or expired. Please try again.");
-          navigate("/auth", { replace: true });
-        });
-      return;
+          setError('Sign-in failed or expired. Please try again.')
+          navigate('/auth', { replace: true })
+        })
+      return
     }
 
-    if (socialError === "social_conflict") {
-      setError("This email is already associated with another login method. Please use your original login.");
-      navigate("/auth", { replace: true });
-      return;
+    if (socialError === 'social_conflict') {
+      setError(
+        'This email is already associated with another login method. Please use your original login.'
+      )
+      navigate('/auth', { replace: true })
+      return
     }
 
     if (googleError) {
-      setError("Google sign-in was cancelled or failed.");
-      navigate("/auth", { replace: true });
+      setError('Google sign-in was cancelled or failed.')
+      navigate('/auth', { replace: true })
     }
 
     if (twitterError) {
-      setError("X sign-in was cancelled or failed.");
-      navigate("/auth", { replace: true });
+      setError('X sign-in was cancelled or failed.')
+      navigate('/auth', { replace: true })
     }
 
     if (discordError) {
-      setError("Discord sign-in was cancelled or failed.");
-      navigate("/auth", { replace: true });
+      setError('Discord sign-in was cancelled or failed.')
+      navigate('/auth', { replace: true })
     }
   }, [
     oauthSuccess,
@@ -98,107 +105,107 @@ export default function AuthPage({
     socialError,
     navigate,
     onAuthSuccess,
-  ]);
+  ])
 
   const switchMode = (next) => {
-    setMode(next);
+    setMode(next)
     reset(
-      next === "register"
-        ? { username: "", email: "", password: "", confirmPassword: "" }
-        : { identifier: "", password: "" },
-    );
-    setError("");
-    setAvatarPreview(null);
-    setPendingAvatarFile(null);
-    setAvatarError("");
-    setShowPassword(false);
-    setShowConfirmPassword(false);
-  };
+      next === 'register'
+        ? { username: '', email: '', password: '', confirmPassword: '' }
+        : { identifier: '', password: '' }
+    )
+    setError('')
+    setAvatarPreview(null)
+    setPendingAvatarFile(null)
+    setAvatarError('')
+    setShowPassword(false)
+    setShowConfirmPassword(false)
+  }
 
   // ── File chosen ────────────────────────────────────────────────────────────
   const handleAvatarChange = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+    const file = e.target.files[0]
+    if (!file) return
 
-    const objectUrl = URL.createObjectURL(file);
-    setAvatarPreview(objectUrl);
-    setAvatarError("");
+    const objectUrl = URL.createObjectURL(file)
+    setAvatarPreview(objectUrl)
+    setAvatarError('')
 
     if (!currentUser) {
       // During register: hold the file, upload after account creation
-      setPendingAvatarFile(file);
-      return;
+      setPendingAvatarFile(file)
+      return
     }
 
     // Signed-in: upload immediately, then only patch the avatar field in state
-    setAvatarUploading(true);
+    setAvatarUploading(true)
     try {
-      const data = await uploadAvatar(file);
-      onAvatarUpdate(data.avatar);
+      const data = await uploadAvatar(file)
+      onAvatarUpdate(data.avatar)
       // Keep the preview until the parent re-renders with the new URL
     } catch (err) {
-      setAvatarError(err.response?.data?.msg || "Upload failed");
-      setAvatarPreview(null);
+      setAvatarError(err.response?.data?.msg || 'Upload failed')
+      setAvatarPreview(null)
     } finally {
-      setAvatarUploading(false);
-      URL.revokeObjectURL(objectUrl);
+      setAvatarUploading(false)
+      URL.revokeObjectURL(objectUrl)
     }
-  };
+  }
 
   // ── Form submit ────────────────────────────────────────────────────────────
   const onSubmit = async (formData) => {
-    setSubmitting(true);
-    setError("");
+    setSubmitting(true)
+    setError('')
 
     try {
-      let response; // { user, token }
+      let response // { user, token }
 
-      if (mode === "register") {
+      if (mode === 'register') {
         response = await registerUser({
           username: formData.username,
           email: formData.email,
           password: formData.password,
-        });
+        })
       } else {
         response = await loginUser({
           identifier: formData.identifier,
           password: formData.password,
-        });
+        })
       }
 
       // Persist session — must be { user, token }
-      onAuthSuccess(response);
+      onAuthSuccess(response)
 
       // Upload avatar chosen before submitting the register form
-      if (mode === "register" && pendingAvatarFile) {
-        setAvatarUploading(true);
+      if (mode === 'register' && pendingAvatarFile) {
+        setAvatarUploading(true)
         try {
-          const data = await uploadAvatar(pendingAvatarFile);
-          onAvatarUpdate(data.avatar); // patch only the avatar slice
+          const data = await uploadAvatar(pendingAvatarFile)
+          onAvatarUpdate(data.avatar) // patch only the avatar slice
         } catch {
           setAvatarError(
-            "Account created! Avatar upload failed — you can change it later.",
-          );
+            'Account created! Avatar upload failed — you can change it later.'
+          )
         } finally {
-          setAvatarUploading(false);
-          setPendingAvatarFile(null);
+          setAvatarUploading(false)
+          setPendingAvatarFile(null)
         }
       }
     } catch (err) {
-      setError(err.response?.data?.msg || "Authentication failed");
+      setError(err.response?.data?.msg || 'Authentication failed')
     } finally {
-      setSubmitting(false);
+      setSubmitting(false)
     }
-  };
+  }
 
   // ─── Signed-in view ────────────────────────────────────────────────────────
   if (currentUser) {
     // Use local preview while upload is in-flight; fall back to persisted URL
-    const avatarSrc = avatarPreview || currentUser.avatar?.url;
+    const avatarSrc = avatarPreview || currentUser.avatar?.url
 
     return (
       <section
-        className={`auth-root ${sidebarCollapsed ? "sidebar-collapsed" : ""}`}
+        className={`auth-root ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}
       >
         <div className="auth-shell auth-shell--signed-in">
           <span className="auth-badge">Signed In</span>
@@ -206,7 +213,7 @@ export default function AuthPage({
           <div className="auth-avatar-wrap">
             <div
               className={`auth-avatar-ring ${
-                avatarUploading ? "auth-avatar-ring--uploading" : ""
+                avatarUploading ? 'auth-avatar-ring--uploading' : ''
               }`}
             >
               <img
@@ -225,14 +232,14 @@ export default function AuthPage({
               onClick={() => fileInputRef.current.click()}
               disabled={avatarUploading}
             >
-              {avatarUploading ? "Uploading…" : "Change Avatar"}
+              {avatarUploading ? 'Uploading…' : 'Change Avatar'}
             </button>
 
             <input
               ref={fileInputRef}
               type="file"
               accept="image/jpeg,image/png,image/jpg"
-              style={{ display: "none" }}
+              style={{ display: 'none' }}
               onChange={handleAvatarChange}
             />
 
@@ -264,13 +271,13 @@ export default function AuthPage({
           </div>
         </div>
       </section>
-    );
+    )
   }
 
   // ─── Login / Register view ─────────────────────────────────────────────────
   return (
     <section
-      className={`auth-root ${sidebarCollapsed ? "sidebar-collapsed" : ""}`}
+      className={`auth-root ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}
     >
       <div className="auth-shell">
         <div className="auth-hero">
@@ -281,22 +288,22 @@ export default function AuthPage({
         <div className="auth-tabs" role="tablist" aria-label="Auth mode tabs">
           <button
             type="button"
-            className={`auth-tab ${mode === "login" ? "active" : ""}`}
-            onClick={() => switchMode("login")}
+            className={`auth-tab ${mode === 'login' ? 'active' : ''}`}
+            onClick={() => switchMode('login')}
           >
             Login
           </button>
           <button
             type="button"
-            className={`auth-tab ${mode === "register" ? "active" : ""}`}
-            onClick={() => switchMode("register")}
+            className={`auth-tab ${mode === 'register' ? 'active' : ''}`}
+            onClick={() => switchMode('register')}
           >
             Register
           </button>
         </div>
 
         <form className="auth-form" onSubmit={rhfHandleSubmit(onSubmit)}>
-          {mode === "register" && (
+          {mode === 'register' && (
             <>
               {/* Avatar picker shown only during registration */}
               <div className="auth-avatar-register">
@@ -318,14 +325,14 @@ export default function AuthPage({
                 <p className="auth-avatar-register-hint">
                   {pendingAvatarFile
                     ? `Selected: ${pendingAvatarFile.name}`
-                    : "Optional — you can change it later"}
+                    : 'Optional — you can change it later'}
                 </p>
 
                 <input
                   ref={fileInputRef}
                   type="file"
                   accept="image/jpeg,image/png,image/jpg"
-                  style={{ display: "none" }}
+                  style={{ display: 'none' }}
                   onChange={handleAvatarChange}
                 />
               </div>
@@ -334,28 +341,34 @@ export default function AuthPage({
                 <span>Username</span>
                 <input
                   type="text"
-                  {...register("username")}
+                  {...register('username')}
                   autoComplete="username"
                 />
                 {fieldErrors.username && (
-                  <span className="auth-field-error">{fieldErrors.username.message}</span>
+                  <span className="auth-field-error">
+                    {fieldErrors.username.message}
+                  </span>
                 )}
               </label>
             </>
           )}
 
           <label className="auth-field">
-            <span>{mode === "register" ? "Email" : "Email or Username"}</span>
+            <span>{mode === 'register' ? 'Email' : 'Email or Username'}</span>
             <input
-              type={mode === "register" ? "email" : "text"}
-              {...register(mode === "register" ? "email" : "identifier")}
-              autoComplete={mode === "register" ? "email" : "username"}
+              type={mode === 'register' ? 'email' : 'text'}
+              {...register(mode === 'register' ? 'email' : 'identifier')}
+              autoComplete={mode === 'register' ? 'email' : 'username'}
             />
-            {mode === "register" && fieldErrors.email && (
-              <span className="auth-field-error">{fieldErrors.email.message}</span>
+            {mode === 'register' && fieldErrors.email && (
+              <span className="auth-field-error">
+                {fieldErrors.email.message}
+              </span>
             )}
-            {mode === "login" && fieldErrors.identifier && (
-              <span className="auth-field-error">{fieldErrors.identifier.message}</span>
+            {mode === 'login' && fieldErrors.identifier && (
+              <span className="auth-field-error">
+                {fieldErrors.identifier.message}
+              </span>
             )}
           </label>
 
@@ -363,37 +376,39 @@ export default function AuthPage({
             <span>Password</span>
             <div className="auth-input-wrapper">
               <input
-                type={showPassword ? "text" : "password"}
-                {...register("password")}
+                type={showPassword ? 'text' : 'password'}
+                {...register('password')}
               />
               <button
                 type="button"
                 className="auth-password-toggle"
                 onClick={() => setShowPassword((prev) => !prev)}
-                title={showPassword ? "Hide password" : "Show password"}
+                title={showPassword ? 'Hide password' : 'Show password'}
               >
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
             {fieldErrors.password && (
-              <span className="auth-field-error">{fieldErrors.password.message}</span>
+              <span className="auth-field-error">
+                {fieldErrors.password.message}
+              </span>
             )}
           </label>
 
-          {mode === "register" && (
+          {mode === 'register' && (
             <label className="auth-field">
               <span>Confirm Password</span>
               <div className="auth-input-wrapper">
                 <input
-                  type={showConfirmPassword ? "text" : "password"}
-                  {...register("confirmPassword")}
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  {...register('confirmPassword')}
                 />
                 <button
                   type="button"
                   className="auth-password-toggle"
                   onClick={() => setShowConfirmPassword((prev) => !prev)}
                   title={
-                    showConfirmPassword ? "Hide password" : "Show password"
+                    showConfirmPassword ? 'Hide password' : 'Show password'
                   }
                 >
                   {showConfirmPassword ? (
@@ -404,13 +419,15 @@ export default function AuthPage({
                 </button>
               </div>
               {fieldErrors.confirmPassword && (
-                <span className="auth-field-error">{fieldErrors.confirmPassword.message}</span>
+                <span className="auth-field-error">
+                  {fieldErrors.confirmPassword.message}
+                </span>
               )}
             </label>
           )}
 
           {error && <p className="auth-error">{error}</p>}
-          {avatarError && mode === "register" && (
+          {avatarError && mode === 'register' && (
             <p className="auth-error">{avatarError}</p>
           )}
 
@@ -420,10 +437,10 @@ export default function AuthPage({
             disabled={submitting || avatarUploading}
           >
             {submitting || avatarUploading
-              ? "Processing…"
-              : mode === "register"
-                ? "Create Account"
-                : "Login"}
+              ? 'Processing…'
+              : mode === 'register'
+                ? 'Create Account'
+                : 'Login'}
           </button>
 
           <div className="auth-divider">
@@ -439,5 +456,5 @@ export default function AuthPage({
         </form>
       </div>
     </section>
-  );
+  )
 }

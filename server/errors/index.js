@@ -1,14 +1,14 @@
-const Errors = require("./custom-error");
+const Errors = require('./custom-error')
 
 class UnauthenticatedError extends Errors.AuthError {
   constructor(message) {
-    super(message || 'Unauthenticated', 401);
+    super(message || 'Unauthenticated', 401)
   }
 }
 
 class UnauthorizedError extends Errors.AuthError {
   constructor(message) {
-    super(message || 'Unauthorized', 403);
+    super(message || 'Unauthorized', 403)
   }
 }
 
@@ -17,4 +17,4 @@ module.exports = {
   UnauthenticatedError,
   UnauthorizedError,
   SoundtrackError: Errors.WikiError,
-};
+}

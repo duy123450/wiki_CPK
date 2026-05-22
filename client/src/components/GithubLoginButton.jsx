@@ -1,9 +1,9 @@
-import { getGithubLoginUrl } from "../services/api";
+import { getGithubLoginUrl } from '../services/api'
 
 export default function GithubLoginButton() {
   const handleClick = () => {
-    window.location.href = getGithubLoginUrl();
-  };
+    window.location.href = getGithubLoginUrl()
+  }
 
   return (
     <button
@@ -24,5 +24,5 @@ export default function GithubLoginButton() {
         />
       </svg>
     </button>
-  );
+  )
 }

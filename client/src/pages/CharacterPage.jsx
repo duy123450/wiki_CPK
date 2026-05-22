@@ -1,17 +1,17 @@
 /* eslint-disable react-hooks/purity */
-import { useState } from "react";
-import { useParams, Link } from "react-router-dom";
-import { ROLE_COLORS } from "../constants/ui.constants";
-import "../styles/CharacterPage.css";
+import { useState } from 'react'
+import { useParams, Link } from 'react-router-dom'
+import { ROLE_COLORS } from '../constants/ui.constants'
+import '../styles/CharacterPage.css'
 
-import { getAppearance } from "../utils/characterUtils";
-import { generateParticles } from "../utils/uiUtils";
-import { useCharacter } from "../hooks/useCharacter";
+import { getAppearance } from '../utils/characterUtils'
+import { generateParticles } from '../utils/uiUtils'
+import { useCharacter } from '../hooks/useCharacter'
 
 // Components
-import AbilityCard from "../components/Character/AbilityCard";
-import RelChip from "../components/Character/RelChip";
-import ImageSwitcher from "../components/Character/ImageSwitcher";
+import AbilityCard from '../components/Character/AbilityCard'
+import RelChip from '../components/Character/RelChip'
+import ImageSwitcher from '../components/Character/ImageSwitcher'
 
 // ─── Role badge ───────────────────────────────────────────────────────────────
 
@@ -19,22 +19,22 @@ function RoleBadge({ role }) {
   return (
     <span
       className="chr-role-badge"
-      style={{ "--badge-color": ROLE_COLORS[role] ?? "var(--chr-purple)" }}
+      style={{ '--badge-color': ROLE_COLORS[role] ?? 'var(--chr-purple)' }}
     >
       {role}
     </span>
-  );
+  )
 }
 
 // ─── Stat row ─────────────────────────────────────────────────────────────────
 function StatRow({ label, value }) {
-  if (!value) return null;
+  if (!value) return null
   return (
     <div className="chr-stat-row">
       <dt className="chr-stat-label">{label}</dt>
       <dd className="chr-stat-value">{value}</dd>
     </div>
-  );
+  )
 }
 
 // ─── Section card ─────────────────────────────────────────────────────────────
@@ -44,13 +44,13 @@ function SectionCard({ title, ornamentColor, children }) {
       <div className="chr-section-head">
         <span
           className="chr-section-orn"
-          style={{ "--orn-color": ornamentColor ?? "var(--chr-purple)" }}
+          style={{ '--orn-color': ornamentColor ?? 'var(--chr-purple)' }}
         />
         <h2 className="chr-section-title">{title}</h2>
       </div>
       {children}
     </div>
-  );
+  )
 }
 
 // ─── Shimmer skeleton ─────────────────────────────────────────────────────────
@@ -64,12 +64,12 @@ function Skeleton() {
         <div className="chr-skeleton-bar w-30" />
       </div>
     </div>
-  );
+  )
 }
 
 // ─── Floating particles ───────────────────────────────────────────────────────
 function Particles() {
-  const [pts] = useState(() => generateParticles(30));
+  const [pts] = useState(() => generateParticles(30))
   return (
     <div className="chr-particles" aria-hidden="true">
       {pts.map((p) => (
@@ -87,19 +87,19 @@ function Particles() {
         />
       ))}
     </div>
-  );
+  )
 }
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 export default function CharacterPage({ sidebarCollapsed }) {
-  const { slug } = useParams();
-  const { character, loading, error } = useCharacter(slug);
+  const { slug } = useParams()
+  const { character, loading, error } = useCharacter(slug)
 
-  const c = character;
-  const appearance = c ? getAppearance(c.description?.appearance) : null;
+  const c = character
+  const appearance = c ? getAppearance(c.description?.appearance) : null
 
   return (
-    <main className={`chr-root ${sidebarCollapsed ? "sidebar-collapsed" : ""}`}>
+    <main className={`chr-root ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
       <Particles />
 
       <div className="chr-breadcrumb">
@@ -154,7 +154,7 @@ export default function CharacterPage({ sidebarCollapsed }) {
                           label={k.charAt(0).toUpperCase() + k.slice(1)}
                           value={v}
                         />
-                      ) : null,
+                      ) : null
                     )}
                 </dl>
               )}
@@ -166,7 +166,7 @@ export default function CharacterPage({ sidebarCollapsed }) {
             <header className="chr-header">
               <div className="chr-eyebrow">
                 <span className="chr-eyebrow-dot" />
-                Character · {c.movie?.title ?? "CPK"}
+                Character · {c.movie?.title ?? 'CPK'}
               </div>
               <h1 className="chr-name">{c.name}</h1>
               <div className="chr-header-rule" />
@@ -234,6 +234,5 @@ export default function CharacterPage({ sidebarCollapsed }) {
         </div>
       )}
     </main>
-  );
+  )
 }
-

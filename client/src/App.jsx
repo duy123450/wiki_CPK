@@ -1,30 +1,30 @@
-import { useState } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import ScrollToTop from "./components/ScrollToTop";
-import DragonCursor from "./components/DragonCursor";
-import Sidebar from "./components/Sidebar";
-import ProtectedRoute from "./components/ProtectedRoute";
-import HeroPage from "./pages/HeroPage";
-import MovieOverviewPage from "./pages/MovieOverviewPage";
-import CharactersPage from "./pages/CharactersPage";
-import CharacterPage from "./pages/CharacterPage";
-import NotFoundPage from "./pages/NotFoundPage";
-import AuthPage from "./pages/AuthPage";
-import ProfilePage from "./pages/ProfilePage";
-import Footer from "./components/Footer";
-import Playlist from "./components/Playlist";
-import useAuth from "./hooks/useAuth";
+import { useState } from 'react'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import ScrollToTop from './components/ScrollToTop'
+import DragonCursor from './components/DragonCursor'
+import Sidebar from './components/Sidebar'
+import ProtectedRoute from './components/ProtectedRoute'
+import HeroPage from './pages/HeroPage'
+import MovieOverviewPage from './pages/MovieOverviewPage'
+import CharactersPage from './pages/CharactersPage'
+import CharacterPage from './pages/CharacterPage'
+import NotFoundPage from './pages/NotFoundPage'
+import AuthPage from './pages/AuthPage'
+import ProfilePage from './pages/ProfilePage'
+import Footer from './components/Footer'
+import Playlist from './components/Playlist'
+import useAuth from './hooks/useAuth'
 
 export default function App() {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [dragonCursorEnabled, setDragonCursorEnabled] = useState(true);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  const [dragonCursorEnabled, setDragonCursorEnabled] = useState(true)
   const {
     authUser,
     handleAuthSuccess,
     handleAvatarUpdate,
     handleLogout,
     handleProfileUpdate,
-  } = useAuth();
+  } = useAuth()
 
   return (
     <Router>
@@ -90,5 +90,5 @@ export default function App() {
         <Playlist />
       </>
     </Router>
-  );
+  )
 }

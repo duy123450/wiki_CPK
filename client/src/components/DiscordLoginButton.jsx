@@ -1,9 +1,9 @@
-import { getDiscordLoginUrl } from "../services/api";
+import { getDiscordLoginUrl } from '../services/api'
 
 export default function DiscordLoginButton() {
   const handleClick = () => {
-    window.location.href = getDiscordLoginUrl();
-  };
+    window.location.href = getDiscordLoginUrl()
+  }
 
   return (
     <button
@@ -24,5 +24,5 @@ export default function DiscordLoginButton() {
         />
       </svg>
     </button>
-  );
+  )
 }

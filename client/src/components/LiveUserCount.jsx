@@ -1,27 +1,37 @@
-import useLiveUserCount from "../hooks/useLiveUserCount";
+import useLiveUserCount from '../hooks/useLiveUserCount'
 
 export default function LiveUserCount() {
-  const userCount = useLiveUserCount();
+  const userCount = useLiveUserCount()
 
   return (
-    <div className="live-user-count" style={{ display: "flex", alignItems: "center", gap: "8px", justifyContent: "center" }}>
+    <div
+      className="live-user-count"
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
+        justifyContent: 'center',
+      }}
+    >
       <span
         style={{
-          width: "10px",
-          height: "10px",
-          backgroundColor: "#4ade80",
-          borderRadius: "50%",
-          display: "inline-block",
-          animation: "pulse 1.5s infinite"
+          width: '10px',
+          height: '10px',
+          backgroundColor: '#4ade80',
+          borderRadius: '50%',
+          display: 'inline-block',
+          animation: 'pulse 1.5s infinite',
         }}
       />
-      <span style={{ 
-        fontSize: "11px", 
-        color: "var(--text-secondary, #8b7da8)", 
-        fontFamily: "'Inter', sans-serif",
-        fontWeight: 500,
-        letterSpacing: "0.02em"
-      }}>
+      <span
+        style={{
+          fontSize: '11px',
+          color: 'var(--text-secondary, #8b7da8)',
+          fontFamily: "'Inter', sans-serif",
+          fontWeight: 500,
+          letterSpacing: '0.02em',
+        }}
+      >
         Có {userCount} con dân CPK đang online
       </span>
       <style>
@@ -34,5 +44,5 @@ export default function LiveUserCount() {
         `}
       </style>
     </div>
-  );
+  )
 }

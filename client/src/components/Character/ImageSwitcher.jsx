@@ -1,35 +1,35 @@
-import { useState, useRef, useCallback, useEffect } from "react";
-import { IMAGE_LABELS } from "../../constants/ui.constants";
+import { useState, useRef, useCallback, useEffect } from 'react'
+import { IMAGE_LABELS } from '../../constants/ui.constants'
 
 export default function ImageSwitcher({ images }) {
-  const [active, setActive] = useState(0);
-  const [fading, setFading] = useState(false);
-  const timerRef = useRef(null);
+  const [active, setActive] = useState(0)
+  const [fading, setFading] = useState(false)
+  const timerRef = useRef(null)
 
   const switchTo = useCallback(
     (idx) => {
-      if (idx === active || fading) return;
-      setFading(true);
-      clearTimeout(timerRef.current);
+      if (idx === active || fading) return
+      setFading(true)
+      clearTimeout(timerRef.current)
       timerRef.current = setTimeout(() => {
-        setActive(idx);
-        setFading(false);
-      }, 260);
+        setActive(idx)
+        setFading(false)
+      }, 260)
     },
-    [active, fading],
-  );
+    [active, fading]
+  )
 
-  useEffect(() => () => clearTimeout(timerRef.current), []);
+  useEffect(() => () => clearTimeout(timerRef.current), [])
 
   if (!images || images.length === 0) {
     return (
       <div className="chr-img-placeholder">
         <span className="chr-img-placeholder-glyph">✦</span>
       </div>
-    );
+    )
   }
 
-  const single = images.length === 1;
+  const single = images.length === 1
 
   return (
     <div className="chr-img-block">
@@ -42,7 +42,7 @@ export default function ImageSwitcher({ images }) {
           key={active}
           src={images[active].url}
           alt={`character view ${active + 1}`}
-          className={`chr-img-main ${fading ? "chr-img-fade-out" : "chr-img-fade-in"}`}
+          className={`chr-img-main ${fading ? 'chr-img-fade-out' : 'chr-img-fade-in'}`}
         />
         <div className="chr-img-reflection" />
       </div>
@@ -52,7 +52,7 @@ export default function ImageSwitcher({ images }) {
           {images.map((_, i) => (
             <button
               key={i}
-              className={`chr-switch-btn ${i === active ? "chr-switch-btn--active" : ""}`}
+              className={`chr-switch-btn ${i === active ? 'chr-switch-btn--active' : ''}`}
               onClick={() => switchTo(i)}
               aria-label={IMAGE_LABELS[i] ?? `View ${i + 1}`}
             >
@@ -65,5 +65,5 @@ export default function ImageSwitcher({ images }) {
         </div>
       )}
     </div>
-  );
+  )
 }

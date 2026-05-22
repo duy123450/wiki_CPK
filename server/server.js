@@ -28,87 +28,90 @@ const characterRouter = require('./modules/characters/character.route')
 const authRouter = require('./modules/auth/auth.route')
 
 // Allowed Origins & Options
-const isProd = envConfig.NODE_ENV === 'production';
+const isProd = envConfig.NODE_ENV === 'production'
 const allowedOrigins = isProd
-    ? [envConfig.FRONTEND_URL]
-    : [
-        'http://localhost:5173',
-        'http://localhost:5174',
-        'http://localhost:3000',
-        envConfig.FRONTEND_URL
-    ].filter(Boolean);
+  ? [envConfig.FRONTEND_URL]
+  : [
+      'http://localhost:5173',
+      'http://localhost:5174',
+      'http://localhost:3000',
+      envConfig.FRONTEND_URL,
+    ].filter(Boolean)
 
 const corsOptions = {
-    origin: function (origin, callback) {
-        if (!origin)
-            return callback(null, true)
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true)
 
-        if (allowedOrigins.indexOf(origin) !== -1)
-            callback(null, true)
-        else
-            callback(new Error('Not allowed by CORS'))
-    },
-    credentials: true,
-    optionsSuccessStatus: 200
+    if (allowedOrigins.indexOf(origin) !== -1) callback(null, true)
+    else callback(new Error('Not allowed by CORS'))
+  },
+  credentials: true,
+  optionsSuccessStatus: 200,
 }
 
 const io = new Server(server, { cors: corsOptions })
 
 let onlineUsers = 0
 io.on('connection', (socket) => {
-    onlineUsers++
+  onlineUsers++
+  io.emit('update_user_count', onlineUsers)
+  socket.on('disconnect', () => {
+    onlineUsers--
     io.emit('update_user_count', onlineUsers)
-    socket.on('disconnect', () => {
-        onlineUsers--
-        io.emit('update_user_count', onlineUsers)
-    })
+  })
 })
 
 // 1. Security Middleware
-app.use(helmet({
+app.use(
+  helmet({
     // 1. Force HSTS even during local development audits
     hsts: {
-        maxAge: 31536000,
-        includeSubDomains: true,
-        preload: true,
+      maxAge: 31536000,
+      includeSubDomains: true,
+      preload: true,
     },
     // 2. Explicitly define strict CSP Directives
     contentSecurityPolicy: {
-        directives: {
-            defaultSrc: ["'self'"],
-            scriptSrc: ["'self'", "'unsafe-inline'"],
-            styleSrc: ["'self'", "'unsafe-inline'"],
-            imgSrc: ["'self'", "data:", "https://res.cloudinary.com"], // Add Cloudinary or other asset hosts here
-            connectSrc: ["'self'", "ws:", "wss:"], // Allows WebSockets to handshake cleanly
-        },
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", 'data:', 'https://res.cloudinary.com'], // Add Cloudinary or other asset hosts here
+        connectSrc: ["'self'", 'ws:', 'wss:'], // Allows WebSockets to handshake cleanly
+      },
     },
     // 3. Strictly prevent framing/clickjacking
     frameguard: {
-        action: 'deny',
+      action: 'deny',
     },
-}))
+  })
+)
 app.set('trust proxy', 1)
-app.use(rateLimit({
+app.use(
+  rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 300
-}))
+    max: 300,
+  })
+)
 app.use(express.json({ limit: '10kb' }))
 app.use(cookieParser())
 app.use(cors(corsOptions))
 if (envConfig.NODE_ENV === 'production' && !envConfig.SESSION_SECRET) {
-    console.error('FATAL ERROR: SESSION_SECRET is not defined in production.')
-    process.exit(1)
-}   
-app.use(session({
+  console.error('FATAL ERROR: SESSION_SECRET is not defined in production.')
+  process.exit(1)
+}
+app.use(
+  session({
     secret: envConfig.SESSION_SECRET || 'your-secret-key',
     resave: false,
     saveUninitialized: false,
     cookie: {
-        secure: envConfig.NODE_ENV === 'production',
-        httpOnly: true,
-        maxAge: 1000 * 60 * 60 * 24
-    }
-}))
+      secure: envConfig.NODE_ENV === 'production',
+      httpOnly: true,
+      maxAge: 1000 * 60 * 60 * 24,
+    },
+  })
+)
 app.use(passport.initialize())
 app.use(passport.session())
 
@@ -126,19 +129,19 @@ app.use(errorHandlerMiddleware)
 const port = envConfig.PORT || 3000
 
 const start = async () => {
-    try {
-        await connectDB(envConfig.MONGO_URI)
-        server.listen(port, () => {
-            console.log(`Server is listening on port ${port}...`)
-        })
-    } catch (error) {
-        console.log('Connection failed: ', error.message)
-        process.exit(1)
-    }
+  try {
+    await connectDB(envConfig.MONGO_URI)
+    server.listen(port, () => {
+      console.log(`Server is listening on port ${port}...`)
+    })
+  } catch (error) {
+    console.log('Connection failed: ', error.message)
+    process.exit(1)
+  }
 }
 
 if (envConfig.NODE_ENV !== 'test') {
-    start()
+  start()
 }
 
 module.exports = app
