@@ -6,7 +6,8 @@ Full-stack MERN (MongoDB, Express, React, Node.js) app—Wiki for "Chou Kaguya H
 
 - [🚀 Features](#-features)
 - [🛠️ Tech Stack](#️-tech-stack)
-- [📦 Installation](#-installation)
+- [� Code Style](#-code-style)
+- [�📦 Installation](#-installation)
 - [🏃 Running the Application](#-running-the-application)
 - [🧪 Testing](#-testing)
 - [📂 Project Structure](#-project-structure)
@@ -45,7 +46,19 @@ Full-stack MERN (MongoDB, Express, React, Node.js) app—Wiki for "Chou Kaguya H
 
 **Backend:** Node.js | Express | MongoDB (Mongoose) | Zod | Socket.io | Passport.js | Argon2/JWT/Helmet/CORS | Multer/Cloudinary | Jest/Supertest
 
-## 📦 Installation
+## � Code Style
+
+**Formatter:** Prettier (no semicolons, single quotes, trailing commas)
+
+Config files: `.prettierrc.json` (client + server)
+
+Format code:
+```bash
+cd server && npx prettier --write "**/*.{js,mjs,cjs}"
+cd ../client && npx prettier --write "**/*.{js,jsx}"
+```
+
+## �📦 Installation
 
 **Prerequisites:** Node.js (v16+), MongoDB (Atlas), Cloudinary, OAuth (Google/X/Discord/GitHub)
 
