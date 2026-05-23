@@ -130,95 +130,56 @@ const updateUserProfile = async (userId, updates) => {
 }
 
 const googleLoginUser = async (profile) => {
-    if (!profile?.id) {
-        throw new ValidationError('Google profile is required')
-    }
-
+    if (!profile?.id) throw new ValidationError('Google profile is required')
     const email = profile.emails?.[0]?.value?.toLowerCase()
-    if (!email) {
-        throw new ValidationError('Google account email is required')
-    }
+    if (!email) throw new ValidationError('Google account email is required')
 
-    const googleId = profile.id
-    const name = profile.displayName || email.split('@')[0]
-    const picture = profile.photos?.[0]?.value
+    let user = await User.findOne({ googleId: profile.id })
+    if (user) return buildTokenResponse(user)
 
-    // 1. Check if a user with this specific googleId already exists
-    let user = await User.findOne({ googleId })
-
-    if (user) {
-        return buildTokenResponse(user)
-    }
-
-    // 2. If it's a new googleId, verify the email isn't already taken by GitHub/Discord/Local
-    const existingByEmail = await User.findOne({ email })
-    if (existingByEmail) {
+    if (await User.findOne({ email })) {
         throw new AuthError('email_taken_other_method', 409)
     }
 
-    // 3. If the email is clear, create a brand new Google user account safely
-    const suffix = '_' + googleId.slice(-4)
-    const baseName = name.replace(/\s+/g, '_').slice(0, 20 - suffix.length)
+    const suffix = '_' + profile.id.slice(-4)
+    const baseName = (profile.displayName || email.split('@')[0]).replace(/\s+/g, '_').slice(0, 20 - suffix.length)
+
     user = await User.create({
         username: baseName + suffix,
         email,
-        googleId,
-        avatar: {
-            url: picture || undefined,
-            public_id: 'google-avatar',
-        },
+        googleId: profile.id,
+        avatar: { url: profile.photos?.[0]?.value, public_id: 'google-avatar' },
     })
 
     return buildTokenResponse(user)
 }
 
 const twitterLoginUser = async (profile) => {
-    if (!profile?.id) {
-        throw new ValidationError("Twitter profile is required");
+    if (!profile?.id) throw new ValidationError('Twitter profile is required')
+
+    let user = await User.findOne({ xId: profile.id })
+    if (user) return buildTokenResponse(user)
+
+    const name = profile.displayName || profile.username || 'x_user'
+    const email = profile.emails?.[0]?.value?.toLowerCase() || `${name.replace(/\s+/g, '').toLowerCase()}_${profile.id}@twitter.local`
+
+    if (await User.findOne({ email })) {
+        throw new AuthError('email_taken_other_method', 409)
     }
 
-    const xId = profile.id;
-    const name = profile.displayName || profile.username || "x_user";
-    const picture = profile.photos?.[0]?.value;
-
-    // 1. Try to find user by their X ID first
-    let user = await User.findOne({ xId });
-    if (user) {
-        return buildTokenResponse(user);
-    }
-
-    // 2. Resolve email (Check if Twitter provided a real one, otherwise build fallback)
-    const email = profile.emails?.[0]?.value?.toLowerCase() ||
-        `${name.replace(/\s+/g, "").toLowerCase()}_${xId}@twitter.local`;
-
-    // 3. Strictly prevent account takeover or database collision on email
-    const existingByEmail = await User.findOne({ email });
-    if (existingByEmail) {
-        throw new AuthError("email_taken_other_method", 409);
-    }
-
-    // 4. Create the new user safely
-    const suffix = "_" + xId.slice(-4);
-    const normalizedName = name
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .replace(/đ/g, "d")
-        .replace(/Đ/g, "D");
-
-    const baseName = normalizedName.replace(/\s+/g, "_").slice(0, 20 - suffix.length);
+    const suffix = '_' + profile.id.slice(-4)
+    const normalizedName = name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D')
+    const baseName = normalizedName.replace(/\s+/g, '_').slice(0, 20 - suffix.length)
 
     user = await User.create({
         username: baseName + suffix,
         email,
-        xId,
-        avatar: {
-            url: picture || undefined,
-            public_id: "twitter-avatar",
-        },
-    });
+        xId: profile.id,
+        avatar: { url: profile.photos?.[0]?.value, public_id: 'twitter-avatar' },
+    })
 
-    return buildTokenResponse(user);
-};
+    return buildTokenResponse(user)
+}
 
 const discordLoginUser = async (profile) => {
     if (!profile?.id) {

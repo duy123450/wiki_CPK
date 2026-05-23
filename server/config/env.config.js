@@ -8,6 +8,7 @@ const envSchema = z.object({
     .default('development'),
   MONGO_URI: z.string().url('Invalid MONGO_URI'),
   FRONTEND_URL: z.string().url('Invalid FRONTEND_URL'),
+  REDIS_URL: z.string().default('redis://localhost:6379'),
   SESSION_SECRET: z
     .string()
     .min(
@@ -21,12 +22,37 @@ const envSchema = z.object({
   CLOUD_NAME: z.string(),
   API_KEY: z.string(),
   API_SECRET: z.string(),
+  // Google OAuth
   GOOGLE_CLIENT_ID: z.string().optional(),
   GOOGLE_CLIENT_SECRET: z.string().optional(),
+  GOOGLE_CALLBACK_URL: z.string().optional(),
+  // Twitter/X OAuth (local)
   X_LOCAL_CLIENT_ID: z.string().optional(),
   X_LOCAL_CLIENT_SECRET: z.string().optional(),
+  X_LOCAL_CALLBACK_URL: z.string().optional(),
+  // Twitter/X OAuth (production)
+  X_PROD_CLIENT_ID: z.string().optional(),
+  X_PROD_CLIENT_SECRET: z.string().optional(),
+  X_PROD_CALLBACK_URL: z.string().optional(),
+  // Twitter/X OAuth (fallback)
+  X_CLIENT_ID: z.string().optional(),
+  X_CLIENT_SECRET: z.string().optional(),
+  // Discord OAuth (local)
   DISCORD_CLIENT_ID: z.string().optional(),
   DISCORD_CLIENT_SECRET: z.string().optional(),
+  DISCORD_LOCAL_CALLBACK_URL: z.string().optional(),
+  // Discord OAuth (production)
+  DISCORD_PROD_CLIENT_ID: z.string().optional(),
+  DISCORD_PROD_CLIENT_SECRET: z.string().optional(),
+  DISCORD_PROD_CALLBACK_URL: z.string().optional(),
+  // GitHub OAuth (local)
+  GITHUB_LOCAL_CLIENT_ID: z.string().optional(),
+  GITHUB_LOCAL_CLIENT_SECRET: z.string().optional(),
+  GITHUB_LOCAL_CALLBACK_URL: z.string().optional(),
+  // GitHub OAuth (production)
+  GITHUB_PROD_CLIENT_ID: z.string().optional(),
+  GITHUB_PROD_CLIENT_SECRET: z.string().optional(),
+  GITHUB_PROD_CALLBACK_URL: z.string().optional(),
 })
 
 const parsed = envSchema.safeParse(process.env)

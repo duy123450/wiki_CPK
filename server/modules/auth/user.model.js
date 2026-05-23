@@ -83,7 +83,7 @@ const UserSchema = new mongoose.Schema(
 UserSchema.pre('save', async function () {
   if (!this.isModified('password')) return
   const hashOptions =
-    process.env.NODE_ENV === 'test'
+    envConfig.NODE_ENV === 'test'
       ? { timeCost: 1, memoryCost: 8, parallelism: 1 }
       : {}
   this.password = await argon2.hash(this.password, hashOptions)

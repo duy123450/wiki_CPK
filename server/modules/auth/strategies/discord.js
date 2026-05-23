@@ -1,18 +1,19 @@
 const passport = require('passport')
 const DiscordStrategy = require('passport-discord').Strategy
 const { discordLoginUser } = require('../auth.service')
+const envConfig = require('../../config/env.config')
 
-const isProduction = process.env.NODE_ENV === 'production'
+const isProduction = envConfig.NODE_ENV === 'production'
 const discordClientId = isProduction
-  ? process.env.DISCORD_PROD_CLIENT_ID || process.env.DISCORD_CLIENT_ID
-  : process.env.DISCORD_CLIENT_ID
+  ? envConfig.DISCORD_PROD_CLIENT_ID || envConfig.DISCORD_CLIENT_ID
+  : envConfig.DISCORD_CLIENT_ID
 const discordClientSecret = isProduction
-  ? process.env.DISCORD_PROD_CLIENT_SECRET || process.env.DISCORD_CLIENT_SECRET
-  : process.env.DISCORD_CLIENT_SECRET
+  ? envConfig.DISCORD_PROD_CLIENT_SECRET || envConfig.DISCORD_CLIENT_SECRET
+  : envConfig.DISCORD_CLIENT_SECRET
 const discordCallbackURL = isProduction
-  ? process.env.DISCORD_PROD_CALLBACK_URL
-  : process.env.DISCORD_LOCAL_CALLBACK_URL ||
-    `${process.env.FRONTEND_URL?.replace(':5173', ':3000') || 'http://localhost:3000'}/api/v1/wiki/auth/discord/callback`
+  ? envConfig.DISCORD_PROD_CALLBACK_URL
+  : envConfig.DISCORD_LOCAL_CALLBACK_URL ||
+  `${envConfig.FRONTEND_URL?.replace(':5173', ':3000') || 'http://localhost:3000'}/api/v1/wiki/auth/discord/callback`
 
 if (discordClientId && discordClientSecret) {
   passport.use(

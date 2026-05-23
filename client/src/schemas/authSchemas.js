@@ -19,3 +19,10 @@ export const registerSchema = z
     message: 'Passwords do not match',
     path: ['confirmPassword'],
   })
+
+// API request schema (no confirmPassword sent to server)
+export const registerRequestSchema = z.object({
+  username: z.string(),
+  email: z.string(),
+  password: z.string(),
+})

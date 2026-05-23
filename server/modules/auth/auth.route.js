@@ -26,7 +26,7 @@ const {
 } = authController
 
 const requireGoogleOAuthConfig = (req, res, next) => {
-  if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+  if (!envConfig.GOOGLE_CLIENT_ID || !envConfig.GOOGLE_CLIENT_SECRET) {
     return res.status(500).json({
       msg: 'Google OAuth is not configured. Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in server/.env.',
     })
@@ -36,13 +36,13 @@ const requireGoogleOAuthConfig = (req, res, next) => {
 }
 
 const requireTwitterOAuthConfig = (req, res, next) => {
-  const isProduction = process.env.NODE_ENV === 'production'
+  const isProduction = envConfig.NODE_ENV === 'production'
   const clientId = isProduction
-    ? process.env.X_PROD_CLIENT_ID || process.env.X_CLIENT_ID
-    : process.env.X_LOCAL_CLIENT_ID || process.env.X_CLIENT_ID
+    ? envConfig.X_PROD_CLIENT_ID || envConfig.X_CLIENT_ID
+    : envConfig.X_LOCAL_CLIENT_ID || envConfig.X_CLIENT_ID
   const clientSecret = isProduction
-    ? process.env.X_PROD_CLIENT_SECRET || process.env.X_CLIENT_SECRET
-    : process.env.X_LOCAL_CLIENT_SECRET || process.env.X_CLIENT_SECRET
+    ? envConfig.X_PROD_CLIENT_SECRET || envConfig.X_CLIENT_SECRET
+    : envConfig.X_LOCAL_CLIENT_SECRET || envConfig.X_CLIENT_SECRET
 
   if (!clientId || !clientSecret) {
     return res.status(500).json({
@@ -56,14 +56,14 @@ const requireTwitterOAuthConfig = (req, res, next) => {
 }
 
 const requireDiscordOAuthConfig = (req, res, next) => {
-  const isProduction = process.env.NODE_ENV === 'production'
+  const isProduction = envConfig.NODE_ENV === 'production'
   const clientId = isProduction
-    ? process.env.DISCORD_PROD_CLIENT_ID || process.env.DISCORD_CLIENT_ID
-    : process.env.DISCORD_CLIENT_ID
+    ? envConfig.DISCORD_PROD_CLIENT_ID || envConfig.DISCORD_CLIENT_ID
+    : envConfig.DISCORD_CLIENT_ID
   const clientSecret = isProduction
-    ? process.env.DISCORD_PROD_CLIENT_SECRET ||
-      process.env.DISCORD_CLIENT_SECRET
-    : process.env.DISCORD_CLIENT_SECRET
+    ? envConfig.DISCORD_PROD_CLIENT_SECRET ||
+    envConfig.DISCORD_CLIENT_SECRET
+    : envConfig.DISCORD_CLIENT_SECRET
 
   if (!clientId || !clientSecret) {
     return res.status(500).json({
@@ -75,13 +75,13 @@ const requireDiscordOAuthConfig = (req, res, next) => {
 }
 
 const requireGitHubOAuthConfig = (req, res, next) => {
-  const isProduction = process.env.NODE_ENV === 'production'
+  const isProduction = envConfig.NODE_ENV === 'production'
   const clientId = isProduction
-    ? process.env.GITHUB_PROD_CLIENT_ID
-    : process.env.GITHUB_LOCAL_CLIENT_ID
+    ? envConfig.GITHUB_PROD_CLIENT_ID
+    : envConfig.GITHUB_LOCAL_CLIENT_ID
   const clientSecret = isProduction
-    ? process.env.GITHUB_PROD_CLIENT_SECRET
-    : process.env.GITHUB_LOCAL_CLIENT_SECRET
+    ? envConfig.GITHUB_PROD_CLIENT_SECRET
+    : envConfig.GITHUB_LOCAL_CLIENT_SECRET
 
   if (!clientId || !clientSecret) {
     return res.status(500).json({

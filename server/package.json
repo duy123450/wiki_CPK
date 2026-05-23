@@ -18,6 +18,7 @@
     "argon2": "^0.44.0",
     "axios": "^1.16.1",
     "cloudinary": "^2.9.0",
+    "connect-redis": "^9.0.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "dotenv": "^17.4.1",
@@ -36,6 +37,7 @@
     "passport-google-oauth20": "^2.0.0",
     "passport-jwt": "^4.0.1",
     "passport-twitter-oauth2": "^2.1.1",
+    "redis": "^5.12.1",
     "socket.io": "^4.8.3",
     "zod": "^4.4.3"
   },

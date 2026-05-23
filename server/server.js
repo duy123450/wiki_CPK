@@ -11,8 +11,12 @@ const passport = require('./config/passport')
 const helmet = require('helmet')
 const cors = require('cors')
 const session = require('express-session')
+const { RedisStore } = require('connect-redis')
 const rateLimit = require('express-rate-limit')
 const cookieParser = require('cookie-parser')
+
+// Import Redis Client
+const redisClient = require('./config/redis')
 
 // Import Database Connection
 const connectDB = require('./config/db')
@@ -32,11 +36,11 @@ const isProd = envConfig.NODE_ENV === 'production'
 const allowedOrigins = isProd
   ? [envConfig.FRONTEND_URL]
   : [
-      'http://localhost:5173',
-      'http://localhost:5174',
-      'http://localhost:3000',
-      envConfig.FRONTEND_URL,
-    ].filter(Boolean)
+    'http://localhost:5173',
+    'http://localhost:5174',
+    'http://localhost:3000',
+    envConfig.FRONTEND_URL,
+  ].filter(Boolean)
 
 const corsOptions = {
   origin: function (origin, callback) {
@@ -87,11 +91,10 @@ app.use(
   })
 )
 app.set('trust proxy', 1)
-app.use(
-  rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 300,
-  })
+app.use(rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 300,
+})
 )
 app.use(express.json({ limit: '10kb' }))
 app.use(cookieParser())
@@ -100,17 +103,17 @@ if (envConfig.NODE_ENV === 'production' && !envConfig.SESSION_SECRET) {
   console.error('FATAL ERROR: SESSION_SECRET is not defined in production.')
   process.exit(1)
 }
-app.use(
-  session({
-    secret: envConfig.SESSION_SECRET || 'your-secret-key',
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      secure: envConfig.NODE_ENV === 'production',
-      httpOnly: true,
-      maxAge: 1000 * 60 * 60 * 24,
-    },
-  })
+app.use(session({
+  store: new RedisStore({ client: redisClient }),
+  secret: envConfig.SESSION_SECRET || 'your-secret-key',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: envConfig.NODE_ENV === 'production',
+    httpOnly: true,
+    maxAge: 1000 * 60 * 60 * 24,
+  },
+})
 )
 app.use(passport.initialize())
 app.use(passport.session())

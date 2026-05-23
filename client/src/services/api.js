@@ -2,7 +2,7 @@ import axios from 'axios'
 import { ACCESS_TOKEN_UPDATED_EVENT } from '../constants'
 import { envConfig } from '../config/env.config'
 import { validateData } from '../utils/api-validator'
-import { loginSchema, registerSchema } from '../schemas/authSchemas'
+import { loginSchema, registerRequestSchema } from '../schemas/authSchemas'
 import { profileSchema as updateProfileSchema } from '../schemas/profileSchemas'
 
 export const AUTH_TOKEN_KEY = envConfig.VITE_AUTH_TOKEN_KEY
@@ -119,7 +119,7 @@ export const getCharacterBySlug = (slug) =>
 // ─── Authentication ─────────────────────────────────────────────────────────
 
 export const registerUser = (payload) => {
-  const validated = validateData(registerSchema, payload, 'Register')
+  const validated = validateData(registerRequestSchema, payload, 'Register')
   return api.post('/auth/register', validated).then((res) => res.data)
 }
 

@@ -1,17 +1,18 @@
 const passport = require('passport')
 const TwitterStrategy = require('passport-twitter-oauth2').Strategy
 const { twitterLoginUser } = require('../auth.service')
+const envConfig = require('../../config/env.config')
 
-const isProduction = process.env.NODE_ENV === 'production'
+const isProduction = envConfig.NODE_ENV === 'production'
 const clientId = isProduction
-  ? process.env.X_PROD_CLIENT_ID || process.env.X_CLIENT_ID
-  : process.env.X_LOCAL_CLIENT_ID || process.env.X_CLIENT_ID
+  ? envConfig.X_PROD_CLIENT_ID || envConfig.X_CLIENT_ID
+  : envConfig.X_LOCAL_CLIENT_ID || envConfig.X_CLIENT_ID
 const clientSecret = isProduction
-  ? process.env.X_PROD_CLIENT_SECRET || process.env.X_CLIENT_SECRET
-  : process.env.X_LOCAL_CLIENT_SECRET || process.env.X_CLIENT_SECRET
+  ? envConfig.X_PROD_CLIENT_SECRET || envConfig.X_CLIENT_SECRET
+  : envConfig.X_LOCAL_CLIENT_SECRET || envConfig.X_CLIENT_SECRET
 const callbackURL = isProduction
-  ? process.env.X_PROD_CALLBACK_URL
-  : `${process.env.FRONTEND_URL?.replace(':5173', ':3000') || 'http://localhost:3000'}/api/v1/wiki/auth/x/callback`
+  ? envConfig.X_PROD_CALLBACK_URL
+  : `${envConfig.FRONTEND_URL?.replace(':5173', ':3000') || 'http://localhost:3000'}/api/v1/wiki/auth/x/callback`
 
 if (clientId && clientSecret) {
   const twitterStrategy = new TwitterStrategy(
