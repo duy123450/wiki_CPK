@@ -29,7 +29,7 @@ Full-stack MERN (MongoDB, Express, React, Node.js) app—Wiki for "Chou Kaguya H
 - **Multimedia Integration:**
   - **Soundtrack Player:** YouTube IFrame API—background play, shuffle history, loop modes, timeline progress.
   - **Synchronized Lyrics:** Real-time highlight + auto-scroll (JP/Romaji) synced to playback milliseconds.
-  - **Karaoke + Translation Engine:** Nested Mongoose `LyricSchema`—dual-language (JP/Romaji + VN/EN) line-synced rendering.
+  - **Karaoke + Translation Engine:** Nested Mongoose `LyricSchema`—dual-language (JP/Romaji + VN) line-synced rendering.
   - **Asset Management:** Image hosting + crop-prevention via **Cloudinary**.
 - **Responsive UI:** React + Vanilla CSS.
 - **Robust Architecture:**
@@ -37,7 +37,6 @@ Full-stack MERN (MongoDB, Express, React, Node.js) app—Wiki for "Chou Kaguya H
   - **Security:** Rate limiting, input sanitization (ReDoS/NoSQL), file constraints.
   - **Modular Backend:** Domain-driven modules.
   - **Error Hierarchy:** Custom classes (AuthError, WikiError, etc.).
-  - **Knowledge Graph:** Auto architecture mapping via **Graphify**.
   - **Testing:** Jest/Supertest (backend), Vitest/RTL (frontend).
 
 ## 🛠️ Tech Stack
