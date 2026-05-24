@@ -1,7 +1,7 @@
 const passport = require('passport')
 const GitHubStrategy = require('passport-github2').Strategy
 const { githubLoginUser } = require('../auth.service')
-const envConfig = require('../../config/env.config')
+const envConfig = require('../../../config/env.config')
 
 const isProduction = envConfig.NODE_ENV === 'production'
 

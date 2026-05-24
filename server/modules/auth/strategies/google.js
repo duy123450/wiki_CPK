@@ -1,7 +1,7 @@
 const passport = require('passport')
 const GoogleStrategy = require('passport-google-oauth20').Strategy
 const { googleLoginUser } = require('../auth.service')
-const envConfig = require('../../config/env.config')
+const envConfig = require('../../../config/env.config')
 
 if (envConfig.GOOGLE_CLIENT_ID && envConfig.GOOGLE_CLIENT_SECRET) {
   passport.use(

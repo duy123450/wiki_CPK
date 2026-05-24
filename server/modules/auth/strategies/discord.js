@@ -1,7 +1,7 @@
 const passport = require('passport')
 const DiscordStrategy = require('passport-discord').Strategy
 const { discordLoginUser } = require('../auth.service')
-const envConfig = require('../../config/env.config')
+const envConfig = require('../../../config/env.config')
 
 const isProduction = envConfig.NODE_ENV === 'production'
 const discordClientId = isProduction

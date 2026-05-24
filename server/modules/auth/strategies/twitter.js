@@ -1,7 +1,7 @@
 const passport = require('passport')
 const TwitterStrategy = require('passport-twitter-oauth2').Strategy
 const { twitterLoginUser } = require('../auth.service')
-const envConfig = require('../../config/env.config')
+const envConfig = require('../../../config/env.config')
 
 const isProduction = envConfig.NODE_ENV === 'production'
 const clientId = isProduction
