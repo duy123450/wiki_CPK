@@ -26,23 +26,49 @@ const {
 } = authController
 
 const requireGoogleOAuthConfig = (req, res, next) => {
-  if (!envConfig.GOOGLE_CLIENT_ID || !envConfig.GOOGLE_CLIENT_SECRET) {
+  const clientId = process.env.GOOGLE_CLIENT_ID
+  const clientSecret = process.env.GOOGLE_CLIENT_SECRET
+
+  if (!clientId || !clientSecret) {
     return res.status(500).json({
       msg: 'Google OAuth is not configured. Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in server/.env.',
     })
   }
 
+  const GoogleStrategy = require('passport-google-oauth20').Strategy
+  const { googleLoginUser } = require('./auth.service')
+  const callbackURL = process.env.GOOGLE_CALLBACK_URL || '/api/v1/wiki/auth/google/callback'
+
+  passport.use(
+    new GoogleStrategy(
+      {
+        clientID: clientId,
+        clientSecret: clientSecret,
+        proxy: true,
+        callbackURL,
+      },
+      async (accessToken, refreshToken, profile, done) => {
+        try {
+          const authResult = await googleLoginUser(profile)
+          return done(null, authResult)
+        } catch (error) {
+          return done(error, false)
+        }
+      }
+    )
+  )
+
   return next()
 }
 
 const requireTwitterOAuthConfig = (req, res, next) => {
-  const isProduction = envConfig.NODE_ENV === 'production'
+  const isProduction = process.env.NODE_ENV === 'production'
   const clientId = isProduction
-    ? envConfig.X_PROD_CLIENT_ID || envConfig.X_CLIENT_ID
-    : envConfig.X_LOCAL_CLIENT_ID || envConfig.X_CLIENT_ID
+    ? process.env.X_PROD_CLIENT_ID || process.env.X_CLIENT_ID
+    : process.env.X_LOCAL_CLIENT_ID || process.env.X_CLIENT_ID
   const clientSecret = isProduction
-    ? envConfig.X_PROD_CLIENT_SECRET || envConfig.X_CLIENT_SECRET
-    : envConfig.X_LOCAL_CLIENT_SECRET || envConfig.X_CLIENT_SECRET
+    ? process.env.X_PROD_CLIENT_SECRET || process.env.X_CLIENT_SECRET
+    : process.env.X_LOCAL_CLIENT_SECRET || process.env.X_CLIENT_SECRET
 
   if (!clientId || !clientSecret) {
     return res.status(500).json({
@@ -52,18 +78,91 @@ const requireTwitterOAuthConfig = (req, res, next) => {
     })
   }
 
+  const TwitterStrategy = require('passport-twitter-oauth2').Strategy
+  const { twitterLoginUser } = require('./auth.service')
+  const callbackURL = isProduction
+    ? process.env.X_PROD_CALLBACK_URL
+    : `${process.env.FRONTEND_URL?.replace(':5173', ':3000') || 'http://localhost:3000'}/api/v1/wiki/auth/x/callback`
+
+  const twitterStrategy = new TwitterStrategy(
+    {
+      clientID: clientId,
+      clientSecret: clientSecret,
+      clientType: 'confidential',
+      callbackURL: callbackURL,
+      authorizationURL: 'https://twitter.com/i/oauth2/authorize',
+      tokenURL: 'https://api.twitter.com/2/oauth2/token',
+      userProfileURL: 'https://api.twitter.com/2/users/me',
+      includeEmail: true,
+      pkce: true,
+      state: true,
+      scopeSeparator: ' ',
+      customHeaders: {
+        Authorization:
+          'Basic ' +
+          Buffer.from(`${clientId}:${clientSecret}`).toString('base64'),
+      },
+    },
+    async (accessToken, refreshToken, profile, done) => {
+      try {
+        const authResult = await twitterLoginUser(profile)
+        return done(null, authResult)
+      } catch (error) {
+        return done(error, false)
+      }
+    }
+  )
+
+  twitterStrategy.userProfile = async function (accessToken, params, done) {
+    if (typeof params === 'function') {
+      done = params
+      params = {}
+    }
+    try {
+      const axios = require('axios')
+      const response = await axios.get(
+        'https://api.twitter.com/2/users/me?user.fields=profile_image_url',
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      )
+
+      const data = response.data
+      const text = JSON.stringify(data)
+
+      const profile = {
+        provider: 'twitter',
+        id: data.data.id,
+        username: data.data.username,
+        displayName: data.data.name,
+        photos: data.data.profile_image_url
+          ? [{ value: data.data.profile_image_url }]
+          : [],
+        _raw: text,
+        _json: data,
+      }
+
+      done(null, profile)
+    } catch (error) {
+      done(error)
+    }
+  }
+
+  passport.use('twitter', twitterStrategy)
+
   return next()
 }
 
 const requireDiscordOAuthConfig = (req, res, next) => {
-  const isProduction = envConfig.NODE_ENV === 'production'
+  const isProduction = process.env.NODE_ENV === 'production'
   const clientId = isProduction
-    ? envConfig.DISCORD_PROD_CLIENT_ID || envConfig.DISCORD_CLIENT_ID
-    : envConfig.DISCORD_CLIENT_ID
+    ? process.env.DISCORD_PROD_CLIENT_ID || process.env.DISCORD_CLIENT_ID
+    : process.env.DISCORD_CLIENT_ID
   const clientSecret = isProduction
-    ? envConfig.DISCORD_PROD_CLIENT_SECRET ||
-    envConfig.DISCORD_CLIENT_SECRET
-    : envConfig.DISCORD_CLIENT_SECRET
+    ? process.env.DISCORD_PROD_CLIENT_SECRET || process.env.DISCORD_CLIENT_SECRET
+    : process.env.DISCORD_CLIENT_SECRET
 
   if (!clientId || !clientSecret) {
     return res.status(500).json({
@@ -71,23 +170,78 @@ const requireDiscordOAuthConfig = (req, res, next) => {
     })
   }
 
+  const DiscordStrategy = require('passport-discord').Strategy
+  const { discordLoginUser } = require('./auth.service')
+  const callbackURL = isProduction
+    ? process.env.DISCORD_PROD_CALLBACK_URL
+    : process.env.DISCORD_LOCAL_CALLBACK_URL ||
+      `${process.env.FRONTEND_URL?.replace(':5173', ':3000') || 'http://localhost:3000'}/api/v1/wiki/auth/discord/callback`
+
+  passport.use(
+    new DiscordStrategy(
+      {
+        clientID: clientId,
+        clientSecret: clientSecret,
+        callbackURL: callbackURL,
+        scope: ['identify', 'email'],
+      },
+      async (accessToken, refreshToken, profile, done) => {
+        try {
+          const authResult = await discordLoginUser(profile)
+          return done(null, authResult)
+        } catch (error) {
+          return done(error, false)
+        }
+      }
+    )
+  )
+
   return next()
 }
 
 const requireGitHubOAuthConfig = (req, res, next) => {
-  const isProduction = envConfig.NODE_ENV === 'production'
+  const isProduction = process.env.NODE_ENV === 'production'
   const clientId = isProduction
-    ? envConfig.GITHUB_PROD_CLIENT_ID
-    : envConfig.GITHUB_LOCAL_CLIENT_ID
+    ? process.env.GITHUB_PROD_CLIENT_ID
+    : process.env.GITHUB_LOCAL_CLIENT_ID
   const clientSecret = isProduction
-    ? envConfig.GITHUB_PROD_CLIENT_SECRET
-    : envConfig.GITHUB_LOCAL_CLIENT_SECRET
+    ? process.env.GITHUB_PROD_CLIENT_SECRET
+    : process.env.GITHUB_LOCAL_CLIENT_SECRET
 
   if (!clientId || !clientSecret) {
     return res.status(500).json({
       msg: 'GitHub OAuth is not configured. Set GITHUB_CLIENT_ID and GITHUB_CLIENT_SECRET in server/.env.',
     })
   }
+
+  const GitHubStrategy = require('passport-github2').Strategy
+  const { githubLoginUser } = require('./auth.service')
+  const callbackURL = isProduction
+    ? process.env.GITHUB_PROD_CALLBACK_URL
+    : process.env.GITHUB_LOCAL_CALLBACK_URL ||
+      `${process.env.FRONTEND_URL?.replace(':5173', ':3000') || 'http://localhost:3000'}/api/v1/wiki/auth/github/callback`
+
+  passport.use(
+    new GitHubStrategy(
+      {
+        clientID: clientId,
+        clientSecret: clientSecret,
+        callbackURL: callbackURL,
+        scope: ['user:email'],
+        customHeaders: {
+          'User-Agent': 'Wiki-CPK-App',
+        },
+      },
+      async (accessToken, refreshToken, profile, done) => {
+        try {
+          const authResult = await githubLoginUser(profile)
+          return done(null, authResult)
+        } catch (error) {
+          return done(error, false)
+        }
+      }
+    )
+  )
 
   return next()
 }

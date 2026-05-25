@@ -7,6 +7,7 @@ const mockRedisStore = new Map()
 let simulateError = false
 
 const mockClient = {
+  isOpen: true,
   connect: jest.fn().mockImplementation(async () => {
     if (simulateError) {
       throw new Error('Connection failed')
@@ -51,9 +52,7 @@ const mockClient = {
   }),
 }
 
-jest.mock('redis', () => ({
-  createClient: jest.fn(() => mockClient),
-}))
+jest.mock('../../config/redis', () => mockClient)
 
 const redisClient = require('../../config/redis')
 const errorHandlerMiddleware = require('../../middleware/error-handler')

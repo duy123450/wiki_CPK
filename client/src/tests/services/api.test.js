@@ -7,8 +7,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import axios from 'axios'
 
-// Mock axios.create to return a mock instance
-vi.mock('axios', () => {
+const { mockInstance } = vi.hoisted(() => {
   const mockInstance = {
     get: vi.fn(),
     post: vi.fn(),
@@ -19,6 +18,10 @@ vi.mock('axios', () => {
       response: { use: vi.fn() },
     },
   }
+  return { mockInstance }
+})
+
+vi.mock('axios', () => {
   return {
     default: {
       create: vi.fn(() => mockInstance),
@@ -26,21 +29,18 @@ vi.mock('axios', () => {
   }
 })
 
-// We need to get the mock instance AFTER the mock is set up
-let api
-let mockAxiosInstance
+import * as api from '@/services/api'
 
-beforeEach(async () => {
-  vi.resetModules()
-  // Re-import to get fresh module
-  const axiosMod = await import('axios')
-  mockAxiosInstance = axiosMod.default.create()
-  const apiModule = await import('@/services/api')
-  api = apiModule
+const mockAxiosInstance = mockInstance
+
+beforeEach(() => {
+  mockAxiosInstance.get.mockClear()
+  mockAxiosInstance.post.mockClear()
+  mockAxiosInstance.put.mockClear()
+  mockAxiosInstance.request.mockClear()
 })
 
 afterEach(() => {
-  vi.restoreAllMocks()
   window.localStorage.clear()
 })
 
@@ -172,7 +172,11 @@ describe('registerUser', () => {
     const result = await api.registerUser(payload)
     expect(mockAxiosInstance.post).toHaveBeenCalledWith(
       '/auth/register',
-      payload
+      {
+        username: payload.username,
+        email: payload.email,
+        password: payload.password,
+      }
     )
     expect(result).toEqual(response)
   })

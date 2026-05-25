@@ -1,18 +1,20 @@
 const passport = require('passport')
 const GoogleStrategy = require('passport-google-oauth20').Strategy
 const { googleLoginUser } = require('../auth.service')
-const envConfig = require('../../../config/env.config')
 
-if (envConfig.GOOGLE_CLIENT_ID && envConfig.GOOGLE_CLIENT_SECRET) {
+// Read directly from process.env so test files can override before requiring server
+const clientId = process.env.GOOGLE_CLIENT_ID
+const clientSecret = process.env.GOOGLE_CLIENT_SECRET
+const callbackURL = process.env.GOOGLE_CALLBACK_URL || '/api/v1/wiki/auth/google/callback'
+
+if (clientId && clientSecret) {
   passport.use(
     new GoogleStrategy(
       {
-        clientID: envConfig.GOOGLE_CLIENT_ID,
-        clientSecret: envConfig.GOOGLE_CLIENT_SECRET,
+        clientID: clientId,
+        clientSecret: clientSecret,
         proxy: true,
-        callbackURL:
-          envConfig.GOOGLE_CALLBACK_URL ||
-          '/api/v1/wiki/auth/google/callback',
+        callbackURL,
       },
       async (accessToken, refreshToken, profile, done) => {
         try {

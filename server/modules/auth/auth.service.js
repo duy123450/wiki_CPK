@@ -137,8 +137,15 @@ const googleLoginUser = async (profile) => {
     let user = await User.findOne({ googleId: profile.id })
     if (user) return buildTokenResponse(user)
 
-    if (await User.findOne({ email })) {
-        throw new AuthError('email_taken_other_method', 409)
+    const existingByEmail = await User.findOne({ email })
+    if (existingByEmail) {
+        if (!existingByEmail.googleId) {
+            existingByEmail.googleId = profile.id
+            await existingByEmail.save()
+            return buildTokenResponse(existingByEmail)
+        } else {
+            throw new AuthError('email_taken_other_method', 409)
+        }
     }
 
     const suffix = '_' + profile.id.slice(-4)
