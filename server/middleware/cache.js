@@ -7,6 +7,10 @@ const redisClient = require('../config/redis')
  */
 const cacheData = (prefix, ttlSeconds = 3600) => {
   return async (req, res, next) => {
+    if (process.env.NODE_ENV === 'test') {
+      return next()
+    }
+
     // Only cache GET requests
     if (req.method !== 'GET') {
       return next()
@@ -52,6 +56,10 @@ const invalidateCache = (prefix) => {
   return async (req, res, next) => {
     // We execute next() immediately so we don't block the actual mutation
     next()
+
+    if (process.env.NODE_ENV === 'test') {
+      return
+    }
 
     if (!redisClient.isReady) {
       return

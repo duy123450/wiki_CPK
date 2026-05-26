@@ -1,7 +1,4 @@
 const mongoose = require('mongoose')
-const { MongoMemoryServer } = require('mongodb-memory-server')
-
-let mongoServer
 
 const connect = async () => {
   process.env.NODE_ENV = 'test'
@@ -12,9 +9,10 @@ const connect = async () => {
     await mongoose.disconnect()
   }
 
-  mongoServer = await MongoMemoryServer.create()
-  const uri = mongoServer.getUri()
-  process.env.MONGO_URI = uri
+  const uri = process.env.MONGO_URI
+  if (!uri) {
+    throw new Error('Global MONGO_URI is not defined. Ensure globalSetup is configured.')
+  }
 
   await mongoose.connect(uri)
 
@@ -35,10 +33,6 @@ const disconnect = async () => {
   if (mongoose.connection.readyState !== 0) {
     await mongoose.connection.dropDatabase()
     await mongoose.disconnect()
-  }
-  if (mongoServer) {
-    await mongoServer.stop()
-    mongoServer = null
   }
 }
 

@@ -22,7 +22,8 @@ const connectRedis = async () => {
   }
 }
 
-// Call connect immediately
-connectRedis()
+if (envConfig.NODE_ENV !== 'test') {
+  connectRedis()
+}
 
 module.exports = redisClient

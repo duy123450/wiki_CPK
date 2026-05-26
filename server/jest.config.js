@@ -5,6 +5,8 @@ module.exports = {
   forceExit: true,
   detectOpenHandles: true,
   setupFilesAfterEnv: ['./tests/setup.js'],
+  globalSetup: './tests/globalSetup.js',
+  globalTeardown: './tests/globalTeardown.js',
 
   testMatch: ['**/tests/**/*.test.js'],
   collectCoverageFrom: [
