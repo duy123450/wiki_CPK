@@ -1,9 +1,12 @@
-// ── Lazy-load jest-dom matchers only for jsdom ────────────────────────────
-if (typeof document !== 'undefined') {
-  import('@testing-library/jest-dom')
-}
+import { afterEach } from 'vitest'
+import { cleanup } from '@testing-library/react'
+import '@testing-library/jest-dom'
 
-// ── Mock browser APIs not available in jsdom ────────────────────────────────
+afterEach(() => {
+  cleanup()
+})
+
+// Mock browser APIs not available in jsdom.
 
 // scrollTo
 window.scrollTo = vi.fn()
@@ -17,8 +20,8 @@ class MockIntersectionObserver {
     // Immediately trigger as intersecting for test simplicity
     this._callback([{ isIntersecting: true }])
   }
-  unobserve() { }
-  disconnect() { }
+  unobserve() {}
+  disconnect() {}
 }
 window.IntersectionObserver = MockIntersectionObserver
 

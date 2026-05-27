@@ -4,9 +4,17 @@ import DiscordLoginButton from '@/components/DiscordLoginButton'
 import * as api from '@/services/api'
 
 vi.mock('@/services/api', () => ({
+  getGoogleLoginUrl: vi.fn(
+    () => 'http://localhost:3000/api/v1/wiki/auth/google'
+  ),
+  getTwitterLoginUrl: vi.fn(() => 'http://localhost:3000/api/v1/wiki/auth/x'),
   getDiscordLoginUrl: vi.fn(
     () => 'http://localhost:3000/api/v1/wiki/auth/discord'
   ),
+  getGithubLoginUrl: vi.fn(
+    () => 'http://localhost:3000/api/v1/wiki/auth/github'
+  ),
+  refreshAccessToken: vi.fn(),
 }))
 
 describe('DiscordLoginButton', () => {

@@ -11,6 +11,16 @@ vi.mock('@/services/api', () => ({
   registerUser: vi.fn(),
   uploadAvatar: vi.fn(),
   refreshAccessToken: vi.fn(),
+  getGoogleLoginUrl: vi.fn(
+    () => 'http://localhost:3000/api/v1/wiki/auth/google'
+  ),
+  getTwitterLoginUrl: vi.fn(() => 'http://localhost:3000/api/v1/wiki/auth/x'),
+  getDiscordLoginUrl: vi.fn(
+    () => 'http://localhost:3000/api/v1/wiki/auth/discord'
+  ),
+  getGithubLoginUrl: vi.fn(
+    () => 'http://localhost:3000/api/v1/wiki/auth/github'
+  ),
 }))
 
 import { loginUser, registerUser } from '@/services/api'

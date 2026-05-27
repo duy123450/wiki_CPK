@@ -8,7 +8,17 @@ const { getTwitterLoginUrl } = vi.hoisted(() => ({
 }))
 
 vi.mock('@/services/api', () => ({
+  getGoogleLoginUrl: vi.fn(
+    () => 'http://localhost:3000/api/v1/wiki/auth/google'
+  ),
   getTwitterLoginUrl,
+  getDiscordLoginUrl: vi.fn(
+    () => 'http://localhost:3000/api/v1/wiki/auth/discord'
+  ),
+  getGithubLoginUrl: vi.fn(
+    () => 'http://localhost:3000/api/v1/wiki/auth/github'
+  ),
+  refreshAccessToken: vi.fn(),
 }))
 
 describe('TwitterLoginButton', () => {
