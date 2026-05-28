@@ -55,7 +55,23 @@ const envSchema = z.object({
   GITHUB_PROD_CALLBACK_URL: z.string().optional(),
 })
 
-const parsed = envSchema.safeParse(process.env)
+const cleanedEnv = Object.fromEntries(
+  Object.entries(process.env).map(([key, val]) => {
+    if (typeof val === 'string') {
+      const trimmed = val.trim()
+      if (
+        (trimmed.startsWith('"') && trimmed.endsWith('"')) ||
+        (trimmed.startsWith("'") && trimmed.endsWith("'"))
+      ) {
+        return [key, trimmed.slice(1, -1)]
+      }
+      return [key, trimmed]
+    }
+    return [key, val]
+  })
+)
+
+const parsed = envSchema.safeParse(cleanedEnv)
 
 if (!parsed.success) {
   console.error('❌ Invalid environment variables:', parsed.error.format())
