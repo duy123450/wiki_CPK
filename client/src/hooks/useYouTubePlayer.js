@@ -234,8 +234,12 @@ export default function useYouTubePlayer(tracks, movie) {
         // Ignore if user is typing in an input field
         const target = e.target
         const tagName = target.tagName.toLowerCase()
+        const isTextInput =
+          tagName === 'input' &&
+          !['range', 'checkbox', 'radio', 'button', 'submit'].includes(target.type)
+
         if (
-          tagName === 'input' ||
+          isTextInput ||
           tagName === 'textarea' ||
           target.isContentEditable
         ) {
