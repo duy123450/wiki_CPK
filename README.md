@@ -20,7 +20,7 @@ Full-stack MERN (MongoDB, Express, React, Node.js) app—Wiki for "Chou Kaguya H
 - **Advanced Authentication:**
   - Local login with **Argon2** hashing.
   - OAuth: **Google**, **X (Twitter)** (API v2), **Discord**.
-  - Session management with **JWT** (Access/Refresh tokens).
+  - Session management with **JWT** (Access/Refresh tokens) and **Redis** for session backing.
   - Account conflict prevention vs OAuth hijacking.
   - **RBAC:** Permission management for restricted routes.
 - **Real-time Interaction:**
@@ -43,9 +43,9 @@ Full-stack MERN (MongoDB, Express, React, Node.js) app—Wiki for "Chou Kaguya H
 
 **Frontend:** React (Vite) | RTK | Socket.io-client | React Router DOM | Axios | Vitest/RTL
 
-**Backend:** Node.js | Express | MongoDB (Mongoose) | Zod | Socket.io | Passport.js | Argon2/JWT/Helmet/CORS | Multer/Cloudinary | Jest/Supertest
+**Backend:** Node.js | Express | MongoDB (Mongoose) | Redis | Zod | Socket.io | Passport.js | Argon2/JWT/Helmet/CORS | Multer/Cloudinary | Jest/Supertest
 
-## � Code Style
+##  Code Style
 
 **Formatter:** Prettier (no semicolons, single quotes, trailing commas)
 
@@ -57,9 +57,9 @@ cd server && npx prettier --write "**/*.{js,mjs,cjs}"
 cd ../client && npx prettier --write "**/*.{js,jsx}"
 ```
 
-## �📦 Installation
+## 📦 Installation
 
-**Prerequisites:** Node.js (v16+), MongoDB (Atlas), Cloudinary, OAuth (Google/X/Discord/GitHub)
+**Prerequisites:** Node.js (v16+), MongoDB (Atlas), Redis Server, Cloudinary, OAuth (Google/X/Discord/GitHub)
 
 ### 1. Clone
 ```bash
@@ -77,6 +77,7 @@ npm install
 ```env
 PORT=3000
 MONGO_URI=your_mongodb_uri
+REDIS_URL=redis://localhost:6379
 SESSION_SECRET=your_session_secret
 JWT_ACCESS_SECRET=your_access_secret
 JWT_REFRESH_SECRET=your_refresh_secret
@@ -155,7 +156,8 @@ wiki_CPK/
 │   ├── src/
 │   │   ├── components/  # UI components
 │   │   ├── config/      # Env config
-│   │   ├── constants/   # Constants
+│   │   ├── constants/   # Constants (roles, ui, api, etc)
+│   │   ├── context/     # AuthContext state provider
 │   │   ├── store/       # Redux (RTK)
 │   │   ├── hooks/       # Custom hooks
 │   │   ├── pages/       # Pages
@@ -167,14 +169,16 @@ wiki_CPK/
 │   └── public/          # Static
 ├── server/              # Express (Node.js)
 │   ├── config/          # Config (Passport/DB/Cloudinary/Env)
+│   ├── constants/       # Global constants (roles.js)
 │   ├── errors/          # Error classes
-│   ├── middleware/      # Global middleware
+│   ├── middleware/      # Global middleware (authorizeRoles.js, authentication.js, etc)
 │   ├── modules/         # Domain modules (Auth/Wiki/Characters/etc)
 │   │   └── [module]/
 │   │       ├── [name].controller.js
 │   │       ├── [name].route.js
 │   │       ├── [name].service.js
-│   │       └── [name].model.js
+│   │       ├── [name].model.js
+│   │       └── strategies/   # Modular OAuth lazy-strategies (google, twitter, discord, github)
 │   ├── schemas/         # Zod validation
 │   ├── tests/           # Jest/Supertest
 │   └── server.js        # Entry + Socket.io

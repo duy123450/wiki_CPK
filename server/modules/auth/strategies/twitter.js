@@ -1,26 +1,40 @@
+/**
+ * Twitter/X OAuth strategy — lazy middleware factory.
+ *
+ * Registers the TwitterStrategy on first request. Handles local vs production
+ * env var switching. Returns 500 if credentials are not configured.
+ *
+ * Usage: router.get('/x', requireTwitterOAuthConfig, passport.authenticate('twitter', ...))
+ */
 const passport = require('passport')
-const TwitterStrategy = require('passport-twitter-oauth2').Strategy
-const { twitterLoginUser } = require('../auth.service')
-const envConfig = require('../../../config/env.config')
 
-const isProduction = envConfig.NODE_ENV === 'production'
-const clientId = isProduction
-  ? envConfig.X_PROD_CLIENT_ID || envConfig.X_CLIENT_ID
-  : envConfig.X_LOCAL_CLIENT_ID || envConfig.X_CLIENT_ID
-const clientSecret = isProduction
-  ? envConfig.X_PROD_CLIENT_SECRET || envConfig.X_CLIENT_SECRET
-  : envConfig.X_LOCAL_CLIENT_SECRET || envConfig.X_CLIENT_SECRET
-const callbackURL = isProduction
-  ? envConfig.X_PROD_CALLBACK_URL
-  : `${envConfig.FRONTEND_URL?.replace(':5173', ':3000') || 'http://localhost:3000'}/api/v1/wiki/auth/x/callback`
+module.exports = function requireTwitterOAuthConfig(req, res, next) {
+  const isProduction = process.env.NODE_ENV === 'production'
+  const clientId = isProduction
+    ? process.env.X_PROD_CLIENT_ID || process.env.X_CLIENT_ID
+    : process.env.X_LOCAL_CLIENT_ID || process.env.X_CLIENT_ID
+  const clientSecret = isProduction
+    ? process.env.X_PROD_CLIENT_SECRET || process.env.X_CLIENT_SECRET
+    : process.env.X_LOCAL_CLIENT_SECRET || process.env.X_CLIENT_SECRET
 
-if (clientId && clientSecret) {
+  if (!clientId || !clientSecret) {
+    return res.status(500).json({
+      msg: 'Twitter OAuth is not configured',
+    })
+  }
+
+  const TwitterStrategy = require('passport-twitter-oauth2').Strategy
+  const { twitterLoginUser } = require('../auth.service')
+  const callbackURL = isProduction
+    ? process.env.X_PROD_CALLBACK_URL
+    : `${process.env.FRONTEND_URL?.replace(':5173', ':3000') || 'http://localhost:3000'}/api/v1/wiki/auth/x/callback`
+
   const twitterStrategy = new TwitterStrategy(
     {
       clientID: clientId,
-      clientSecret: clientSecret,
+      clientSecret,
       clientType: 'confidential',
-      callbackURL: callbackURL,
+      callbackURL,
       authorizationURL: 'https://twitter.com/i/oauth2/authorize',
       tokenURL: 'https://api.twitter.com/2/oauth2/token',
       userProfileURL: 'https://api.twitter.com/2/users/me',
@@ -30,20 +44,19 @@ if (clientId && clientSecret) {
       scopeSeparator: ' ',
       customHeaders: {
         Authorization:
-          'Basic ' +
-          Buffer.from(`${clientId}:${clientSecret}`).toString('base64'),
+          'Basic ' + Buffer.from(`${clientId}:${clientSecret}`).toString('base64'),
       },
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
-        const authResult = await twitterLoginUser(profile)
-        return done(null, authResult)
+        return done(null, await twitterLoginUser(profile))
       } catch (error) {
         return done(error, false)
       }
     }
   )
 
+  // Custom userProfile override — Twitter v2 API (no standard profile endpoint)
   twitterStrategy.userProfile = async function (accessToken, params, done) {
     if (typeof params === 'function') {
       done = params
@@ -53,17 +66,10 @@ if (clientId && clientSecret) {
       const axios = require('axios')
       const response = await axios.get(
         'https://api.twitter.com/2/users/me?user.fields=profile_image_url',
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
+        { headers: { Authorization: `Bearer ${accessToken}` } }
       )
-
       const data = response.data
-      const text = JSON.stringify(data)
-
-      const profile = {
+      done(null, {
         provider: 'twitter',
         id: data.data.id,
         username: data.data.username,
@@ -71,15 +77,14 @@ if (clientId && clientSecret) {
         photos: data.data.profile_image_url
           ? [{ value: data.data.profile_image_url }]
           : [],
-        _raw: text,
+        _raw: JSON.stringify(data),
         _json: data,
-      }
-
-      done(null, profile)
+      })
     } catch (error) {
       done(error)
     }
   }
 
   passport.use('twitter', twitterStrategy)
+  return next()
 }

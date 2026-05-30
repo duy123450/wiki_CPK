@@ -3,20 +3,23 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import Sidebar from '@/components/Sidebar'
+import { useAuthContext } from '@/context/AuthContext'
 
 // Mock API
 vi.mock('@/services/api', () => ({
   getSidebar: vi.fn(),
 }))
 
+// Mock AuthContext — Sidebar now reads from useAuthContext() not props
+vi.mock('@/context/AuthContext', () => ({
+  useAuthContext: vi.fn(),
+}))
+
 import { getSidebar } from '@/services/api'
 
 const defaultProps = {
   onCollapseChange: vi.fn(),
-  onDragonCursorToggle: vi.fn(),
   dragonCursorEnabled: true,
-  currentUser: null,
-  onLogout: vi.fn(),
 }
 
 const renderSidebar = (overrides = {}) =>
@@ -28,7 +31,12 @@ const renderSidebar = (overrides = {}) =>
 
 beforeEach(() => {
   vi.clearAllMocks()
-  // Return unresolved promise by default to prevent state update after basic tests end
+  // Default: no user logged in
+  vi.mocked(useAuthContext).mockReturnValue({
+    authUser: null,
+    handleLogout: vi.fn(),
+  })
+  // Return unresolved promise by default — prevents state update after basic tests end
   getSidebar.mockReturnValue(new Promise(() => {}))
 })
 
@@ -139,30 +147,37 @@ describe('Sidebar — Category Interaction', () => {
 
 describe('Sidebar — Auth State', () => {
   it('shows login button when no user', () => {
-    renderSidebar({ currentUser: null })
+    vi.mocked(useAuthContext).mockReturnValue({ authUser: null, handleLogout: vi.fn() })
+    renderSidebar()
     const loginBtn = screen.getByTitle('Login / Register')
     expect(loginBtn).toBeInTheDocument()
   })
 
   it('shows avatar when user is logged in', () => {
-    const currentUser = {
-      username: 'testuser',
-      avatar: { url: 'http://img.com/a.png' },
-      role: 'viewer',
-    }
-    renderSidebar({ currentUser })
+    vi.mocked(useAuthContext).mockReturnValue({
+      authUser: {
+        username: 'testuser',
+        avatar: { url: 'http://img.com/a.png' },
+        role: 'user',
+      },
+      handleLogout: vi.fn(),
+    })
+    renderSidebar()
     const avatarBtn = screen.getByTitle('testuser')
     expect(avatarBtn).toBeInTheDocument()
   })
 
   it('shows avatar flyout with Profile and Log Out on click', async () => {
     const user = userEvent.setup()
-    const currentUser = {
-      username: 'testuser',
-      avatar: { url: 'http://img.com/a.png' },
-      role: 'viewer',
-    }
-    renderSidebar({ currentUser })
+    vi.mocked(useAuthContext).mockReturnValue({
+      authUser: {
+        username: 'testuser',
+        avatar: { url: 'http://img.com/a.png' },
+        role: 'user',
+      },
+      handleLogout: vi.fn(),
+    })
+    renderSidebar()
 
     await user.click(screen.getByTitle('testuser'))
 
@@ -174,12 +189,15 @@ describe('Sidebar — Auth State', () => {
 
   it('shows Admin option for admin users', async () => {
     const user = userEvent.setup()
-    const currentUser = {
-      username: 'admin',
-      avatar: { url: 'http://img.com/a.png' },
-      role: 'admin',
-    }
-    renderSidebar({ currentUser })
+    vi.mocked(useAuthContext).mockReturnValue({
+      authUser: {
+        username: 'admin',
+        avatar: { url: 'http://img.com/a.png' },
+        role: 'admin',
+      },
+      handleLogout: vi.fn(),
+    })
+    renderSidebar()
 
     await user.click(screen.getByTitle('admin'))
 
@@ -188,14 +206,17 @@ describe('Sidebar — Auth State', () => {
     })
   })
 
-  it('does NOT show Admin option for viewer users', async () => {
+  it('does NOT show Admin option for regular users', async () => {
     const user = userEvent.setup()
-    const currentUser = {
-      username: 'viewer',
-      avatar: { url: 'http://img.com/a.png' },
-      role: 'viewer',
-    }
-    renderSidebar({ currentUser })
+    vi.mocked(useAuthContext).mockReturnValue({
+      authUser: {
+        username: 'viewer',
+        avatar: { url: 'http://img.com/a.png' },
+        role: 'user',
+      },
+      handleLogout: vi.fn(),
+    })
+    renderSidebar()
 
     await user.click(screen.getByTitle('viewer'))
 

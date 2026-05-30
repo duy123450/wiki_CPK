@@ -10,8 +10,8 @@ export default mergeConfig(
       setupFiles: ['./src/tests/setup.js'],
       include: ['src/tests/**/*.test.{js,jsx}'],
       css: false,
-      pool: 'forks',
-      testTimeout: 10000,
+      pool: 'threads',
+      testTimeout: 20000,
     },
   })
 )

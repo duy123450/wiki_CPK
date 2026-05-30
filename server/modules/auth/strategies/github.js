@@ -1,31 +1,41 @@
+/**
+ * GitHub OAuth strategy — lazy middleware factory.
+ *
+ * Registers the GitHubStrategy on first request. Handles local vs production
+ * env var switching. Returns 500 if credentials are not configured.
+ *
+ * Usage: router.get('/github', requireGitHubOAuthConfig, passport.authenticate('github', ...))
+ */
 const passport = require('passport')
-const GitHubStrategy = require('passport-github2').Strategy
-const { githubLoginUser } = require('../auth.service')
-const envConfig = require('../../../config/env.config')
 
-const isProduction = envConfig.NODE_ENV === 'production'
+module.exports = function requireGitHubOAuthConfig(req, res, next) {
+  const isProduction = process.env.NODE_ENV === 'production'
+  const clientId = isProduction
+    ? process.env.GITHUB_PROD_CLIENT_ID
+    : process.env.GITHUB_LOCAL_CLIENT_ID
+  const clientSecret = isProduction
+    ? process.env.GITHUB_PROD_CLIENT_SECRET
+    : process.env.GITHUB_LOCAL_CLIENT_SECRET
 
-// Automatically switch between local and production environment variables
-const githubClientId = isProduction
-  ? envConfig.GITHUB_PROD_CLIENT_ID
-  : envConfig.GITHUB_LOCAL_CLIENT_ID
+  if (!clientId || !clientSecret) {
+    return res.status(500).json({
+      msg: 'GitHub OAuth not configured. Set GITHUB_CLIENT_ID and GITHUB_CLIENT_SECRET in server/.env.',
+    })
+  }
 
-const githubClientSecret = isProduction
-  ? envConfig.GITHUB_PROD_CLIENT_SECRET
-  : envConfig.GITHUB_LOCAL_CLIENT_SECRET
+  const GitHubStrategy = require('passport-github2').Strategy
+  const { githubLoginUser } = require('../auth.service')
+  const callbackURL = isProduction
+    ? process.env.GITHUB_PROD_CALLBACK_URL
+    : process.env.GITHUB_LOCAL_CALLBACK_URL ||
+      `${process.env.FRONTEND_URL?.replace(':5173', ':3000') || 'http://localhost:3000'}/api/v1/wiki/auth/github/callback`
 
-const githubCallbackURL = isProduction
-  ? envConfig.GITHUB_PROD_CALLBACK_URL
-  : envConfig.GITHUB_LOCAL_CALLBACK_URL ||
-  `${envConfig.FRONTEND_URL?.replace(':5173', ':3000') || 'http://localhost:3000'}/api/v1/wiki/auth/github/callback`
-
-if (githubClientId && githubClientSecret) {
   passport.use(
     new GitHubStrategy(
       {
-        clientID: githubClientId,
-        clientSecret: githubClientSecret,
-        callbackURL: githubCallbackURL,
+        clientID: clientId,
+        clientSecret,
+        callbackURL,
         scope: ['user:email'],
         customHeaders: {
           'User-Agent': 'Wiki-CPK-App',
@@ -33,12 +43,13 @@ if (githubClientId && githubClientSecret) {
       },
       async (accessToken, refreshToken, profile, done) => {
         try {
-          const authResult = await githubLoginUser(profile)
-          return done(null, authResult)
+          return done(null, await githubLoginUser(profile))
         } catch (error) {
           return done(error, false)
         }
       }
     )
   )
+
+  return next()
 }

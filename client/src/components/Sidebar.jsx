@@ -17,6 +17,8 @@ import {
   DEFAULT_AVATAR,
   OPEN_CATEGORY_COOKIE as DEFAULT_COOKIE,
 } from '../constants/ui.constants'
+import { ROLES } from '../constants'
+import { useAuthContext } from '../context/AuthContext'
 import { getSidebar } from '../services/api'
 import LiveUserCount from './LiveUserCount'
 import '../styles/Sidebar.css'
@@ -88,9 +90,10 @@ function CategoryItem({
 export default function Sidebar({
   onCollapseChange,
   dragonCursorEnabled,
-  currentUser,
-  onLogout,
 }) {
+  // Auth state sourced from AuthContext — not props.
+  // Eliminates the INFERRED edge between App Component and Sidebar Navigation Component.
+  const { authUser: currentUser, handleLogout } = useAuthContext()
   const [activePage, setActivePage] = useState('princess-kaguya')
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [categories, setCategories] = useState([])
@@ -172,7 +175,7 @@ export default function Sidebar({
   }
 
   const handleLogoutClick = () => {
-    onLogout?.()
+    handleLogout()
     setAvatarMenuOpen(false)
     navigate('/auth')
     applyCollapsedState(true)
@@ -332,8 +335,8 @@ export default function Sidebar({
                       <Bookmark size={14} strokeWidth={1.8} />
                       <span>Bookmarks</span>
                     </button>
-                    {(currentUser.role === 'admin' ||
-                      currentUser.role === 'editor') && (
+                    {(currentUser.role === ROLES.ADMIN ||
+                      currentUser.role === ROLES.SUB_ADMIN) && (
                       <button
                         className="flyout-item"
                         onClick={() => handleAvatarMenuNavigate('/admin')}

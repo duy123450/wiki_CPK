@@ -2,6 +2,7 @@ const mongoose = require('mongoose')
 const argon2 = require('argon2')
 const jwt = require('jsonwebtoken')
 const envConfig = require('../../config/env.config')
+const { ROLES } = require('../../constants/roles')
 
 const UserSchema = new mongoose.Schema(
   {
@@ -56,8 +57,8 @@ const UserSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ['admin', 'sub_admin', 'user'],
-      default: 'user',
+      enum: Object.values(ROLES), // derived from canonical constants/roles.js
+      default: ROLES.USER,
     },
     // --- FIXED AVATAR SECTION ---
     avatar: {
