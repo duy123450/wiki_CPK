@@ -11,7 +11,15 @@ export default mergeConfig(
       include: ['src/tests/**/*.test.{js,jsx}'],
       css: false,
       pool: 'threads',
-      testTimeout: 20000,
+      poolOptions: {
+        threads: {
+          // Unbounded parallelism exhausts the thread pool on heavy jsdom suites.
+          // Cap at 4 to prevent "Timeout waiting for worker to respond" errors.
+          maxThreads: 4,
+          minThreads: 1,
+        },
+      },
+      testTimeout: 30000,
     },
   })
 )
