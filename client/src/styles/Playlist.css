@@ -174,7 +174,7 @@
 /* Mobile: player = exact 60% of panel height, content scales to fill */
 @media (max-width: 768px) {
     .pl-panel-player {
-        flex: 0 0 67%;
+        flex: 0 1 60%;
         overflow: hidden;
         /* no scroll — we scale content to fit */
         border-bottom: 1px solid #282828;
@@ -205,7 +205,7 @@
 /* Mobile: tracklist is the bottom 40% */
 @media (max-width: 768px) {
     .pl-panel-tracks {
-        flex: 0 0 40%;
+        flex: 1 1 40%;
         min-height: 0;
         border-right: none;
     }
@@ -240,7 +240,7 @@
     overflow-x: hidden;
     padding: 0;
     /* Push content above Android nav bar (env() = 0 on desktop) */
-    padding-bottom: env(safe-area-inset-bottom, 0px);
+    padding-bottom: max(16px, env(safe-area-inset-bottom, 0px));
     min-height: 0;
 }
 
