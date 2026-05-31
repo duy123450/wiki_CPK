@@ -133,7 +133,8 @@
     bottom: 0;
     right: 0;
     width: 100%;
-    height: 88vh;
+    height: 88vh; /* fallback */
+    height: 88dvh;
     background: #121212;
     border-radius: 18px 18px 0 0;
     box-shadow: 0 -6px 28px rgba(0, 0, 0, 0.75);
@@ -238,6 +239,8 @@
     overflow-y: auto;
     overflow-x: hidden;
     padding: 0;
+    /* Push content above Android nav bar (env() = 0 on desktop) */
+    padding-bottom: env(safe-area-inset-bottom, 0px);
     min-height: 0;
 }
 
@@ -756,7 +759,8 @@
     }
 
     .pl-panel {
-        height: 92vh;
+        height: 92vh; /* fallback */
+        height: 92dvh;
     }
 
     /* Tighten controls row on very small screens */

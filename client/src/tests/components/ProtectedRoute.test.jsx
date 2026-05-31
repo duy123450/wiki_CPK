@@ -8,10 +8,17 @@ vi.mock('@/context/AuthContext', () => ({
   useAuthContext: vi.fn(),
 }))
 
+// ProtectedRoute reads isRestoringSession from Redux via useSelector.
+// In tests, session is always already resolved (false = not loading).
+vi.mock('react-redux', () => ({
+  useSelector: vi.fn(() => false),
+}))
+
 describe('ProtectedRoute', () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
+
 
   it('renders children when currentUser exists', () => {
     const mockUser = { id: '1', username: 'testuser' }
