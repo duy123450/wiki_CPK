@@ -104,7 +104,9 @@ const authSlice = createSlice({
       state.user = action.payload.user
       if (action.payload.token) {
         state.token = action.payload.token
+        window.localStorage.setItem(AUTH_TOKEN_KEY, action.payload.token)
       }
+      state.isAuthenticated = !!action.payload.user
     },
   },
   extraReducers: (builder) => {

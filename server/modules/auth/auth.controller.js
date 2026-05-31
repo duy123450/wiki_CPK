@@ -1,10 +1,12 @@
 const authService = require('./auth.service')
 const envConfig = require('../../config/env.config')
 
+const isProd = envConfig.NODE_ENV === 'production'
+
 const refreshCookieOptions = {
   httpOnly: true,
-  secure: true,
-  sameSite: 'None',
+  secure: isProd,
+  sameSite: isProd ? 'None' : 'Lax',
   path: '/api/v1/wiki/auth',
 }
 
