@@ -19,6 +19,7 @@
  *   <ProtectedRoute requiredRole={ROLES.ADMIN}><AdminDashboard /></ProtectedRoute>
  */
 import { Navigate } from 'react-router-dom'
+import { useSelector } from 'react-redux'
 import { useAuthContext } from '../context/AuthContext'
 import { ROLES } from '../constants'
 
@@ -28,6 +29,12 @@ export default function ProtectedRoute({
   children,
 }) {
   const { authUser } = useAuthContext()
+  const isRestoringSession = useSelector((state) => state.auth.isRestoringSession)
+
+  // Session restore still in-flight — don't redirect yet, just wait
+  if (isRestoringSession) {
+    return null
+  }
 
   // Not authenticated — redirect to login
   if (!authUser) {

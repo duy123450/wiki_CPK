@@ -76,6 +76,9 @@ const initialState = {
   user: null,
   token: window.localStorage.getItem(AUTH_TOKEN_KEY) || null,
   isAuthenticated: false,
+  // True while restoreSession is in-flight — prevents ProtectedRoute from
+  // redirecting to /auth before we know if a valid session exists in storage.
+  isRestoringSession: !!window.localStorage.getItem(AUTH_TOKEN_KEY),
   status: 'idle',
   error: null,
 }
@@ -139,12 +142,20 @@ const authSlice = createSlice({
         state.error = action.payload
       })
       // Restore Session
+      .addCase(restoreSession.pending, (state) => {
+        // Only set flag if a token actually exists (thunk will check)
+        state.isRestoringSession = !!window.localStorage.getItem(AUTH_TOKEN_KEY)
+      })
       .addCase(restoreSession.fulfilled, (state, action) => {
         if (action.payload) {
           state.user = action.payload.user
           state.token = action.payload.token
           state.isAuthenticated = true
         }
+        state.isRestoringSession = false
+      })
+      .addCase(restoreSession.rejected, (state) => {
+        state.isRestoringSession = false
       })
       // Update Profile Info
       .addCase(updateProfileInfo.pending, (state) => {
