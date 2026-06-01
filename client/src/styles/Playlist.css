@@ -135,6 +135,7 @@
     width: 100%;
     height: 88vh; /* fallback */
     height: 88dvh;
+    height: calc(var(--pl-viewport-height, 100vh) * 0.88);
     background: #121212;
     border-radius: 18px 18px 0 0;
     box-shadow: 0 -6px 28px rgba(0, 0, 0, 0.75);
@@ -326,6 +327,8 @@
     min-height: 0;
     padding: 4px 12px;
     position: relative;
+    overflow: hidden;
+    transform: translate3d(0, 0, 0); /* Force WebKit clipping */
 }
 
 .pl-panel-cover {
@@ -354,11 +357,23 @@
 .pl-panel-lyrics-wrap {
     width: 100%;
     height: 100%;
+    min-height: 0;
     display: flex;
     flex-direction: column;
     justify-content: center;
     padding: 0 10px;
     gap: 0;
+    overflow: hidden;
+    transform: translate3d(0, 0, 0); /* Force WebKit clipping */
+}
+
+@media (max-width: 768px) {
+    .pl-panel-lyrics-wrap {
+        position: absolute;
+        inset: 4px 12px;
+        width: auto;
+        height: auto;
+    }
 }
 
 .pl-lyric-section h3 {
@@ -393,6 +408,8 @@
     transition: all 0.25s ease;
     opacity: 0.35;
     cursor: pointer;
+    min-height: 0;
+    overflow: hidden;
 }
 
 .pl-synced-line:hover {
@@ -410,6 +427,11 @@
     color: #fff;
     line-height: 1.4;
     transition: color 0.25s;
+    display: -webkit-box;
+    overflow: hidden;
+    overflow-wrap: anywhere;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
 }
 
 .pl-synced-line--active .pl-synced-text {
@@ -421,6 +443,9 @@
     color: #888;
     margin-top: 1px;
     line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .pl-karaoke-sub {
@@ -761,6 +786,20 @@
     .pl-panel {
         height: 92vh; /* fallback */
         height: 92dvh;
+        height: calc(var(--pl-viewport-height, 100vh) * 0.92);
+    }
+
+    .pl-panel-lyrics-wrap {
+        padding: 0 8px;
+    }
+
+    .pl-synced-line {
+        padding: 2px 8px;
+    }
+
+    .pl-synced-text {
+        font-size: clamp(14px, 4.4vw, 18px);
+        line-height: 1.25;
     }
 
     /* Tighten controls row on very small screens */

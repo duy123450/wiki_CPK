@@ -199,6 +199,30 @@ export default function Playlist() {
     init()
   }, [])
 
+  useEffect(() => {
+    if (!isExpanded) return undefined
+
+    const setViewportHeight = () => {
+      const viewportHeight = window.visualViewport?.height || window.innerHeight
+      document.documentElement.style.setProperty(
+        '--pl-viewport-height',
+        `${viewportHeight}px`
+      )
+    }
+
+    setViewportHeight()
+    window.addEventListener('resize', setViewportHeight)
+    window.visualViewport?.addEventListener('resize', setViewportHeight)
+    window.visualViewport?.addEventListener('scroll', setViewportHeight)
+
+    return () => {
+      window.removeEventListener('resize', setViewportHeight)
+      window.visualViewport?.removeEventListener('resize', setViewportHeight)
+      window.visualViewport?.removeEventListener('scroll', setViewportHeight)
+      document.documentElement.style.removeProperty('--pl-viewport-height')
+    }
+  }, [isExpanded])
+
   const {
     currentIdx,
     isPlaying,
