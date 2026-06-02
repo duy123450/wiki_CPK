@@ -78,8 +78,12 @@ const updateUserAvatar = async (userId, file) => {
     const user = await User.findById(userId)
     if (!user) throw new NotFoundError('User not found')
 
-    if (user.avatar?.public_id && user.avatar.public_id !== DEFAULT_PUBLIC_ID) {
-        const { cloudinary } = require('../config/cloudinary')
+    const OAUTH_AVATARS = ['google-avatar', 'github-avatar', 'discord-avatar', 'twitter-avatar']
+    if (user.avatar?.public_id && 
+        user.avatar.public_id !== DEFAULT_PUBLIC_ID && 
+        !OAUTH_AVATARS.includes(user.avatar.public_id)
+    ) {
+        const { cloudinary } = require('../../config/cloudinary')
         await cloudinary.uploader.destroy(user.avatar.public_id)
     }
 
@@ -119,8 +123,13 @@ const updateUserProfile = async (userId, updates) => {
     }
 
     if (newPassword) {
-        const isMatch = await user.comparePassword(currentPassword)
-        if (!isMatch) throw new AuthError('Current password is incorrect')
+        if (user.password) {
+            if (!currentPassword) {
+                throw new ValidationError('Current password is required to set a new password')
+            }
+            const isMatch = await user.comparePassword(currentPassword)
+            if (!isMatch) throw new AuthError('Current password is incorrect')
+        }
         user.password = newPassword
     }
 

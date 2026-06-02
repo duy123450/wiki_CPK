@@ -3,7 +3,7 @@ import { ACCESS_TOKEN_UPDATED_EVENT } from '../constants'
 import { envConfig } from '../config/env.config'
 import { validateData } from '../utils/api-validator'
 import { loginSchema, registerRequestSchema } from '../schemas/authSchemas'
-import { profileSchema as updateProfileSchema } from '../schemas/profileSchemas'
+import { profileRequestSchema as updateProfileSchema } from '../schemas/profileSchemas'
 
 export const AUTH_TOKEN_KEY = envConfig.VITE_AUTH_TOKEN_KEY
 export const API_BASE_URL = envConfig.VITE_API_BASE_URL

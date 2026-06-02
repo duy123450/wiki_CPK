@@ -39,3 +39,15 @@ export const profileSchema = z
       }
     }
   })
+
+export const profileRequestSchema = z.object({
+  username: z
+    .string()
+    .min(3, 'Username must be at least 3 characters')
+    .max(20, 'Username must be at most 20 characters')
+    .optional(),
+  email: z.string().email('Please enter a valid email address').optional(),
+  currentPassword: z.string().optional(),
+  newPassword: z.string().min(6, 'New password must be at least 6 characters').optional(),
+})
+
