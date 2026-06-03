@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react'
-import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams, Navigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Eye, EyeOff } from 'lucide-react'
@@ -200,78 +200,7 @@ export default function AuthPage({
 
   // ─── Signed-in view ────────────────────────────────────────────────────────
   if (currentUser) {
-    // Use local preview while upload is in-flight; fall back to persisted URL
-    const avatarSrc = avatarPreview || currentUser.avatar?.url
-
-    return (
-      <section
-        className={`auth-root ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}
-      >
-        <div className="auth-shell auth-shell--signed-in">
-          <span className="auth-badge">Signed In</span>
-
-          <div className="auth-avatar-wrap">
-            <div
-              className={`auth-avatar-ring ${
-                avatarUploading ? 'auth-avatar-ring--uploading' : ''
-              }`}
-            >
-              <img
-                src={avatarSrc}
-                alt={`${currentUser.username}'s avatar`}
-                className="auth-avatar-img"
-              />
-              {avatarUploading && (
-                <div className="auth-avatar-spinner" aria-label="Uploading…" />
-              )}
-            </div>
-
-            <button
-              type="button"
-              className="auth-avatar-btn"
-              onClick={() => fileInputRef.current.click()}
-              disabled={avatarUploading}
-            >
-              {avatarUploading ? 'Uploading…' : 'Change Avatar'}
-            </button>
-
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/jpeg,image/png,image/jpg"
-              style={{ display: 'none' }}
-              onChange={handleAvatarChange}
-            />
-
-            {avatarError && <p className="auth-error">{avatarError}</p>}
-          </div>
-
-          <h1 className="auth-title">
-            Chào mừng trở lại, {currentUser.username}
-          </h1>
-          <p className="auth-copy">Quay về wiki hoặc đăng xuất tại đây.</p>
-
-          <div className="auth-user-card">
-            <span className="auth-user-label">Email</span>
-            <strong>{currentUser.email}</strong>
-            <span className="auth-user-role">{currentUser.role}</span>
-          </div>
-
-          <div className="auth-actions">
-            <Link to="/" className="auth-btn auth-btn-primary">
-              Back To Wiki
-            </Link>
-            <button
-              type="button"
-              className="auth-btn auth-btn-secondary"
-              onClick={onLogout}
-            >
-              Log Out
-            </button>
-          </div>
-        </div>
-      </section>
-    )
+    return <Navigate to="/welcome" replace />
   }
 
   // ─── Login / Register view ─────────────────────────────────────────────────

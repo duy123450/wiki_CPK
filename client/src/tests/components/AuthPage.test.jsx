@@ -321,44 +321,6 @@ describe('AuthPage — Google OAuth Callback', () => {
   })
 })
 
-describe('AuthPage — Signed In View', () => {
-  const signedInUser = {
-    username: 'testuser',
-    email: 'test@test.com',
-    role: 'viewer',
-    avatar: { url: 'http://img.com/a.png' },
-  }
-
-  it('shows welcome message with username', () => {
-    renderAuth({ currentUser: signedInUser })
-    expect(screen.getByText(/Chào mừng trở lại, testuser/)).toBeInTheDocument()
-  })
-
-  it('shows email', () => {
-    renderAuth({ currentUser: signedInUser })
-    expect(screen.getByText('test@test.com')).toBeInTheDocument()
-  })
-
-  it('shows "Signed In" badge', () => {
-    renderAuth({ currentUser: signedInUser })
-    expect(screen.getByText('Signed In')).toBeInTheDocument()
-  })
-
-  it('shows Log Out button that calls onLogout', async () => {
-    const user = userEvent.setup()
-    const onLogout = vi.fn()
-    renderAuth({ currentUser: signedInUser, onLogout })
-
-    await user.click(screen.getByText('Log Out'))
-    expect(onLogout).toHaveBeenCalled()
-  })
-
-  it('shows "Back To Wiki" link', () => {
-    renderAuth({ currentUser: signedInUser })
-    const link = screen.getByText('Back To Wiki').closest('a')
-    expect(link).toHaveAttribute('href', '/')
-  })
-})
 
 describe('AuthPage — Password Visibility Toggle', () => {
   it('toggles password visibility', async () => {

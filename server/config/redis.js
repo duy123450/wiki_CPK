@@ -3,6 +3,11 @@ const envConfig = require('./env.config')
 
 const redisClient = createClient({
   url: envConfig.REDIS_URL,
+  pingInterval: 10000,
+  socket: {
+    family: 4,
+    tls: envConfig.REDIS_URL.startsWith('rediss://')
+  }
 })
 
 redisClient.on('error', (err) => {

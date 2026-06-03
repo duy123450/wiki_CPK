@@ -23,6 +23,7 @@ import CharactersPage     from './pages/CharactersPage'
 import CharacterPage      from './pages/CharacterPage'
 import NotFoundPage       from './pages/NotFoundPage'
 import AuthPage           from './pages/AuthPage'
+import WelcomePage        from './pages/WelcomePage'
 import ProfilePage        from './pages/ProfilePage'
 import Footer             from './components/Footer'
 import Playlist           from './components/Playlist'
@@ -84,6 +85,18 @@ export default function App() {
                   sidebarCollapsed={sidebarCollapsed}
                   currentUser={authUser}
                   onAuthSuccess={authState.handleAuthSuccess}
+                  onAvatarUpdate={authState.handleAvatarUpdate}
+                  onLogout={authState.handleLogout}
+                />
+              }
+            />
+
+            <Route
+              path="/welcome"
+              element={
+                <WelcomePage
+                  sidebarCollapsed={sidebarCollapsed}
+                  currentUser={authUser}
                   onAvatarUpdate={authState.handleAvatarUpdate}
                   onLogout={authState.handleLogout}
                 />
