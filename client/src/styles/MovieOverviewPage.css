@@ -744,3 +744,54 @@
         width: 110px;
     }
 }
+
+/* ── Trailers Section ────────────────────────────────────────────────────── */
+.mov-trailer-btns {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.mov-trailer-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 99px;
+  background: var(--mov-surface, hsl(228, 18%, 11%));
+  border: 1px solid var(--mov-border, hsl(228, 18%, 18%));
+  color: var(--mov-muted, hsl(220, 12%, 55%));
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mov-trailer-btn:hover {
+  border-color: var(--mov-purple, hsl(272, 78%, 62%));
+  color: var(--mov-text, hsl(220, 20%, 90%));
+}
+
+.mov-trailer-btn--active {
+  background: color-mix(in srgb, var(--mov-purple, hsl(272, 78%, 62%)) 20%, transparent);
+  border-color: var(--mov-purple, hsl(272, 78%, 62%));
+  color: var(--mov-purple, hsl(272, 78%, 62%));
+  box-shadow: 0 0 12px color-mix(in srgb, var(--mov-purple, hsl(272, 78%, 62%)) 30%, transparent);
+}
+
+.mov-trailer-embed {
+  position: relative;
+  width: 100%;
+  padding-top: 56.25%; /* 16:9 Aspect Ratio */
+  border-radius: 8px;
+  overflow: hidden;
+  background: #000;
+  border: 1px solid var(--mov-border, hsl(228, 18%, 18%));
+}
+
+.mov-trailer-iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}

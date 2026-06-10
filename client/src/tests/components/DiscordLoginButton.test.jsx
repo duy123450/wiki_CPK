@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
-import DiscordLoginButton from '@/components/DiscordLoginButton'
+import { DiscordLoginButton } from '@/components/Button'
 import * as api from '@/services/api'
 
 vi.mock('@/services/api', () => ({

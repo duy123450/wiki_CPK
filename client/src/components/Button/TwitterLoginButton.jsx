@@ -1,4 +1,4 @@
-import { getTwitterLoginUrl } from '../services/api'
+import { getTwitterLoginUrl } from '../../services/api'
 
 export default function TwitterLoginButton() {
   const handleClick = () => {

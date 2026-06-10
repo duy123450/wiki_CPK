@@ -1,6 +1,7 @@
 const Category = require('./models/category.model')
 const Movie = require('./models/movie.model')
 const WikiPage = require('./models/wiki-page.model')
+const Soundtrack = require('../soundtrack/sound-track.model')
 const { WikiError, ValidationError } = require('../../errors')
 const asyncWrapper = require('../../middleware/async')
 
@@ -17,25 +18,42 @@ const fetchMovieData = async (title = 'Chou Kaguya Hime') => {
 
 /**
  * Aggregates all categories and their associated pages for the sidebar.
+ * For the 'soundtrack' category, real track documents are used as pages.
  */
 const fetchSidebarData = async () => {
   const categories = await Category.find({}).sort('order')
 
   const categoriesWithPages = await Promise.all(
     categories.map(async (category) => {
-      const pages = await WikiPage.find({ category: category._id })
-        .select('title slug order')
-        .sort({ order: 1 })
+      let pages
+
+      if (category.slug === 'soundtrack') {
+        // Return actual tracks as sidebar entries
+        const tracks = await Soundtrack.find({})
+          .select('title slug trackNumber')
+          .sort({ trackNumber: 1 })
+
+        pages = tracks.map((t) => ({
+          title: t.title,
+          slug: t.slug,
+        }))
+      } else {
+        const wikiPages = await WikiPage.find({ category: category._id })
+          .select('title slug order')
+          .sort({ order: 1 })
+
+        pages = wikiPages.map((p) => ({
+          title: p.title,
+          slug: p.slug,
+        }))
+      }
 
       return {
         _id: category._id,
         name: category.name,
         icon: category.icon,
         slug: category.slug,
-        pages: pages.map((p) => ({
-          title: p.title,
-          slug: p.slug,
-        })),
+        pages,
       }
     })
   )

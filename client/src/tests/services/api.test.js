@@ -264,7 +264,10 @@ describe('fetchSoundtracks', () => {
 
 describe('fetchNextTrack', () => {
   it('calls /soundtrack/next with params', async () => {
-    const data = { track: { _id: 't1' } }
+    const data = {
+      mode: 'sequential',
+      track: { _id: 't1', slug: 'track-1', title: 'Track One', trackNumber: 1, lyrics: {}, officialUrl: [] },
+    }
     mockAxiosInstance.get.mockResolvedValueOnce({ data })
     const result = await api.fetchNextTrack({
       currentTrackId: 't1',
@@ -274,11 +277,17 @@ describe('fetchNextTrack', () => {
     expect(mockAxiosInstance.get).toHaveBeenCalledWith('/soundtrack/next', {
       params: { currentTrackId: 't1', mode: 'sequential', movieId: 'm1' },
     })
-    expect(result).toEqual(data)
+    expect(result).toMatchObject({
+      mode: 'sequential',
+      track: expect.objectContaining({ _id: 't1', slug: 'track-1', title: 'Track One' }),
+    })
   })
 
   it('adds cache buster for shuffle mode', async () => {
-    const data = { track: { _id: 't2' } }
+    const data = {
+      mode: 'shuffle',
+      track: { _id: 't2', slug: 'track-2', title: 'Track Two', trackNumber: 2, lyrics: {}, officialUrl: [] },
+    }
     mockAxiosInstance.get.mockResolvedValueOnce({ data })
     await api.fetchNextTrack({
       currentTrackId: 't1',

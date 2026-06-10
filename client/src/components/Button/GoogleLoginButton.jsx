@@ -1,4 +1,4 @@
-import { getGoogleLoginUrl } from '../services/api'
+import { getGoogleLoginUrl } from '../../services/api'
 
 export default function GoogleLoginButton() {
   const handleClick = () => {

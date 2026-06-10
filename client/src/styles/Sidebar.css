@@ -296,6 +296,27 @@
     box-shadow: 0 0 6px currentColor;
 }
 
+/* "View All" index link */
+.page-link--index {
+    color: var(--accent-purple);
+    opacity: 0.75;
+    font-style: italic;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+}
+
+.page-link--index:hover {
+    opacity: 1;
+    background: rgba(192, 132, 252, 0.1);
+    color: var(--accent-purple);
+}
+
+.page-dot--index {
+    background: var(--accent-purple);
+    opacity: 0.6;
+}
+
 @media (max-width: 768px) {
     .category-header {
         min-height: 42px;

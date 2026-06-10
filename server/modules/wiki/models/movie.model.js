@@ -43,6 +43,10 @@ const MovieSchema = new mongoose.Schema(
             type: String,
             default: '',
           },
+          label: {
+            type: String,
+            default: '',
+          },
         },
       ],
       watchUrl: {

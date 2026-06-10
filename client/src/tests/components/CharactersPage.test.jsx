@@ -7,6 +7,7 @@ import CharactersPage from '@/pages/CharactersPage'
 // Mock API
 vi.mock('@/services/api', () => ({
   getCharacters: vi.fn(),
+  getCharacterRoles: vi.fn(),
 }))
 
 // Mock useMovieInfo hook
@@ -18,7 +19,8 @@ vi.mock('@/hooks/useMovieInfo', () => ({
   })),
 }))
 
-import { getCharacters } from '@/services/api'
+import { getCharacters, getCharacterRoles } from '@/services/api'
+import useMovieInfo from '@/hooks/useMovieInfo'
 
 const mockCharacters = [
   {
@@ -54,8 +56,14 @@ const renderPage = () =>
   )
 
 beforeEach(() => {
-  vi.clearAllMocks()
+  vi.resetAllMocks()
+  useMovieInfo.mockReturnValue({
+    data: { title: '超かぐや姫', tagline: 'A tale of the moon' },
+    loading: false,
+    error: null,
+  })
   getCharacters.mockResolvedValue(mockResponse)
+  getCharacterRoles.mockResolvedValue(['Protagonist', 'Antagonist', 'Supporting', 'Cameo'])
 })
 
 describe('CharactersPage', () => {
@@ -78,8 +86,9 @@ describe('CharactersPage', () => {
     renderPage()
 
     await waitFor(() => {
-      expect(screen.getByText('Protagonist')).toBeInTheDocument()
-      expect(screen.getByText('Supporting')).toBeInTheDocument()
+      // Role names appear both as filter pills and as card badges, so use getAllByText
+      expect(screen.getAllByText('Protagonist').length).toBeGreaterThanOrEqual(1)
+      expect(screen.getAllByText('Supporting').length).toBeGreaterThanOrEqual(1)
     })
   })
 

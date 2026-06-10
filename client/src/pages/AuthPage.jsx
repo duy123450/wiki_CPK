@@ -9,10 +9,12 @@ import {
   uploadAvatar,
   refreshAccessToken,
 } from '../services/api'
-import GoogleLoginButton from '../components/GoogleLoginButton'
-import TwitterLoginButton from '../components/TwitterLoginButton'
-import DiscordLoginButton from '../components/DiscordLoginButton'
-import GithubLoginButton from '../components/GithubLoginButton'
+import {
+  GoogleLoginButton,
+  TwitterLoginButton,
+  DiscordLoginButton,
+  GithubLoginButton,
+} from '../components/Button'
 import { loginSchema, registerSchema } from '../schemas/authSchemas'
 import '../styles/AuthPage.css'
 

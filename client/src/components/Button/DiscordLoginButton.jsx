@@ -1,4 +1,4 @@
-import { getDiscordLoginUrl } from '../services/api'
+import { getDiscordLoginUrl } from '../../services/api'
 
 export default function DiscordLoginButton() {
   const handleClick = () => {

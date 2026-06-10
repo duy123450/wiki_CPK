@@ -13,4 +13,9 @@ const getSoundtracks = asyncWrapper(async (req, res) => {
   res.status(200).json({ tracks })
 })
 
-module.exports = { getNextTrack, getSoundtracks }
+const getSoundtrackBySlug = asyncWrapper(async (req, res) => {
+  const track = await soundtrackService.fetchTrackBySlug(req.params.slug)
+  res.status(200).json({ track })
+})
+
+module.exports = { getNextTrack, getSoundtracks, getSoundtrackBySlug }

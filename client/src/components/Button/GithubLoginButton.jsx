@@ -1,4 +1,4 @@
-import { getGithubLoginUrl } from '../services/api'
+import { getGithubLoginUrl } from '../../services/api'
 
 export default function GithubLoginButton() {
   const handleClick = () => {

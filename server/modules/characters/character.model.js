@@ -19,6 +19,7 @@ const CharacterSchema = new mongoose.Schema(
     role: {
       type: String,
       enum: ['Protagonist', 'Supporting', 'Antagonist', 'Cameo'],
+      default: 'Supporting',
     },
 
     description: {

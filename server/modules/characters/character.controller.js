@@ -11,4 +11,9 @@ const getCharacterBySlug = asyncWrapper(async (req, res) => {
   res.status(200).json({ character })
 })
 
-module.exports = { getAllCharacters, getCharacterBySlug }
+const getCharacterRoles = asyncWrapper(async (req, res) => {
+  const roles = characterService.fetchCharacterRoles()
+  res.status(200).json({ roles })
+})
+
+module.exports = { getAllCharacters, getCharacterBySlug, getCharacterRoles }

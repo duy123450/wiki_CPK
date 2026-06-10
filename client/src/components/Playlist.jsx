@@ -1,7 +1,11 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import '../styles/Playlist.css'
-import { fetchMovieInfo, fetchSoundtracks } from '../services/api'
 import useYouTubePlayer from '../hooks/useYouTubePlayer'
+import { useAppDispatch, useAppSelector } from '../store/hooks'
+import {
+  fetchSoundtrackMovie,
+  fetchAllSoundtracks,
+} from '../store/slices/soundtrackSlice'
 
 const fmtTime = (s) => {
   s = Math.max(0, Math.floor(s))
@@ -176,28 +180,26 @@ const IconVolume = () => (
 )
 
 export default function Playlist() {
-  const [movie, setMovie] = useState(null)
-  const [tracks, setTracks] = useState([])
+  const dispatch = useAppDispatch()
+
+  // Read from the shared Redux store — avoids duplicate fetch & race conditions
+  const movie = useAppSelector((s) => s.soundtracks.movie)
+  const tracks = useAppSelector((s) => s.soundtracks.all) || []
+  const allStatus = useAppSelector((s) => s.soundtracks.allStatus)
+  const allError = useAppSelector((s) => s.soundtracks.allError)
+  const movieStatus = useAppSelector((s) => s.soundtracks.movieStatus)
+
   const [isExpanded, setIsExpanded] = useState(false)
   const [activeTab, setActiveTab] = useState('cover')
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+
+  // Kick off fetches on mount (thunks bail early if data already cached)
+  useEffect(() => {
+    dispatch(fetchSoundtrackMovie())
+  }, [dispatch])
 
   useEffect(() => {
-    const init = async () => {
-      try {
-        const { movie: movieData } = await fetchMovieInfo()
-        setMovie(movieData)
-        const { tracks: trackData } = await fetchSoundtracks(movieData._id)
-        setTracks(trackData)
-      } catch (err) {
-        setError(err.message)
-      } finally {
-        setLoading(false)
-      }
-    }
-    init()
-  }, [])
+    if (movie?._id) dispatch(fetchAllSoundtracks(movie._id))
+  }, [dispatch, movie])
 
   useEffect(() => {
     if (!isExpanded) return undefined
@@ -253,7 +255,14 @@ export default function Playlist() {
     if (!synced?.length) return -1
     let idx = -1
     for (let i = 0; i < synced.length; i++) {
-      if (synced[i].time <= currentTime) idx = i
+      const item = synced[i]
+      if (
+        item &&
+        typeof item === 'object' &&
+        'time' in item &&
+        item.time <= currentTime
+      )
+        idx = i
       else break
     }
     return idx
@@ -274,9 +283,45 @@ export default function Playlist() {
 
   // Keep activeLine for karaoke subtitle on cover tab
   const activeLine =
-    activeLineIdx >= 0 ? currentTrack.lyrics.synced[activeLineIdx] : null
+    activeLineIdx >= 0 && currentTrack?.lyrics?.synced?.[activeLineIdx]
+      ? currentTrack.lyrics.synced[activeLineIdx]
+      : null
 
-  if (error || loading || !currentTrack) return null
+  const loading =
+    allStatus === 'idle' ||
+    allStatus === 'loading' ||
+    movieStatus === 'loading' ||
+    movieStatus === 'idle'
+
+  // While loading, render nothing — player will appear once data arrives
+  if (loading && !currentTrack) return null
+
+  // On error: show a small persistent error bar so the player doesn't silently vanish
+  if ((allStatus === 'failed' || allError) && !currentTrack) {
+    return (
+      <div className="pl-container">
+        <div className="pl-sticky-bar pl-sticky-bar--error">
+          <span
+            className="pl-sticky-info"
+            style={{ color: '#ff6b6b', fontSize: '0.75rem' }}
+          >
+            ♩ Could not load tracks
+          </span>
+          <button
+            className="pl-sticky-play"
+            style={{ fontSize: '0.65rem', padding: '0.25rem 0.5rem' }}
+            onClick={() => {
+              dispatch(fetchSoundtrackMovie())
+            }}
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  if (!currentTrack) return null
 
   return (
     <>

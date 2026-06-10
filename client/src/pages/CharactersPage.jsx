@@ -1,7 +1,8 @@
 /* eslint-disable react-hooks/purity */
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { Link } from 'react-router-dom'
-import { getCharacters } from '../services/api'
+import { getCharacters, getCharacterRoles } from '../services/api';
+import CharacterCard from '../components/Character/CharacterCard';
 import useMovieInfo from '../hooks/useMovieInfo'
 import { ROLE_COLORS } from '../constants/ui.constants'
 import '../styles/CharactersPage.css'
@@ -47,57 +48,7 @@ function RoleBadge({ role }) {
 }
 
 // ─── Character card ───────────────────────────────────────────────────────────
-function CharacterCard({ character, index }) {
-  const slug = character.slug ?? nameToSlug(character.name)
-  const coverUrl = character.image?.[0]?.url
-
-  return (
-    <Link
-      to={`/wiki/characters/${slug}`}
-      className="chrs-card"
-      style={{ animationDelay: `${index * 60}ms` }}
-    >
-      {/* Image */}
-      <div className="chrs-card-img-wrap">
-        {coverUrl ? (
-          <img
-            src={coverUrl}
-            alt={character.name}
-            className="chrs-card-img"
-            loading="lazy"
-          />
-        ) : (
-          <div className="chrs-card-img-placeholder">
-            <span className="chrs-card-glyph">✦</span>
-          </div>
-        )}
-        <div className="chrs-card-img-scrim" />
-        <div className="chrs-card-corner chrs-card-corner--tl" />
-        <div className="chrs-card-corner chrs-card-corner--tr" />
-        <div className="chrs-card-corner chrs-card-corner--bl" />
-        <div className="chrs-card-corner chrs-card-corner--br" />
-      </div>
-
-      {/* Info */}
-      <div className="chrs-card-body">
-        <RoleBadge role={character.role} />
-        <h2 className="chrs-card-name">{character.name}</h2>
-        {character.voiceActor && (
-          <p className="chrs-card-voice">
-            <span className="chrs-card-voice-label">CV</span>
-            {character.voiceActor}
-          </p>
-        )}
-        {character.description?.summary && (
-          <p className="chrs-card-summary">{character.description.summary}</p>
-        )}
-        <span className="chrs-card-cta">
-          View Profile <span className="chrs-card-arrow">→</span>
-        </span>
-      </div>
-    </Link>
-  )
-}
+// CharacterCard is now imported from components/Character/CharacterCard.jsx
 
 // ─── Skeleton card ────────────────────────────────────────────────────────────
 function SkeletonCard() {
@@ -116,9 +67,9 @@ function SkeletonCard() {
 }
 
 // ─── Filter / search bar ──────────────────────────────────────────────────────
-const ROLES = ['All', 'Protagonist', 'Supporting', 'Antagonist', 'Cameo']
+/* duplicate roles state removed */
 
-function FilterBar({ search, onSearch, role, onRole, total, showing }) {
+function FilterBar({ search, onSearch, role, onRole, roles, total, showing }) {
   return (
     <div className="chrs-filter-bar">
       {/* Search */}
@@ -158,7 +109,7 @@ function FilterBar({ search, onSearch, role, onRole, total, showing }) {
 
       {/* Role pills */}
       <div className="chrs-role-pills">
-        {ROLES.map((r) => (
+        {roles.map((r) => (
           <button
             key={r}
             className={`chrs-role-pill ${role === r ? 'chrs-role-pill--active' : ''}`}
@@ -253,6 +204,7 @@ export default function CharactersPage({ sidebarCollapsed }) {
   const [error, setError] = useState(null)
   const [search, setSearch] = useState('')
   const [role, setRole] = useState('All')
+  const [roles, setRoles] = useState(['All'])
   const [page, setPage] = useState(1)
   const [pagination, setPagination] = useState({ total: 0, totalPages: 1 })
 
@@ -280,6 +232,21 @@ export default function CharactersPage({ sidebarCollapsed }) {
   useEffect(() => {
     load(1, '', 'All')
   }, [load])
+
+  // Fetch roles on mount
+  useEffect(() => {
+    const fetchRoles = async () => {
+      try {
+        const fetched = await getCharacterRoles()
+        if (Array.isArray(fetched)) {
+          setRoles(['All', ...fetched])
+        }
+      } catch (e) {
+        console.error('Failed to fetch roles', e)
+      }
+    }
+    fetchRoles()
+  }, [])
 
   // Debounced search
   const handleSearch = useCallback(
@@ -335,6 +302,7 @@ export default function CharactersPage({ sidebarCollapsed }) {
         onSearch={handleSearch}
         role={role}
         onRole={handleRole}
+        roles={roles}
         total={pagination.total}
         showing={characters.length}
       />

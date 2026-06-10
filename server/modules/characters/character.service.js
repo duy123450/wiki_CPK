@@ -63,4 +63,11 @@ const fetchCharacterBySlug = async (slug) => {
   return formatCharacter(character.toJSON ? character.toJSON() : character)
 }
 
-module.exports = { fetchAllCharacters, fetchCharacterBySlug }
+const fetchCharacterRoles = async () => {
+  // Get distinct role values directly from the database
+  const roles = await Character.distinct('role')
+  // Ensure we return an array (fallback to empty if undefined)
+  return roles || []
+}
+
+module.exports = { fetchAllCharacters, fetchCharacterBySlug, fetchCharacterRoles }

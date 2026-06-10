@@ -1,8 +1,9 @@
 /* eslint-disable react-hooks/purity */
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import useMovieInfo from '../hooks/useMovieInfo'
 import useReveal from '../hooks/useReveal'
+import { getYoutubeId } from '../utils/youtubeUtils'
 import '../styles/MovieOverviewPage.css'
 
 // ─── Floating particles ───────────────────────────────────────────────────────
@@ -105,10 +106,22 @@ function formatRuntime(minutes) {
   return `${hours}h ${remainingMins}m`
 }
 
+
+const TRAILER_LABELS = ['Official Trailer #1', 'Official Trailer #2', 'Special Trailer']
+
 // ─── Main ─────────────────────────────────────────────────────────────────────
 export default function MovieOverviewPage({ sidebarCollapsed }) {
   const { data: movie, loading, error } = useMovieInfo()
   const [imgLoaded, setImgLoaded] = useState(false)
+  const [selectedTrailer, setSelectedTrailer] = useState(0)
+
+  const trailers = useMemo(() => {
+    const urls = movie?.details?.trailerUrl ?? []
+    return urls
+      .slice(0, 3)
+      .map((t, i) => ({ label: t?.label || TRAILER_LABELS[i], ytId: getYoutubeId(t?.url) }))
+      .filter((t) => t.ytId)
+  }, [movie])
 
   const releaseYear = movie?.details?.releaseDate
     ? new Date(movie.details.releaseDate).getFullYear()
@@ -330,6 +343,40 @@ export default function MovieOverviewPage({ sidebarCollapsed }) {
             )}
           </div>
         </Reveal>
+
+        {/* Trailers */}
+        {!loading && trailers.length > 0 && (
+          <Reveal delay={160}>
+            <div className="mov-section-card">
+              <header className="mov-section-header">
+                <span className="mov-section-ornament" />
+                <h2 className="mov-section-title">Trailers</h2>
+              </header>
+              <div className="mov-trailer-btns">
+                {trailers.map((t, i) => (
+                  <button
+                    key={i}
+                    className={`mov-trailer-btn${selectedTrailer === i ? ' mov-trailer-btn--active' : ''}`}
+                    onClick={() => setSelectedTrailer(i)}
+                  >
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+              <div className="mov-trailer-embed">
+                <iframe
+                  key={trailers[selectedTrailer]?.ytId}
+                  src={`https://www.youtube.com/embed/${trailers[selectedTrailer]?.ytId}`}
+                  title={trailers[selectedTrailer]?.label}
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  className="mov-trailer-iframe"
+                />
+              </div>
+            </div>
+          </Reveal>
+        )}
 
         {/* Explore more */}
         <Reveal delay={200}>

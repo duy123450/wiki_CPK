@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import GithubLoginButton from '@/components/GithubLoginButton'
+import { GithubLoginButton } from '@/components/Button'
 import { getGithubLoginUrl } from '@/services/api'
 
 // Mock the API service

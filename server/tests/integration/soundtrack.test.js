@@ -56,6 +56,10 @@ describe('Soundtrack API', () => {
       expect(res.body.tracks).toHaveLength(2)
       expect(res.body.tracks[0].trackNumber).toBe(1)
       expect(res.body.tracks[1].trackNumber).toBe(2)
+      expect(res.body.tracks[0].movie).toEqual({
+        _id: movie._id.toString(),
+        title: 'Chou Kaguya Hime',
+      })
     })
 
     it('returns 400 without movieId', async () => {
@@ -84,6 +88,7 @@ describe('Soundtrack API', () => {
       expect(res.status).toBe(200)
       expect(res.body.mode).toBe('sequential')
       expect(res.body.track.trackNumber).toBe(2)
+      expect(res.body.track.movie.title).toBe('Chou Kaguya Hime')
     })
 
     it('sequential: wraps around to first track', async () => {
@@ -161,6 +166,48 @@ describe('Soundtrack API', () => {
       expect(res.status).toBe(200)
       // With only 1 track, it should restart
       expect(res.body.restart).toBe(true)
+    })
+  })
+
+  describe('GET /:slug (single track by slug)', () => {
+    it('returns the track when slug is matched exactly', async () => {
+      const track = await seedTrack(movie._id, {
+        trackNumber: 1,
+        title: 'Opening Theme',
+        slug: 'opening-theme',
+      })
+
+      const res = await request(app).get(`${BASE}/opening-theme`)
+      expect(res.status).toBe(200)
+      expect(res.body.track).toBeDefined()
+      expect(res.body.track.title).toBe('Opening Theme')
+      expect(res.body.track._id.toString()).toBe(track._id.toString())
+      expect(res.body.track.movie).toEqual({
+        _id: movie._id.toString(),
+        title: 'Chou Kaguya Hime',
+      })
+    })
+
+    it('returns 404 if the slug does not exist and regex title match fails', async () => {
+      const res = await request(app).get(`${BASE}/non-existent-slug`)
+      expect(res.status).toBe(404)
+      expect(res.body.msg).toContain('No soundtrack found with slug')
+    })
+
+    it('falls back to matching by title regex when exact slug match is not found', async () => {
+      // Create a track without a slug (or mismatching slug) but with matching title
+      const track = await seedTrack(movie._id, {
+        trackNumber: 3,
+        title: 'Insert Song One',
+        slug: 'different-slug',
+      })
+
+      // Query using slug 'insert-song-one', which should fall back to matching title 'Insert Song One'
+      const res = await request(app).get(`${BASE}/insert-song-one`)
+      expect(res.status).toBe(200)
+      expect(res.body.track).toBeDefined()
+      expect(res.body.track.title).toBe('Insert Song One')
+      expect(res.body.track._id.toString()).toBe(track._id.toString())
     })
   })
 })

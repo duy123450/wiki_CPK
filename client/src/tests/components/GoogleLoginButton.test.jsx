@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import GoogleLoginButton from '@/components/GoogleLoginButton'
+import { GoogleLoginButton } from '@/components/Button'
 
 vi.mock('@/services/api', () => ({
   getGoogleLoginUrl: vi.fn(

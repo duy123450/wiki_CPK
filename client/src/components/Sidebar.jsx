@@ -40,15 +40,23 @@ function setCookie(name, value, maxAgeSeconds = 60 * 60 * 24 * 30) {
   document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=${maxAgeSeconds}; samesite=lax`
 }
 
+// Categories that have their own index / listing page
+const COLLECTION_CATEGORIES = {
+  characters: '/wiki/characters',
+  soundtrack: '/wiki/soundtrack',
+}
+
 function CategoryItem({
   category,
   activePage,
   onPageSelect,
   isOpen,
   onToggle,
+  onNavigate,
 }) {
   const Icon = ICON_MAP[category.icon] || BookOpen
   const hasActivePage = category.pages?.some((p) => p.slug === activePage)
+  const indexPath = COLLECTION_CATEGORIES[category.slug]
 
   return (
     <div className={`category-item ${hasActivePage ? 'has-active' : ''}`}>
@@ -69,6 +77,16 @@ function CategoryItem({
 
       <div className={`pages-list ${isOpen ? 'expanded' : ''}`}>
         <div className="pages-inner">
+          {/* Index / listing page link for collection categories */}
+          {indexPath && (
+            <button
+              className="page-link page-link--index"
+              onClick={() => onNavigate(indexPath)}
+            >
+              <span className="page-dot page-dot--index" />
+              View All
+            </button>
+          )}
           {category.pages?.map((page) => (
             <button
               key={page.slug}
@@ -84,6 +102,7 @@ function CategoryItem({
     </div>
   )
 }
+
 
 // Placeholder for avatar if none provided
 
@@ -136,6 +155,8 @@ export default function Sidebar({
     setActivePage(pageSlug)
     if (categorySlug === 'characters') {
       navigate(`/wiki/characters/${pageSlug}`)
+    } else if (categorySlug === 'soundtrack') {
+      navigate(`/wiki/soundtrack/${pageSlug}`)
     } else {
       navigate(`/wiki/${pageSlug}`)
     }
@@ -280,6 +301,7 @@ export default function Sidebar({
                   onPageSelect={handlePageSelect}
                   isOpen={openCategorySlug === category.slug}
                   onToggle={handleCategoryToggle}
+                  onNavigate={navigate}
                 />
                 {i < categories.length - 1 && i % 2 === 1 && (
                   <div className="nav-divider" />

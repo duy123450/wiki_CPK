@@ -1,4 +1,7 @@
 const mongoose = require('mongoose')
+const slug = require('mongoose-slug-updater')
+
+mongoose.plugin(slug)
 
 const LyricSchema = new mongoose.Schema(
   {
@@ -30,6 +33,11 @@ const SoundtrackSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Song title is required'],
       trim: true,
+    },
+    slug: {
+      type: String,
+      slug: 'title',
+      unique: true,
     },
     vocal: {
       type: String,

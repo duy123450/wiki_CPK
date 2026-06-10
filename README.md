@@ -1,6 +1,6 @@
 # Wiki CPK (Chou Kaguya Hime)
 
-Full-stack MERN (MongoDB, Express, React, Node.js) app—Wiki for "Chou Kaguya Hime" series + music player (YouTube IFrame API).
+Full-stack MERN (MongoDB, Express, React, Node.js) app—Wiki for "Chou Kaguya Hime" movie + music player (YouTube IFrame API).
 
 ## 📖 Table of Contents
 
@@ -12,7 +12,6 @@ Full-stack MERN (MongoDB, Express, React, Node.js) app—Wiki for "Chou Kaguya H
 - [🧪 Testing](#-testing)
 - [📂 Project Structure](#-project-structure)
 - [📜 License](#-license)
-
 
 ## 🚀 Features
 
@@ -45,13 +44,14 @@ Full-stack MERN (MongoDB, Express, React, Node.js) app—Wiki for "Chou Kaguya H
 
 **Backend:** Node.js | Express | MongoDB (Mongoose) | Redis | Zod | Socket.io | Passport.js | Argon2/JWT/Helmet/CORS | Multer/Cloudinary | Jest/Supertest
 
-##  Code Style
+## Code Style
 
 **Formatter:** Prettier (no semicolons, single quotes, trailing commas)
 
 Config files: `.prettierrc.json` (client + server)
 
 Format code:
+
 ```bash
 cd server && npx prettier --write "**/*.{js,mjs,cjs}"
 cd ../client && npx prettier --write "**/*.{js,jsx}"
@@ -62,18 +62,21 @@ cd ../client && npx prettier --write "**/*.{js,jsx}"
 **Prerequisites:** Node.js (v16+), MongoDB (Atlas), Redis Server, Cloudinary, OAuth (Google/X/Discord/GitHub)
 
 ### 1. Clone
+
 ```bash
 git clone <repository-url>
 cd wiki_CPK
 ```
 
 ### 2. Backend
+
 ```bash
 cd server
 npm install
 ```
 
 `.env` config:
+
 ```env
 PORT=3000
 MONGO_URI=your_mongodb_uri
@@ -123,12 +126,14 @@ NODE_ENV=development
 ```
 
 ### 3. Frontend
+
 ```bash
 cd ../client
 npm install
 ```
 
 `.env` config:
+
 ```env
 VITE_API_BASE_URL=http://localhost:3000/api/v1/wiki
 VITE_AUTH_TOKEN_KEY=cpkAuthToken

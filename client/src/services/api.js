@@ -4,6 +4,11 @@ import { envConfig } from '../config/env.config'
 import { validateData } from '../utils/api-validator'
 import { loginSchema, registerRequestSchema } from '../schemas/authSchemas'
 import { profileRequestSchema as updateProfileSchema } from '../schemas/profileSchemas'
+import {
+  soundtrackListResponseSchema,
+  soundtrackDetailResponseSchema,
+  soundtrackNextResponseSchema,
+} from '../schemas/soundtrackSchemas'
 
 export const AUTH_TOKEN_KEY = envConfig.VITE_AUTH_TOKEN_KEY
 export const API_BASE_URL = envConfig.VITE_API_BASE_URL
@@ -91,7 +96,17 @@ export const getPageBySlug = (slug) =>
 
 export const fetchSoundtracks = async (movieId) => {
   const res = await api.get('/soundtrack', { params: { movieId } })
-  return res.data
+  const result = soundtrackListResponseSchema.safeParse(res.data)
+  if (!result.success) {
+    // Log exact field issues to browser console for debugging
+    console.warn('[fetchSoundtracks] Zod validation issues:', result.error.issues)
+    // Fall back to raw server data — HTTP 200 means the data itself is valid
+    const fallback = res.data
+    return Array.isArray(fallback) ? fallback : fallback.tracks || []
+  }
+  // Normalize response: always return array
+  const data = result.data
+  return Array.isArray(data) ? data : data.tracks || []
 }
 
 export const fetchNextTrack = async ({ currentTrackId, mode, movieId }) => {
@@ -100,7 +115,12 @@ export const fetchNextTrack = async ({ currentTrackId, mode, movieId }) => {
     params._t = Date.now() // cache buster to ensure true randomness
   }
   const res = await api.get('/soundtrack/next', { params })
-  return res.data
+  return soundtrackNextResponseSchema.parse(res.data)
+}
+
+export const getSoundtrackBySlug = async (slug) => {
+  const res = await api.get(`/soundtrack/${slug}`)
+  return soundtrackDetailResponseSchema.parse(res.data).track
 }
 
 export const fetchMovieInfo = async () => {
@@ -112,6 +132,9 @@ export const fetchMovieInfo = async () => {
 
 export const getCharacters = (params = {}) =>
   api.get('/characters', { params }).then((res) => res.data)
+
+export const getCharacterRoles = () =>
+  api.get('/characters/roles').then((res) => res.data.roles)
 
 export const getCharacterBySlug = (slug) =>
   api.get(`/characters/${slug}`).then((res) => res.data.character)

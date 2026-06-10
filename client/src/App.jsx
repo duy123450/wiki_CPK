@@ -21,6 +21,8 @@ import HeroPage           from './pages/HeroPage'
 import MovieOverviewPage  from './pages/MovieOverviewPage'
 import CharactersPage     from './pages/CharactersPage'
 import CharacterPage      from './pages/CharacterPage'
+import SoundtracksPage    from './pages/SoundtracksPage'
+import SoundtrackPage     from './pages/SoundtrackPage'
 import NotFoundPage       from './pages/NotFoundPage'
 import AuthPage           from './pages/AuthPage'
 import WelcomePage        from './pages/WelcomePage'
@@ -28,6 +30,8 @@ import ProfilePage        from './pages/ProfilePage'
 import Footer             from './components/Footer'
 import Playlist           from './components/Playlist'
 import useAuth            from './hooks/useAuth'
+import { Analytics }      from '@vercel/analytics/react'
+import { SpeedInsights }   from '@vercel/speed-insights/react'
 
 export default function App() {
   const [sidebarCollapsed,    setSidebarCollapsed]    = useState(false)
@@ -72,6 +76,14 @@ export default function App() {
             <Route
               path="/wiki/characters/:slug"
               element={<CharacterPage sidebarCollapsed={sidebarCollapsed} />}
+            />
+            <Route
+              path="/wiki/soundtrack"
+              element={<SoundtracksPage sidebarCollapsed={sidebarCollapsed} />}
+            />
+            <Route
+              path="/wiki/soundtrack/:slug"
+              element={<SoundtrackPage sidebarCollapsed={sidebarCollapsed} />}
             />
 
             {/*
@@ -130,6 +142,8 @@ export default function App() {
 
           <Footer sidebarCollapsed={sidebarCollapsed} />
           <Playlist />
+          <Analytics />
+          <SpeedInsights />
         </>
       </Router>
     </AuthContext.Provider>
