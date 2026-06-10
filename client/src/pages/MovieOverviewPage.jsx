@@ -14,8 +14,7 @@ function Particles() {
     top: `${Math.random() * 100}%`,
     size: Math.random() * 3 + 1,
     delay: `${Math.random() * 8}s`,
-    dur: `${Math.random() * 6 + 4}s`,
-    drift: Math.random() * 60 - 30,
+    dur: `${Math.random() * 5 + 5}s`,
   }))
   return (
     <div className="mov-particles" aria-hidden="true">
@@ -30,7 +29,6 @@ function Particles() {
             height: p.size,
             animationDelay: p.delay,
             animationDuration: p.dur,
-            '--drift': `${p.drift}px`,
           }}
         />
       ))}
@@ -106,8 +104,11 @@ function formatRuntime(minutes) {
   return `${hours}h ${remainingMins}m`
 }
 
-
-const TRAILER_LABELS = ['Official Trailer #1', 'Official Trailer #2', 'Special Trailer']
+const TRAILER_LABELS = [
+  'Official Trailer #1',
+  'Official Trailer #2',
+  'Special Trailer',
+]
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 export default function MovieOverviewPage({ sidebarCollapsed }) {
@@ -119,7 +120,10 @@ export default function MovieOverviewPage({ sidebarCollapsed }) {
     const urls = movie?.details?.trailerUrl ?? []
     return urls
       .slice(0, 3)
-      .map((t, i) => ({ label: t?.label || TRAILER_LABELS[i], ytId: getYoutubeId(t?.url) }))
+      .map((t, i) => ({
+        label: t?.label || TRAILER_LABELS[i],
+        ytId: getYoutubeId(t?.url),
+      }))
       .filter((t) => t.ytId)
   }, [movie])
 
