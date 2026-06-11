@@ -12,6 +12,7 @@ const formatCharacter = (char) => ({
   description: char.description ?? null,
   origin: char.origin ?? null,
   abilities: char.abilities ?? [],
+  metadata: char.metadata ?? null,
   relationships: (char.relationships ?? []).map((rel) => ({
     ...rel,
     targetId: rel.targetId ?? null,
