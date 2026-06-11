@@ -1,16 +1,16 @@
 # Wiki CPK (Chou Kaguya Hime)
 
-Full-stack MERN (MongoDB, Express, React, Node.js) app—Wiki for "Chou Kaguya Hime" movie + music player (YouTube IFrame API).
+A full-stack **MERN** (MongoDB, Express, React, Node.js) web application—comprehensive wiki for "Chou Kaguya Hime" featuring character profiles, movie information, and an integrated music player with synchronized lyrics.
 
 ## 📖 Table of Contents
 
 - [🚀 Features](#-features)
 - [🛠️ Tech Stack](#️-tech-stack)
-- [� Code Style](#-code-style)
-- [�📦 Installation](#-installation)
+- [📦 Installation](#-installation)
 - [🏃 Running the Application](#-running-the-application)
 - [🧪 Testing](#-testing)
 - [📂 Project Structure](#-project-structure)
+- [🔑 Key Concepts](#-key-concepts)
 - [📜 License](#-license)
 
 ## 🚀 Features
@@ -43,19 +43,6 @@ Full-stack MERN (MongoDB, Express, React, Node.js) app—Wiki for "Chou Kaguya H
 **Frontend:** React (Vite) | RTK | Socket.io-client | React Router DOM | Axios | Vitest/RTL
 
 **Backend:** Node.js | Express | MongoDB (Mongoose) | Redis | Zod | Socket.io | Passport.js | Argon2/JWT/Helmet/CORS | Multer/Cloudinary | Jest/Supertest
-
-## Code Style
-
-**Formatter:** Prettier (no semicolons, single quotes, trailing commas)
-
-Config files: `.prettierrc.json` (client + server)
-
-Format code:
-
-```bash
-cd server && npx prettier --write "**/*.{js,mjs,cjs}"
-cd ../client && npx prettier --write "**/*.{js,jsx}"
-```
 
 ## 📦 Installation
 
@@ -141,7 +128,7 @@ VITE_DRAGON_ENABLED_KEY=cpkDragonCursorEnabled
 VITE_OPEN_CATEGORY_COOKIE=cpkSidebarOpenCategory
 ```
 
-## 🏃 Running
+## 🏃 Running the Application
 
 **Backend:** `cd server && npm run dev`
 
@@ -190,6 +177,28 @@ wiki_CPK/
 └── README.md
 ```
 
-## 📜 License
+## � Key Concepts
+
+### Authentication & Security
+- **Multi-factor OAuth:** Supports Google, X (Twitter), Discord, and GitHub out of the box.
+- **Argon2 Hashing:** Industry-standard password hashing for local accounts.
+- **JWT Token Strategy:** Access tokens (15m) + Refresh tokens (30d) for secure, scalable authentication.
+- **Role-Based Access Control (RBAC):** Granular permission management for protected routes.
+- **Session Persistence:** Redis-backed sessions ensure user continuity across server restarts.
+
+### Content & Media
+- **Synchronized Lyrics:** Real-time highlight + auto-scroll lyrics (Japanese/Romaji/Vietnamese) synced to millisecond precision.
+- **Karaoke Support:** Nested MongoDB schemas enable line-by-line dual-language rendering.
+- **YouTube Integration:** IFrame API for background playback, shuffle, loop modes, and timeline control.
+- **Cloudinary Asset Management:** Secure image hosting with crop prevention and CDN delivery.
+
+### Architecture
+- **Domain-Driven Design:** Modular backend organized by feature (Auth, Wiki, Characters, Soundtrack).
+- **Type-Safe Config:** Zod validation ensures all environment variables are correct at startup.
+- **Real-time Updates:** Socket.io for live user counter and interactive features.
+- **Input Sanitization:** Protection against ReDoS, NoSQL injection, and malformed payloads.
+- **Error Hierarchy:** Structured error classes for consistent API responses.
+
+## �📜 License
 
 Educational/personal use. "Chou Kaguya Hime" content © respective owners.
