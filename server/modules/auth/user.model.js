@@ -76,6 +76,10 @@ const UserSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Character',
     },
+    bio: {
+      type: String,
+      default: null,
+    },
   },
   { timestamps: true }
 )

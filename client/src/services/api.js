@@ -101,12 +101,10 @@ export const fetchSoundtracks = async (movieId) => {
     // Log exact field issues to browser console for debugging
     console.warn('[fetchSoundtracks] Zod validation issues:', result.error.issues)
     // Fall back to raw server data — HTTP 200 means the data itself is valid
-    const fallback = res.data
-    return Array.isArray(fallback) ? fallback : fallback.tracks || []
+    return res.data
   }
-  // Normalize response: always return array
-  const data = result.data
-  return Array.isArray(data) ? data : data.tracks || []
+  // Return validated data (preserves both array and object formats)
+  return result.data
 }
 
 export const fetchNextTrack = async ({ currentTrackId, mode, movieId }) => {

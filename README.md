@@ -142,7 +142,7 @@ VITE_OPEN_CATEGORY_COOKIE=cpkSidebarOpenCategory
 
 ## 📂 Project Structure
 
-```
+```plaintext
 wiki_CPK/
 ├── client/              # React (Vite)
 │   ├── src/
