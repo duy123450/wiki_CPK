@@ -9,16 +9,20 @@ const {
 const validateRequest = require('../../middleware/validateRequest')
 const { characterQuerySchema } = require('../../schemas/character.schemas')
 const { cacheData, invalidateCache } = require('../../middleware/cache')
+const { leakyBucketLimiter } = require('../../middleware/leakyBucket')
+const redisClient = require('../../config/redis')
+
+const characterLimiter = leakyBucketLimiter(redisClient, { capacity: 50, leakRate: 10 })
 
 // GET /api/v1/wiki/characters
-router.get('/', validateRequest(characterQuerySchema), cacheData('characters', 3600), getAllCharacters)
+router.get('/', characterLimiter, validateRequest(characterQuerySchema), cacheData('characters', 3600), getAllCharacters)
 
 // GET /api/v1/wiki/characters/roles
-router.get('/roles', getCharacterRoles)
+router.get('/roles', characterLimiter, getCharacterRoles)
 
 // GET /api/v1/wiki/characters/:slug
 // e.g. /api/v1/wiki/characters/kaguya
-router.get('/:slug', cacheData('characters', 3600), getCharacterBySlug)
+router.get('/:slug', characterLimiter, cacheData('characters', 3600), getCharacterBySlug)
 
 // Example POST route to demonstrate cache invalidation
 router.post('/', invalidateCache('characters'), (req, res) => {
