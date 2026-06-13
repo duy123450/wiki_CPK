@@ -2,5 +2,6 @@
 graphify-out/
 .graphifyignore
 obsidian-vault/
+docs/
 CLAUDE.md
 vsub/
