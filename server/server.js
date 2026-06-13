@@ -84,6 +84,14 @@ if (envConfig.NODE_ENV !== 'test') {
   })
 }
 
+const crypto = require('crypto')
+
+// Generate a random nonce per request for CSP
+app.use((req, res, next) => {
+  res.locals.nonce = crypto.randomBytes(16).toString('base64')
+  next()
+})
+
 // ─── Middleware Order (DO NOT REORDER without reading this) ──────────────────
 // 1. helmet  — sets security headers BEFORE any response can be sent
 // 2. trust proxy — must be before rateLimit so req.ip is the real client IP
@@ -106,8 +114,8 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", "'unsafe-inline'"],
-        styleSrc: ["'self'", "'unsafe-inline'"],
+        scriptSrc: ["'self'", (req, res) => `'nonce-${res.locals.nonce}'`],
+        styleSrc: ["'self'", (req, res) => `'nonce-${res.locals.nonce}'`],
         imgSrc: ["'self'", 'data:', 'https://res.cloudinary.com'],
         connectSrc: ["'self'", 'ws:', 'wss:'],
       },
