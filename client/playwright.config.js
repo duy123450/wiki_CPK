@@ -21,5 +21,7 @@ export default defineConfig({
     command: 'npm run dev',
     url: 'http://localhost:5173',
     reuseExistingServer: !process.env.CI,
+    // Note: The E2E tests require the backend server to be running on localhost:5000.
+    // If running tests locally, please ensure `npm run dev` is running in the `server/` directory.
   },
 });
