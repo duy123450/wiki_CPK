@@ -7,7 +7,6 @@ import App from '@/App'
 
 // Mock all API calls used by the app and its children
 vi.mock('@/services/api', () => ({
-  AUTH_TOKEN_KEY: 'testToken',
   getCurrentUser: vi.fn(),
   getMovieInfo: vi.fn(),
   getSidebar: vi.fn(),
@@ -91,8 +90,7 @@ describe('App', () => {
     await screen.findByText('Explore Wiki')
   })
 
-  it('restores user from localStorage token', async () => {
-    window.localStorage.setItem('testToken', 'valid-token')
+  it('fetches current user on mount', async () => {
     getCurrentUser.mockResolvedValueOnce({
       username: 'restored',
       email: 'r@test.com',
@@ -103,17 +101,6 @@ describe('App', () => {
 
     await waitFor(() => {
       expect(getCurrentUser).toHaveBeenCalled()
-    })
-  })
-
-  it('clears token when getCurrentUser fails', async () => {
-    window.localStorage.setItem('testToken', 'bad-token')
-    getCurrentUser.mockRejectedValueOnce(new Error('invalid'))
-
-    renderApp()
-
-    await waitFor(() => {
-      expect(window.localStorage.getItem('testToken')).toBeNull()
     })
   })
 })

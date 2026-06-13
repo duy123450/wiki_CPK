@@ -1,19 +1,23 @@
-const passport = require('../config/passport')
+const jwt = require('jsonwebtoken')
+const { timingSafeVerify } = require('../utils/security')
 const { UnauthenticatedError } = require('../errors')
+const envConfig = require('../config/env.config')
 
 const authenticateUser = (req, res, next) => {
-  passport.authenticate('jwt', { session: false }, (error, user) => {
-    if (error) {
-      return next(error)
-    }
+  const authHeader = req.headers.authorization
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return next(new UnauthenticatedError('Authentication invalid'))
+  }
 
-    if (!user) {
-      return next(new UnauthenticatedError('Authentication invalid'))
-    }
+  const token = authHeader.split(' ')[1]
 
-    req.user = user
+  try {
+    const payload = timingSafeVerify(token, envConfig.JWT_ACCESS_SECRET)
+    req.user = { userId: payload.userId, name: payload.name, role: payload.role }
     next()
-  })(req, res, next)
+  } catch (error) {
+    return next(new UnauthenticatedError('Authentication invalid'))
+  }
 }
 
 module.exports = authenticateUser

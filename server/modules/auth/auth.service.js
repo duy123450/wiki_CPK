@@ -1,6 +1,9 @@
 const User = require('./user.model')
 const envConfig = require('../../config/env.config')
 const { AuthError, ValidationError, NotFoundError } = require('../../errors')
+const redisClient = require('../../config/redis')
+const { timingSafeVerify } = require('../../utils/security')
+const { logSecurityEvent } = require('../../utils/logger')
 
 const buildAuthResponse = (user) => ({
     id: user._id,
@@ -20,8 +23,7 @@ const buildTokenResponse = async (user) => {
 
     return {
         user: buildAuthResponse(user),
-        accessToken,
-        token: accessToken,
+        accessToken,    // canonical key — api.js reads this
         refreshToken,
     }
 }
@@ -285,9 +287,18 @@ const refreshAccessToken = async (refreshToken) => {
     const jwt = require('jsonwebtoken')
     let payload
     try {
-        payload = jwt.verify(refreshToken, envConfig.JWT_REFRESH_SECRET)
+        payload = timingSafeVerify(refreshToken, envConfig.JWT_REFRESH_SECRET)
     } catch {
+        logSecurityEvent('REFRESH_TOKEN_INVALID', { tokenLength: refreshToken.length })
         throw new AuthError('Refresh token is invalid')
+    }
+
+    // Check Redis Blacklist
+    if (payload.jti) {
+        const isBlacklisted = await redisClient.get(`blacklist:${payload.jti}`)
+        if (isBlacklisted) {
+            throw new AuthError('Refresh token has been revoked')
+        }
     }
 
     const user = await User.findOne({ _id: payload.userId, refreshToken })
@@ -304,6 +315,29 @@ const refreshAccessToken = async (refreshToken) => {
     }
 }
 
+const logoutUser = async (refreshToken) => {
+    if (!refreshToken) return
+    const jwt = require('jsonwebtoken')
+    try {
+        const payload = timingSafeVerify(refreshToken, envConfig.JWT_REFRESH_SECRET)
+        if (payload.jti) {
+            // Exp is in seconds, get remaining time
+            const remaining = payload.exp - Math.floor(Date.now() / 1000)
+            if (remaining > 0) {
+                await redisClient.setEx(`blacklist:${payload.jti}`, remaining, '1')
+            }
+        }
+    } catch (err) {
+        // Token already invalid or expired, do nothing
+    }
+}
+
+const deleteAccount = async (userId) => {
+    const user = await User.findByIdAndDelete(userId)
+    if (!user) throw new NotFoundError('User not found')
+    return { success: true, message: 'Account deleted successfully' }
+}
+
 module.exports = {
     registerUser,
     loginUser,
@@ -315,4 +349,6 @@ module.exports = {
     discordLoginUser,
     githubLoginUser,
     refreshAccessToken,
+    logoutUser,
+    deleteAccount,
 }

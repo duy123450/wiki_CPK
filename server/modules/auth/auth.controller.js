@@ -5,8 +5,9 @@ const isProd = envConfig.NODE_ENV === 'production'
 
 const refreshCookieOptions = {
   httpOnly: true,
-  secure: isProd,
-  sameSite: isProd ? 'None' : 'Lax',
+  secure: true,
+  sameSite: 'lax',
+  maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
   path: '/api/v1/wiki/auth',
 }
 
@@ -97,6 +98,18 @@ const updateProfile = async (req, res) => {
   sendAuthResponse(res, 200, result)
 }
 
+const logout = async (req, res) => {
+  await authService.logoutUser(req.cookies?.refreshToken)
+  res.clearCookie('refreshToken', refreshCookieOptions)
+  res.status(200).json({ message: 'Logged out successfully' })
+}
+
+const deleteAccount = async (req, res) => {
+  const result = await authService.deleteAccount(req.user.userId)
+  res.clearCookie('refreshToken', refreshCookieOptions)
+  res.status(200).json(result)
+}
+
 module.exports = {
   register,
   login,
@@ -108,4 +121,6 @@ module.exports = {
   getCurrentUser,
   updateAvatar,
   updateProfile,
+  logout,
+  deleteAccount,
 }

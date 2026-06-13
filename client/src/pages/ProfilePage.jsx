@@ -13,8 +13,11 @@ import {
   X,
   Eye,
   EyeOff,
+  AlertTriangle,
 } from 'lucide-react'
-import { uploadAvatar, updateProfile, AUTH_TOKEN_KEY } from '../services/api'
+import { uploadAvatar, updateProfile } from '../services/api'
+import { useAppDispatch } from '../store/hooks'
+import { deleteAccountThunk } from '../store/slices/authSlice'
 import { DEFAULT_AVATAR } from '../constants'
 import { formatVNDate } from '../utils/dateUtils'
 import { profileSchema } from '../schemas/profileSchemas'
@@ -28,6 +31,7 @@ export default function ProfilePage({
   onLogout,
 }) {
   const navigate = useNavigate()
+  const dispatch = useAppDispatch()
   const fileInputRef = useRef(null)
 
   // ── react-hook-form setup ──────────────────────────────────────────────────
@@ -56,6 +60,9 @@ export default function ProfilePage({
   const [showCurrentPassword, setShowCurrentPassword] = useState(false)
   const [showNewPassword, setShowNewPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [deleting, setDeleting] = useState(false)
 
   // ── Sync form when user data changes ────────────────────────────────────────
   useEffect(() => {
@@ -146,10 +153,6 @@ export default function ProfilePage({
     setSaving(true)
     try {
       const data = await updateProfile(payload)
-      // Re-save token (username is in JWT)
-      if (data.token) {
-        window.localStorage.setItem(AUTH_TOKEN_KEY, data.token)
-      }
       onProfileUpdate(data.user, data.token)
       setToast({ type: 'success', msg: 'Profile updated successfully!' })
     } catch (err) {
@@ -173,6 +176,18 @@ export default function ProfilePage({
     setShowCurrentPassword(false)
     setShowNewPassword(false)
     setShowConfirmPassword(false)
+  }
+
+  const handleDeleteAccount = async () => {
+    setDeleting(true)
+    try {
+      await dispatch(deleteAccountThunk()).unwrap()
+      navigate('/auth')
+    } catch (err) {
+      setToast({ type: 'error', msg: err || 'Failed to delete account' })
+      setDeleting(false)
+      setShowDeleteConfirm(false)
+    }
   }
 
   const avatarSrc = avatarPreview || currentUser.avatar?.url || DEFAULT_AVATAR
@@ -403,6 +418,53 @@ export default function ProfilePage({
             </button>
           </div>
         </form>
+
+        {/* Delete Account Section */}
+        <div className="profile-card" style={{ marginTop: '24px', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
+          <h2 className="profile-card-title" style={{ color: '#ef4444' }}>
+            <AlertTriangle size={14} />
+            Danger Zone
+          </h2>
+          <p className="profile-field-hint" style={{ marginTop: -8, marginBottom: 16 }}>
+            Permanently delete your account and all of your data. This action cannot be undone.
+          </p>
+          
+          {showDeleteConfirm ? (
+            <div style={{ background: 'rgba(239, 68, 68, 0.1)', padding: '16px', borderRadius: '8px', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
+              <p style={{ color: '#ef4444', marginBottom: '16px', fontWeight: 500, fontSize: '14px' }}>
+                Are you absolutely sure? This will permanently delete your account.
+              </p>
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <button
+                  type="button"
+                  className="profile-btn"
+                  style={{ background: '#ef4444', color: 'white', borderColor: '#ef4444' }}
+                  onClick={handleDeleteAccount}
+                  disabled={deleting}
+                >
+                  {deleting ? 'Deleting…' : 'Yes, delete my account'}
+                </button>
+                <button
+                  type="button"
+                  className="profile-btn profile-btn--ghost"
+                  onClick={() => setShowDeleteConfirm(false)}
+                  disabled={deleting}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button
+              type="button"
+              className="profile-btn"
+              style={{ color: '#ef4444', borderColor: 'rgba(239, 68, 68, 0.3)', background: 'transparent' }}
+              onClick={() => setShowDeleteConfirm(true)}
+            >
+              Delete Account
+            </button>
+          )}
+        </div>
       </div>
     </section>
   )

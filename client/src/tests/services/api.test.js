@@ -6,6 +6,7 @@
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import axios from 'axios'
+import { getAccessToken, setAccessToken, clearAccessToken } from '@/services/tokenStore'
 
 const { mockInstance } = vi.hoisted(() => {
   const mockInstance = {
@@ -42,14 +43,11 @@ beforeEach(() => {
 
 afterEach(() => {
   window.localStorage.clear()
+  clearAccessToken()
 })
 
-describe('AUTH_TOKEN_KEY', () => {
-  it('has a default value', () => {
-    expect(api.AUTH_TOKEN_KEY).toBeDefined()
-    expect(typeof api.AUTH_TOKEN_KEY).toBe('string')
-  })
-})
+
+
 
 describe('axios instance', () => {
   it('uses the Render backend URL and sends credentials', async () => {
@@ -61,8 +59,8 @@ describe('axios instance', () => {
 })
 
 describe('request interceptor', () => {
-  it('attaches the access token from localStorage', async () => {
-    window.localStorage.setItem(api.AUTH_TOKEN_KEY, 'access-token')
+  it('attaches the access token from in-memory tokenStore', async () => {
+    setAccessToken('access-token')
     const requestHandler =
       mockAxiosInstance.interceptors.request.use.mock.calls[0][0]
 
@@ -73,7 +71,7 @@ describe('request interceptor', () => {
 })
 
 describe('response interceptor', () => {
-  it('refreshes on 401, saves the new access token, and retries the original request', async () => {
+  it('refreshes on 401, saves the new access token to memory, and retries the original request', async () => {
     const responseErrorHandler =
       mockAxiosInstance.interceptors.response.use.mock.calls[0][1]
     const originalRequest = { url: '/auth/me', headers: {} }
@@ -95,9 +93,7 @@ describe('response interceptor', () => {
         _skipAuthRefresh: true,
       }
     )
-    expect(window.localStorage.getItem(api.AUTH_TOKEN_KEY)).toBe(
-      'fresh-access-token'
-    )
+    expect(getAccessToken()).toBe('fresh-access-token')
     expect(originalRequest.headers.Authorization).toBe(
       'Bearer fresh-access-token'
     )
@@ -204,7 +200,7 @@ describe('getCurrentUser', () => {
 })
 
 describe('refreshAccessToken', () => {
-  it('posts to /auth/refresh and stores the returned access token', async () => {
+  it('posts to /auth/refresh and stores the returned access token in memory', async () => {
     const response = { accessToken: 'new-access-token' }
     mockAxiosInstance.post.mockResolvedValueOnce({ data: response })
 
@@ -217,9 +213,7 @@ describe('refreshAccessToken', () => {
         _skipAuthRefresh: true,
       }
     )
-    expect(window.localStorage.getItem(api.AUTH_TOKEN_KEY)).toBe(
-      'new-access-token'
-    )
+    expect(getAccessToken()).toBe('new-access-token')
     expect(result).toEqual(response)
   })
 })

@@ -172,7 +172,9 @@ wiki_CPK/
 │   │       ├── [name].model.js
 │   │       └── strategies/   # Modular OAuth lazy-strategies (google, twitter, discord, github)
 │   ├── schemas/         # Zod validation
+│   ├── scripts/         # Backup & utility scripts
 │   ├── tests/           # Jest/Supertest
+│   ├── utils/           # Helpers (security, logger)
 │   └── server.js        # Entry + Socket.io
 └── README.md
 ```
@@ -185,6 +187,7 @@ wiki_CPK/
 - **JWT Token Strategy:** Access tokens (15m) + Refresh tokens (30d) for secure, scalable authentication.
 - **Role-Based Access Control (RBAC):** Granular permission management for protected routes.
 - **Session Persistence:** Redis-backed sessions ensure user continuity across server restarts.
+- **Hardened Security:** CSRF protection (Secure/Lax cookies), timing-safe token validations, XSS sanitization, and structured security event logging.
 
 ### Content & Media
 - **Synchronized Lyrics:** Real-time highlight + auto-scroll lyrics (Japanese/Romaji/Vietnamese) synced to millisecond precision.

@@ -1,3 +1,10 @@
+// Mock argon2 so hash/verify are instant in integration tests.
+// Password-hashing correctness is covered by tests/unit/models/user.model.test.js.
+jest.mock('argon2', () => ({
+  hash: jest.fn(async (pw) => `hashed::${pw}`),
+  verify: jest.fn(async (hash, pw) => hash === `hashed::${pw}`),
+}))
+
 const request = require('supertest')
 
 let app

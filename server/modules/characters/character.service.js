@@ -12,22 +12,26 @@ const {
 /**
  * Fetch characters with filtering and canonical sorting
  */
+/**
+ * Fetch characters with filtering and DB-layer pagination.
+ * NOTE: canonical sort is applied via JS sort on the paginated slice only,
+ * since canonical order is defined by a constants array, not a DB field.
+ */
 const fetchAllCharacters = async (query) => {
   const filter = buildCharacterFilter(query)
   const { page, limit } = parsePagination(query.page, query.limit)
   const populateConfig = getPopulateConfig()
+  const skip = (page - 1) * limit
 
   const [allCharacters, total] = await Promise.all([
-    Character.find(filter).populate(populateConfig).lean(),
+    Character.find(filter).populate(populateConfig).skip(skip).limit(limit).lean(),
     Character.countDocuments(filter),
   ])
 
   const sorted = sortByCanonicalOrder(allCharacters)
-  const skip = (page - 1) * limit
-  const paginated = sorted.slice(skip, skip + limit)
 
   return {
-    characters: paginated.map(formatCharacter),
+    characters: sorted.map(formatCharacter),
     pagination: {
       total,
       totalPages: Math.ceil(total / limit),

@@ -11,6 +11,10 @@ vi.mock('@/services/api', () => ({
   updateProfile: vi.fn(),
 }))
 
+vi.mock('@/store/hooks', () => ({
+  useAppDispatch: () => vi.fn().mockReturnValue({ unwrap: vi.fn().mockResolvedValue(true) }),
+}))
+
 import { updateProfile } from '@/services/api'
 
 const mockUser = {

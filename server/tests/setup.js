@@ -1,4 +1,4 @@
-const { connect, clearDatabase } = require('./utils/dbHandler')
+const { connect, clearDatabase, disconnect } = require('./utils/dbHandler')
 
 beforeAll(async () => {
   await connect()
@@ -6,4 +6,8 @@ beforeAll(async () => {
 
 afterEach(async () => {
   await clearDatabase()
+})
+
+afterAll(async () => {
+  await disconnect()
 })

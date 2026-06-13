@@ -2,6 +2,7 @@ const mongoose = require('mongoose')
 const argon2 = require('argon2')
 const jwt = require('jsonwebtoken')
 const envConfig = require('../../config/env.config')
+const crypto = require('crypto')
 const { ROLES } = require('../../constants/roles')
 
 const UserSchema = new mongoose.Schema(
@@ -109,8 +110,9 @@ UserSchema.methods.createAccessToken = function () {
 }
 
 UserSchema.methods.createRefreshToken = function () {
-  return jwt.sign({ userId: this._id }, envConfig.JWT_REFRESH_SECRET, {
-    expiresIn: envConfig.JWT_REFRESH_LIFETIME || '30d',
+  const jti = crypto.randomUUID()
+  return jwt.sign({ userId: this._id, jti }, envConfig.JWT_REFRESH_SECRET, {
+    expiresIn: envConfig.JWT_REFRESH_LIFETIME || '7d',
   })
 }
 

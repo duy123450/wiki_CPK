@@ -4,6 +4,13 @@
  * Does not require complex concurrency mocking
  */
 
+// Mock argon2 — this suite tests DB concurrency and session ops, not password hashing.
+// Hashing correctness is covered by tests/unit/models/user.model.test.js.
+jest.mock('argon2', () => ({
+  hash: jest.fn(async (pw) => `hashed::${pw}`),
+  verify: jest.fn(async (hash, pw) => hash === `hashed::${pw}`),
+}))
+
 const User = require('../../modules/auth/user.model');
 
 describe('Redis/MongoDB Concurrency Tests', () => {

@@ -19,12 +19,13 @@ beforeAll(async () => {
   // Spy on passport.authenticate
   jest
     .spyOn(passport, 'authenticate')
-    .mockImplementation((strategy, callback) => {
-      if (typeof callback === 'function') {
+    .mockImplementation((strategy, options, callback) => {
+      const cb = typeof options === 'function' ? options : callback
+      if (typeof cb === 'function') {
         return (req, res, next) => {
-          if (mockPassportError) return callback(mockPassportError, null)
-          if (mockPassportUser) return callback(null, mockPassportUser)
-          return callback(null, { _id: 'mock-id', username: 'mock-user' })
+          if (mockPassportError) return cb(mockPassportError, null)
+          if (mockPassportUser) return cb(null, mockPassportUser)
+          return cb(null, { _id: 'mock-id', username: 'mock-user' })
         }
       }
       return (req, res, next) => {

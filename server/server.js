@@ -3,20 +3,19 @@ const envConfig = require('./config/env.config')
 const express = require('express')
 const app = express()
 const http = require('http')
-const server = http.createServer(app)
-const { Server } = require('socket.io')
 const passport = require('./config/passport')
 
 // Import Security Packages
 const helmet = require('helmet')
 const cors = require('cors')
-const session = require('express-session')
-const { RedisStore } = require('connect-redis')
 const rateLimit = require('express-rate-limit')
 const cookieParser = require('cookie-parser')
 
 // Import Redis Client
 const redisClient = require('./config/redis')
+
+// Import Logger
+const { logSecurityEvent } = require('./utils/logger')
 
 // Import Database Connection
 const connectDB = require('./config/db')
@@ -53,38 +52,67 @@ const corsOptions = {
   optionsSuccessStatus: 200,
 }
 
-const io = new Server(server, { cors: corsOptions })
+// In test mode supertest creates its own ephemeral HTTP server, so we only
+// need the bare Express app. Skipping socket.io + http.Server here removes
+// the open handles that keep Jest workers alive after tests finish.
+let server
+let io
 
-let onlineUsers = 0
-io.on('connection', (socket) => {
-  onlineUsers++
-  io.emit('update_user_count', onlineUsers)
-  socket.on('disconnect', () => {
-    onlineUsers--
-    io.emit('update_user_count', onlineUsers)
+if (envConfig.NODE_ENV !== 'test') {
+  const { Server } = require('socket.io')
+  server = http.createServer(app)
+  io = new Server(server, { cors: corsOptions })
+
+  // Redis-backed counter: safe across multiple server instances (Render scale-out)
+  io.on('connection', async (socket) => {
+    logSecurityEvent('SOCKET_CONNECT', { socketId: socket.id, ip: socket.handshake.address })
+    try {
+      const count = await redisClient.incr('online:users')
+      io.emit('update_user_count', count)
+    } catch {
+      io.emit('update_user_count', 0)
+    }
+    socket.on('disconnect', async () => {
+      logSecurityEvent('SOCKET_DISCONNECT', { socketId: socket.id })
+      try {
+        const count = await redisClient.decr('online:users')
+        io.emit('update_user_count', Math.max(0, count))
+      } catch {
+        io.emit('update_user_count', 0)
+      }
+    })
   })
-})
+}
 
-// 1. Security Middleware
+// ─── Middleware Order (DO NOT REORDER without reading this) ──────────────────
+// 1. helmet  — sets security headers BEFORE any response can be sent
+// 2. trust proxy — must be before rateLimit so req.ip is the real client IP
+// 3. rateLimit — runs before body parsing to reject cheap (no-parse) early
+// 4. express.json — parses body; AFTER rateLimit so rejected reqs are cheap
+// 5. cookieParser — needed by OAuth session + refresh cookie reads
+// 6. cors — must be BEFORE passport; preflight OPTIONS must pass CORS check
+//           or OAuth redirects fail with "Not allowed by CORS"
+// 7. passport — needs CORS headers already set for redirect flows
+// ─────────────────────────────────────────────────────────────────────────────
 app.use(
   helmet({
-    // 1. Force HSTS even during local development audits
+    // Force HSTS even during local development audits
     hsts: {
       maxAge: 31536000,
       includeSubDomains: true,
       preload: true,
     },
-    // 2. Explicitly define strict CSP Directives
+    // Strict CSP Directives
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
         scriptSrc: ["'self'", "'unsafe-inline'"],
         styleSrc: ["'self'", "'unsafe-inline'"],
-        imgSrc: ["'self'", 'data:', 'https://res.cloudinary.com'], // Add Cloudinary or other asset hosts here
-        connectSrc: ["'self'", 'ws:', 'wss:'], // Allows WebSockets to handshake cleanly
+        imgSrc: ["'self'", 'data:', 'https://res.cloudinary.com'],
+        connectSrc: ["'self'", 'ws:', 'wss:'],
       },
     },
-    // 3. Strictly prevent framing/clickjacking
+    // Strictly prevent framing/clickjacking
     frameguard: {
       action: 'deny',
     },
@@ -94,29 +122,16 @@ app.set('trust proxy', 1)
 app.use(rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 300,
+  handler: (req, res, next, options) => {
+    logSecurityEvent('RATE_LIMIT_EXCEEDED', { ip: req.ip, path: req.originalUrl })
+    res.status(options.statusCode).send(options.message)
+  }
 })
 )
 app.use(express.json({ limit: '10kb' }))
 app.use(cookieParser())
 app.use(cors(corsOptions))
-if (envConfig.NODE_ENV === 'production' && !envConfig.SESSION_SECRET) {
-  console.error('FATAL ERROR: SESSION_SECRET is not defined in production.')
-  process.exit(1)
-}
-app.use(session({
-  store: new RedisStore({ client: redisClient }),
-  secret: envConfig.SESSION_SECRET || 'your-secret-key',
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    secure: envConfig.NODE_ENV === 'production',
-    httpOnly: true,
-    maxAge: 1000 * 60 * 60 * 24,
-  },
-})
-)
 app.use(passport.initialize())
-app.use(passport.session())
 
 // 2. Routes
 app.use('/api/v1/wiki', wikiRouter)

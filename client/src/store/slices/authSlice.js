@@ -5,15 +5,17 @@ import {
   getCurrentUser,
   updateProfile,
   uploadAvatar,
-  AUTH_TOKEN_KEY,
+  logoutApi,
+  deleteAccountApi,
 } from '../../services/api'
+import { setAccessToken, clearAccessToken } from '../../services/tokenStore'
 
-// Async Thunks
 export const login = createAsyncThunk(
   'auth/login',
   async (payload, { rejectWithValue }) => {
     try {
       const data = await loginUser(payload)
+      setAccessToken(data.accessToken || data.token)
       return data
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || err.message)
@@ -26,6 +28,7 @@ export const register = createAsyncThunk(
   async (payload, { rejectWithValue }) => {
     try {
       const data = await registerUser(payload)
+      setAccessToken(data.accessToken || data.token)
       return data
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || err.message)
@@ -33,16 +36,23 @@ export const register = createAsyncThunk(
   }
 )
 
+/**
+ * Silent refresh on app load / page refresh.
+ *
+ * No localStorage check — access token lives in memory only.
+ * Calls GET /auth/me directly. If the access token is null the request
+ * returns 401, the Axios response interceptor automatically calls
+ * POST /auth/refresh (sending the httpOnly refresh cookie), stores the
+ * new access token in tokenStore, then retries GET /auth/me.
+ * If no valid refresh cookie exists the retry also fails → rejected.
+ */
 export const restoreSession = createAsyncThunk(
   'auth/restoreSession',
   async (_, { rejectWithValue }) => {
     try {
-      const token = window.localStorage.getItem(AUTH_TOKEN_KEY)
-      if (!token) return null
       const user = await getCurrentUser()
-      return { user, token }
+      return { user }
     } catch (err) {
-      window.localStorage.removeItem(AUTH_TOKEN_KEY)
       return rejectWithValue(err.response?.data?.message || err.message)
     }
   }
@@ -53,6 +63,9 @@ export const updateProfileInfo = createAsyncThunk(
   async (payload, { rejectWithValue }) => {
     try {
       const data = await updateProfile(payload)
+      if (data.accessToken || data.token) {
+        setAccessToken(data.accessToken || data.token)
+      }
       return data
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || err.message)
@@ -72,13 +85,36 @@ export const updateAvatarImage = createAsyncThunk(
   }
 )
 
+export const logoutUserThunk = createAsyncThunk(
+  'auth/logout',
+  async (_, { rejectWithValue }) => {
+    try {
+      await logoutApi()
+      return true
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || err.message)
+    }
+  }
+)
+
+export const deleteAccountThunk = createAsyncThunk(
+  'auth/deleteAccount',
+  async (_, { rejectWithValue }) => {
+    try {
+      await deleteAccountApi()
+      return true
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || err.message)
+    }
+  }
+)
+
 const initialState = {
   user: null,
-  token: window.localStorage.getItem(AUTH_TOKEN_KEY) || null,
   isAuthenticated: false,
-  // True while restoreSession is in-flight — prevents ProtectedRoute from
-  // redirecting to /auth before we know if a valid session exists in storage.
-  isRestoringSession: !!window.localStorage.getItem(AUTH_TOKEN_KEY),
+  // Always true on init — we always attempt a silent refresh on mount.
+  // ProtectedRoute waits for this to be false before rendering.
+  isRestoringSession: true,
   status: 'idle',
   error: null,
 }
@@ -88,9 +124,8 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     logout(state) {
-      window.localStorage.removeItem(AUTH_TOKEN_KEY)
+      clearAccessToken()
       state.user = null
-      state.token = null
       state.isAuthenticated = false
       state.status = 'idle'
       state.error = null
@@ -103,8 +138,7 @@ const authSlice = createSlice({
     syncProfile(state, action) {
       state.user = action.payload.user
       if (action.payload.token) {
-        state.token = action.payload.token
-        window.localStorage.setItem(AUTH_TOKEN_KEY, action.payload.token)
+        setAccessToken(action.payload.token)
       }
       state.isAuthenticated = !!action.payload.user
     },
@@ -119,9 +153,7 @@ const authSlice = createSlice({
       .addCase(login.fulfilled, (state, action) => {
         state.status = 'succeeded'
         state.user = action.payload.user
-        state.token = action.payload.accessToken || action.payload.token
         state.isAuthenticated = true
-        window.localStorage.setItem(AUTH_TOKEN_KEY, state.token)
       })
       .addCase(login.rejected, (state, action) => {
         state.status = 'failed'
@@ -135,9 +167,7 @@ const authSlice = createSlice({
       .addCase(register.fulfilled, (state, action) => {
         state.status = 'succeeded'
         state.user = action.payload.user
-        state.token = action.payload.accessToken || action.payload.token
         state.isAuthenticated = true
-        window.localStorage.setItem(AUTH_TOKEN_KEY, state.token)
       })
       .addCase(register.rejected, (state, action) => {
         state.status = 'failed'
@@ -145,13 +175,11 @@ const authSlice = createSlice({
       })
       // Restore Session
       .addCase(restoreSession.pending, (state) => {
-        // Only set flag if a token actually exists (thunk will check)
-        state.isRestoringSession = !!window.localStorage.getItem(AUTH_TOKEN_KEY)
+        state.isRestoringSession = true
       })
       .addCase(restoreSession.fulfilled, (state, action) => {
         if (action.payload) {
           state.user = action.payload.user
-          state.token = action.payload.token
           state.isAuthenticated = true
         }
         state.isRestoringSession = false
@@ -167,10 +195,6 @@ const authSlice = createSlice({
       .addCase(updateProfileInfo.fulfilled, (state, action) => {
         state.status = 'succeeded'
         state.user = action.payload.user
-        if (action.payload.token) {
-          state.token = action.payload.token
-          window.localStorage.setItem(AUTH_TOKEN_KEY, action.payload.token)
-        }
       })
       .addCase(updateProfileInfo.rejected, (state, action) => {
         state.status = 'failed'
@@ -190,6 +214,22 @@ const authSlice = createSlice({
       .addCase(updateAvatarImage.rejected, (state, action) => {
         state.status = 'failed'
         state.error = action.payload
+      })
+      // Logout User
+      .addCase(logoutUserThunk.fulfilled, (state) => {
+        clearAccessToken()
+        state.user = null
+        state.isAuthenticated = false
+        state.status = 'idle'
+        state.error = null
+      })
+      // Delete Account
+      .addCase(deleteAccountThunk.fulfilled, (state) => {
+        clearAccessToken()
+        state.user = null
+        state.isAuthenticated = false
+        state.status = 'idle'
+        state.error = null
       })
   },
 })

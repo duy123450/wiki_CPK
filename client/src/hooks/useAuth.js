@@ -2,7 +2,7 @@ import { useCallback, useEffect } from 'react'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
 import {
   restoreSession,
-  logout,
+  logoutUserThunk,
   syncAvatar,
   syncProfile,
 } from '../store/slices/authSlice'
@@ -30,7 +30,7 @@ export default function useAuth() {
   )
 
   const handleLogout = useCallback(() => {
-    dispatch(logout())
+    dispatch(logoutUserThunk())
   }, [dispatch])
 
   const handleProfileUpdate = useCallback(

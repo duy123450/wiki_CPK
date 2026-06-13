@@ -16,7 +16,11 @@ const connect = async () => {
     throw new Error('Global MONGO_URI is not defined. Ensure globalSetup is configured.')
   }
 
-  await mongoose.connect(uri)
+  // Ensure each Jest worker gets its own database name so they can run in parallel without collisions
+  const workerId = process.env.JEST_WORKER_ID || '1'
+  const workerUri = uri.replace(/\/?$/, '') + `/testdb_${workerId}`
+
+  await mongoose.connect(workerUri)
 
   // Ensure indexes only once per test session
   if (!indexesEnsured) {

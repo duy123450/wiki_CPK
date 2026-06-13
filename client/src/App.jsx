@@ -13,10 +13,12 @@
 import { useState } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { AuthContext } from './context/AuthContext'
+import { useAppSelector }   from './store/hooks'
 import ScrollToTop        from './components/ScrollToTop'
 import DragonCursor       from './components/DragonCursor'
 import Sidebar            from './components/Sidebar'
 import ProtectedRoute     from './components/ProtectedRoute'
+import DevToolsGuard      from './components/DevToolsGuard'
 import HeroPage           from './pages/HeroPage'
 import MovieOverviewPage  from './pages/MovieOverviewPage'
 import CharactersPage     from './pages/CharactersPage'
@@ -41,10 +43,32 @@ export default function App() {
   const authState = useAuth()
   const { authUser } = authState
 
+  // Read session-restore flag directly from Redux.
+  // Keeps guardEnabled=false while session is in-flight so admins
+  // never see a brief false-positive protection flash on page load.
+  const isRestoringSession = useAppSelector((state) => state.auth.isRestoringSession)
+
+  // Guard active only in production AND after session is known AND user is NOT admin.
+  // Admins get full DevTools access for debugging in production.
+  const isAdmin     = authUser?.role === 'admin'
+  const guardEnabled = import.meta.env.PROD && !isRestoringSession && !isAdmin
+
   return (
     // AuthContext.Provider makes auth state explicitly available tree-wide.
     // Eliminates implicit prop-chain coupling flagged as INFERRED edges.
     <AuthContext.Provider value={authState}>
+      {/* DevToolsGuard wraps the entire app tree.
+          Disabled for admins in production — they need DevTools for debugging.
+          Disabled in development via guardEnabled (import.meta.env.PROD=false). */}
+      <DevToolsGuard
+        enabled={guardEnabled}
+        suppressConsole={guardEnabled}
+        blockSelection={guardEnabled}
+        blockDrag={guardEnabled}
+        timingDetect={guardEnabled}
+        getterDetect={guardEnabled}
+        clearConsoleMs={guardEnabled ? 1000 : 0}
+      >
       <Router>
         <ScrollToTop />
         <>
@@ -146,6 +170,7 @@ export default function App() {
           <SpeedInsights />
         </>
       </Router>
+      </DevToolsGuard>
     </AuthContext.Provider>
   )
 }

@@ -1,5 +1,4 @@
 import axios from 'axios'
-import { ACCESS_TOKEN_UPDATED_EVENT } from '../constants'
 import { envConfig } from '../config/env.config'
 import { validateData } from '../utils/api-validator'
 import { loginSchema, registerRequestSchema } from '../schemas/authSchemas'
@@ -9,20 +8,13 @@ import {
   soundtrackDetailResponseSchema,
   soundtrackNextResponseSchema,
 } from '../schemas/soundtrackSchemas'
+import { getAccessToken, setAccessToken, clearAccessToken } from './tokenStore'
 
-export const AUTH_TOKEN_KEY = envConfig.VITE_AUTH_TOKEN_KEY
 export const API_BASE_URL = envConfig.VITE_API_BASE_URL
 
 const redirectToLogin = () => {
-  window.localStorage.removeItem(AUTH_TOKEN_KEY)
+  clearAccessToken()
   window.location.assign('/auth')
-}
-
-const saveAccessToken = (accessToken) => {
-  window.localStorage.setItem(AUTH_TOKEN_KEY, accessToken)
-  window.dispatchEvent(
-    new CustomEvent(ACCESS_TOKEN_UPDATED_EVENT, { detail: { accessToken } })
-  )
 }
 
 const api = axios.create({
@@ -31,13 +23,11 @@ const api = axios.create({
 })
 
 api.interceptors.request.use((config) => {
-  const token = window.localStorage.getItem(AUTH_TOKEN_KEY)
-
+  const token = getAccessToken()
   if (token) {
     config.headers = config.headers ?? {}
     config.headers.Authorization = `Bearer ${token}`
   }
-
   return config
 })
 
@@ -62,14 +52,13 @@ api.interceptors.response.use(
       const refreshResponse = await api.post('/auth/refresh', undefined, {
         _skipAuthRefresh: true,
       })
-      const accessToken =
-        refreshResponse.data?.accessToken || refreshResponse.data?.token
+      const accessToken = refreshResponse.data?.accessToken
 
       if (!accessToken) {
         throw new Error('Refresh response did not include an access token')
       }
 
-      saveAccessToken(accessToken)
+      setAccessToken(accessToken)
       originalRequest.headers = originalRequest.headers ?? {}
       originalRequest.headers.Authorization = `Bearer ${accessToken}`
 
@@ -79,7 +68,6 @@ api.interceptors.response.use(
       if (refreshStatus === 401 || refreshStatus === 403 || !refreshStatus) {
         redirectToLogin()
       }
-
       return Promise.reject(refreshError)
     }
   }
@@ -98,19 +86,16 @@ export const fetchSoundtracks = async (movieId) => {
   const res = await api.get('/soundtrack', { params: { movieId } })
   const result = soundtrackListResponseSchema.safeParse(res.data)
   if (!result.success) {
-    // Log exact field issues to browser console for debugging
     console.warn('[fetchSoundtracks] Zod validation issues:', result.error.issues)
-    // Fall back to raw server data — HTTP 200 means the data itself is valid
     return res.data
   }
-  // Return validated data (preserves both array and object formats)
   return result.data
 }
 
 export const fetchNextTrack = async ({ currentTrackId, mode, movieId }) => {
   const params = { currentTrackId, mode, movieId }
   if (mode === 'shuffle') {
-    params._t = Date.now() // cache buster to ensure true randomness
+    params._t = Date.now()
   }
   const res = await api.get('/soundtrack/next', { params })
   return soundtrackNextResponseSchema.parse(res.data)
@@ -123,7 +108,7 @@ export const getSoundtrackBySlug = async (slug) => {
 
 export const fetchMovieInfo = async () => {
   const res = await api.get('/movie-info')
-  return res.data // { movie: { _id, title, ... } }
+  return res.data
 }
 
 // ─── Characters ───────────────────────────────────────────────────────────────
@@ -156,8 +141,8 @@ export const refreshAccessToken = () =>
   api
     .post('/auth/refresh', undefined, { _skipAuthRefresh: true })
     .then((res) => {
-      const accessToken = res.data?.accessToken || res.data?.token
-      if (accessToken) saveAccessToken(accessToken)
+      const accessToken = res.data?.accessToken
+      if (accessToken) setAccessToken(accessToken)
       return res.data
     })
 
@@ -167,34 +152,37 @@ export const uploadAvatar = async (file) => {
   const res = await api.put('/auth/avatar', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   })
-  return res.data // { avatar: { url, public_id } }
+  return res.data
 }
 
 export const updateProfile = async (payload) => {
   const validated = validateData(updateProfileSchema, payload, 'Profile Update')
   const res = await api.put('/auth/profile', validated)
-  return res.data // { user, token }
+  return res.data
+}
+
+export const logoutApi = async () => {
+  const res = await api.post('/auth/logout')
+  return res.data
+}
+
+export const deleteAccountApi = async () => {
+  const res = await api.delete('/auth/me')
+  return res.data
 }
 
 // ─── Google OAuth ───────────────────────────────────────────────────────────
 
-export const getGoogleLoginUrl = () => {
-  return `${API_BASE_URL}/auth/google`
-}
+export const getGoogleLoginUrl = () => `${API_BASE_URL}/auth/google`
+
 // ─── Twitter OAuth ──────────────────────────────────────────────────────
 
-export const getTwitterLoginUrl = () => {
-  return `${API_BASE_URL}/auth/x`
-}
+export const getTwitterLoginUrl = () => `${API_BASE_URL}/auth/x`
 
 // ─── Discord OAuth ──────────────────────────────────────────────────────
 
-export const getDiscordLoginUrl = () => {
-  return `${API_BASE_URL}/auth/discord`
-}
+export const getDiscordLoginUrl = () => `${API_BASE_URL}/auth/discord`
 
 // ─── GitHub OAuth ───────────────────────────────────────────────────────
 
-export const getGithubLoginUrl = () => {
-  return `${API_BASE_URL}/auth/github`
-}
+export const getGithubLoginUrl = () => `${API_BASE_URL}/auth/github`

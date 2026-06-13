@@ -25,6 +25,35 @@ const requireTwitterOAuthConfig = require('./strategies/twitter')
 const requireDiscordOAuthConfig = require('./strategies/discord')
 const requireGitHubOAuthConfig  = require('./strategies/github')
 
+// ─── Temporary OAuth Session for State/PKCE ───────────────────────────────────
+const session = require('express-session')
+const { RedisStore } = require('connect-redis')
+const redisClient = require('../../config/redis')
+
+const oauthSessionStore =
+  envConfig.NODE_ENV === 'test'
+    ? undefined // express-session defaults to MemoryStore — no Redis needed in tests
+    : new RedisStore({ client: redisClient })
+
+const oauthSession = session({
+  store: oauthSessionStore,
+  secret: envConfig.JWT_REFRESH_SECRET || 'oauth-secret',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    httpOnly: true,
+    secure: envConfig.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 10 * 60 * 1000, // 10 minutes max for auth flow
+  },
+})
+
+// Apply oauthSession only to OAuth routes
+router.use('/google', oauthSession)
+router.use('/x', oauthSession)
+router.use('/discord', oauthSession)
+router.use('/github', oauthSession)
+
 // ─── Rate limiting ─────────────────────────────────────────────────────────────
 const rateLimit = require('express-rate-limit')
 const authLimiter = rateLimit({
@@ -45,24 +74,28 @@ const {
   githubLoginCallback,
   updateAvatar,
   updateProfile,
+  logout,
+  deleteAccount,
 } = authController
 
 // ─── Standard auth routes ──────────────────────────────────────────────────────
 router.post('/register', validateRequest(registerSchema), register)
 router.post('/login', authLimiter, validateRequest(loginSchema), login)
 router.post('/refresh', authLimiter, refresh)
+router.post('/logout', logout)
 
 // ─── Google OAuth ──────────────────────────────────────────────────────────────
 router.get(
   '/google',
   requireGoogleOAuthConfig,
-  passport.authenticate('google', { scope: ['profile', 'email'] })
+  passport.authenticate('google', { scope: ['profile', 'email'], session: false })
 )
 router.get(
   '/google/callback',
   requireGoogleOAuthConfig,
   passport.authenticate('google', {
     failureRedirect: `${envConfig.FRONTEND_URL || 'http://localhost:5173'}/auth?googleError=1`,
+    session: false,
   }),
   googleLoginCallback
 )
@@ -71,25 +104,26 @@ router.get(
 router.get(
   '/x',
   requireTwitterOAuthConfig,
-  passport.authenticate('twitter', { scope: ['tweet.read', 'users.read'] })
+  passport.authenticate('twitter', { scope: ['tweet.read', 'users.read'], session: false })
 )
 router.get(
   '/x/callback',
   requireTwitterOAuthConfig,
   passport.authenticate('twitter', {
     failureRedirect: `${envConfig.FRONTEND_URL || 'http://localhost:5173'}/auth?twitterError=1`,
+    session: false,
   }),
   twitterLoginCallback
 )
 
 // ─── Discord OAuth ─────────────────────────────────────────────────────────────
-router.get('/discord', requireDiscordOAuthConfig, passport.authenticate('discord'))
+router.get('/discord', requireDiscordOAuthConfig, passport.authenticate('discord', { session: false }))
 router.get(
   '/discord/callback',
   requireDiscordOAuthConfig,
   function discordOAuthCallbackHandler(req, res, next) {
     const frontendUrl = envConfig.FRONTEND_URL || 'http://localhost:5173'
-    passport.authenticate('discord', (err, user) => {
+    passport.authenticate('discord', { session: false }, (err, user) => {
       if (err) {
         if (err.message === 'email_taken_other_method') {
           return res.redirect(`${frontendUrl}/auth?error=social_conflict`)
@@ -136,6 +170,7 @@ router.get(
 
 // ─── Protected user routes ─────────────────────────────────────────────────────
 router.get('/me', authenticateUser, getCurrentUser)
+router.delete('/me', authenticateUser, deleteAccount)
 router.put('/avatar', authenticateUser, upload.single('avatar'), updateAvatar)
 router.put(
   '/profile',

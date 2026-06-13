@@ -29,6 +29,11 @@ const connectRedis = async () => {
 
 if (envConfig.NODE_ENV !== 'test') {
   connectRedis()
+} else {
+  // Mock redis for tests
+  redisClient.get = async () => null
+  redisClient.setEx = async () => 'OK'
+  redisClient.isOpen = true
 }
 
 module.exports = redisClient

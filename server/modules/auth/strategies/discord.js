@@ -8,6 +8,8 @@
  */
 const passport = require('passport')
 
+let _registered = false
+
 module.exports = function requireDiscordOAuthConfig(req, res, next) {
   const isProduction = process.env.NODE_ENV === 'production'
   const clientId = isProduction
@@ -17,11 +19,15 @@ module.exports = function requireDiscordOAuthConfig(req, res, next) {
     ? process.env.DISCORD_PROD_CLIENT_SECRET || process.env.DISCORD_CLIENT_SECRET
     : process.env.DISCORD_CLIENT_SECRET
 
+  // Always check credentials — a missing-credentials 500 must fire even after registration.
   if (!clientId || !clientSecret) {
     return res.status(500).json({
       msg: 'Discord OAuth not configured. Set DISCORD_CLIENT_ID and DISCORD_CLIENT_SECRET in server/.env.',
     })
   }
+
+  // Short-circuit after first successful registration — strategy construction is expensive.
+  if (_registered) return next()
 
   const DiscordStrategy = require('passport-discord').Strategy
   const { discordLoginUser } = require('../auth.service')
@@ -48,5 +54,6 @@ module.exports = function requireDiscordOAuthConfig(req, res, next) {
     )
   )
 
+  _registered = true
   return next()
 }

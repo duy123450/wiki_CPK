@@ -8,6 +8,8 @@
  */
 const passport = require('passport')
 
+let _registered = false
+
 module.exports = function requireTwitterOAuthConfig(req, res, next) {
   const isProduction = process.env.NODE_ENV === 'production'
   const clientId = isProduction
@@ -17,11 +19,15 @@ module.exports = function requireTwitterOAuthConfig(req, res, next) {
     ? process.env.X_PROD_CLIENT_SECRET || process.env.X_CLIENT_SECRET
     : process.env.X_LOCAL_CLIENT_SECRET || process.env.X_CLIENT_SECRET
 
+  // Always check credentials — a missing-credentials 500 must fire even after registration.
   if (!clientId || !clientSecret) {
     return res.status(500).json({
       msg: 'Twitter OAuth is not configured',
     })
   }
+
+  // Short-circuit after first successful registration — strategy construction is expensive.
+  if (_registered) return next()
 
   const TwitterStrategy = require('passport-twitter-oauth2').Strategy
   const { twitterLoginUser } = require('../auth.service')
@@ -86,5 +92,6 @@ module.exports = function requireTwitterOAuthConfig(req, res, next) {
   }
 
   passport.use('twitter', twitterStrategy)
+  _registered = true
   return next()
 }

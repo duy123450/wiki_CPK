@@ -2,6 +2,8 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import obfuscator from 'rollup-plugin-obfuscator'
+import { visualizer } from 'rollup-plugin-visualizer'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -37,6 +39,27 @@ export default defineConfig({
           }
         },
       },
+      plugins: [
+        process.env.NODE_ENV === 'production' && obfuscator({
+          globalOptions: {
+            compact: true,
+            controlFlowFlattening: true,
+            controlFlowFlatteningThreshold: 0.75,
+            numbersToExpressions: true,
+            simplify: true,
+            stringArrayShuffle: true,
+            splitStrings: true,
+            stringArrayThreshold: 0.75,
+            selfDefending: true,
+          },
+        }),
+        // Bundle analysis: run `ANALYZE=true npm run build` to generate stats.html
+        process.env.ANALYZE === 'true' && visualizer({
+          open: true,
+          filename: 'stats.html',
+          gzipSize: true,
+        }),
+      ].filter(Boolean),
     },
   },
 
