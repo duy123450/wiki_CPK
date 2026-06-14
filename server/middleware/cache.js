@@ -5,23 +5,24 @@ const redisClient = require('../config/redis')
  * @param {string} prefix - The group of the cache (e.g., 'characters', 'soundtracks')
  * @param {number} ttlSeconds - Time to live in seconds (default: 3600)
  */
-const cacheData = (prefix, ttlSeconds = 3600) => {
+const cacheData = (prefix, ttlSeconds = 3600, tierResolver = null) => {
   return async (req, res, next) => {
     if (process.env.NODE_ENV === 'test') {
       return next()
     }
 
-    // Only cache GET requests
     if (req.method !== 'GET') {
       return next()
     }
 
-    // Ensure Redis is connected before trying to use it
     if (!redisClient.isReady) {
       return next()
     }
 
-    const key = `cache:${prefix}:${req.originalUrl}`
+    const tier = tierResolver ? tierResolver(req) : null
+    const key = tier
+      ? `cache:${prefix}:${tier}:${req.originalUrl}`
+      : `cache:${prefix}:${req.originalUrl}`
 
     try {
       const cachedResponse = await redisClient.get(key)

@@ -18,7 +18,7 @@ A full-stack **MERN** (MongoDB, Express, React, Node.js) web application—compr
 - **Wiki Management:** Movies, characters, categories, soundtracks.
 - **Advanced Authentication:**
   - Local login with **Argon2** hashing.
-  - OAuth: **Google**, **X (Twitter)** (API v2), **Discord**.
+  - OAuth: **Google**, **X (Twitter)** (API v2), **Discord**, **GitHub**.
   - Session management with **JWT** (Access/Refresh tokens) and **Redis** for session backing.
   - Account conflict prevention vs OAuth hijacking.
   - **RBAC:** Permission management for restricted routes.
@@ -32,21 +32,23 @@ A full-stack **MERN** (MongoDB, Express, React, Node.js) web application—compr
   - **Asset Management:** Image hosting + crop-prevention via **Cloudinary**.
 - **Responsive UI:** React + Vanilla CSS.
 - **Robust Architecture:**
-  - **Validation:** Zod schemas for env vars + API payloads.
-  - **Security:** Rate limiting, input sanitization (ReDoS/NoSQL), file constraints.
+  - **Validation:** Zod schemas for env vars + API payloads (backend & frontend).
+  - **Security:** Rate limiting (leaky bucket), input sanitization (ReDoS/NoSQL), file constraints.
   - **Modular Backend:** Domain-driven modules.
-  - **Error Hierarchy:** Custom classes (AuthError, WikiError, etc.).
-  - **Testing:** Jest/Supertest (backend), Vitest/RTL (frontend).
+  - **Error Hierarchy:** Custom classes (`CustomAPIError`, `AuthError`, `BadRequestError`, `NotFoundError`, `ValidationError`, `WikiError`, `UnauthenticatedError`, `UnauthorizedError`, `SoundtrackError`).
+  - **Testing:** Jest/Supertest (backend), Vitest/RTL + Playwright E2E (frontend).
 
 ## 🛠️ Tech Stack
 
-**Frontend:** React (Vite) | RTK | Socket.io-client | React Router DOM | Axios | Vitest/RTL
+**Frontend:** React (Vite) | RTK | React Hook Form | Lucide React | Socket.io-client | React Router DOM | Axios | Zod | Vitest/RTL | Playwright (E2E)
 
 **Backend:** Node.js | Express | MongoDB (Mongoose) | Redis | Zod | Socket.io | Passport.js | Argon2/JWT/Helmet/CORS | Multer/Cloudinary | Jest/Supertest
 
 ## 📦 Installation
 
-**Prerequisites:** Node.js (v16+), MongoDB (Atlas), Redis Server, Cloudinary, OAuth (Google/X/Discord/GitHub)
+**Prerequisites:** Node.js (v16+), MongoDB (Atlas or local), Cloudinary account.
+
+> **Redis** and all **OAuth providers** are optional — the app degrades gracefully without them (no caching/session store without Redis; social login disabled without OAuth keys). Only `MONGO_URI`, `SESSION_SECRET`, `JWT_ACCESS_SECRET`, and `JWT_REFRESH_SECRET` are required for a minimal first run.
 
 ### 1. Clone
 
@@ -65,26 +67,33 @@ npm install
 `.env` config:
 
 ```env
+# ─── Core ────────────────────────────────────────────────────────────────────
 PORT=3000
+NODE_ENV=development
 MONGO_URI=your_mongodb_uri
+FRONTEND_URL=http://localhost:5173
+
+# ─── Redis (optional) ────────────────────────────────────────────────────────
 REDIS_URL=redis://localhost:6379
+
+# ─── Session & JWT ───────────────────────────────────────────────────────────
 SESSION_SECRET=your_session_secret
 JWT_ACCESS_SECRET=your_access_secret
 JWT_REFRESH_SECRET=your_refresh_secret
 JWT_ACCESS_LIFETIME=15m
 JWT_REFRESH_LIFETIME=30d
 
-# Cloudinary
+# ─── Cloudinary ──────────────────────────────────────────────────────────────
 CLOUD_NAME=your_cloud_name
 API_KEY=your_api_key
 API_SECRET=your_api_secret
 
-# Google OAuth
+# ─── Google OAuth (optional) ─────────────────────────────────────────────────
 GOOGLE_CLIENT_ID=your_google_id
 GOOGLE_CLIENT_SECRET=your_google_secret
 GOOGLE_CALLBACK_URL=http://localhost:3000/api/v1/wiki/auth/google/callback
 
-# X (Twitter) OAuth
+# ─── X (Twitter) OAuth (optional) ────────────────────────────────────────────
 X_LOCAL_CLIENT_ID=your_x_local_id
 X_LOCAL_CLIENT_SECRET=your_x_local_secret
 X_LOCAL_CALLBACK_URL=http://127.0.0.1:3000/api/v1/wiki/auth/x/callback
@@ -92,7 +101,7 @@ X_LOCAL_CALLBACK_URL=http://127.0.0.1:3000/api/v1/wiki/auth/x/callback
 # X_PROD_CLIENT_SECRET=your_x_prod_client_secret
 # X_PROD_CALLBACK_URL=https://yourdomain.com/api/v1/wiki/auth/x/callback
 
-# Discord OAuth
+# ─── Discord OAuth (optional) ────────────────────────────────────────────────
 DISCORD_CLIENT_ID=your_discord_id
 DISCORD_CLIENT_SECRET=your_discord_secret
 DISCORD_LOCAL_CALLBACK_URL=http://localhost:3000/api/v1/wiki/auth/discord/callback
@@ -100,16 +109,13 @@ DISCORD_LOCAL_CALLBACK_URL=http://localhost:3000/api/v1/wiki/auth/discord/callba
 # DISCORD_PROD_CLIENT_SECRET=your_discord_prod_client_secret
 # DISCORD_PROD_CALLBACK_URL=https://yourdomain.com/api/v1/wiki/auth/discord/callback
 
-# GitHub OAuth
+# ─── GitHub OAuth (optional) ─────────────────────────────────────────────────
 GITHUB_LOCAL_CLIENT_ID=your_github_local_id
 GITHUB_LOCAL_CLIENT_SECRET=your_github_local_secret
 GITHUB_LOCAL_CALLBACK_URL=http://localhost:3000/api/v1/wiki/auth/github/callback
 # GITHUB_PROD_CLIENT_ID=your_github_prod_id
 # GITHUB_PROD_CLIENT_SECRET=your_github_prod_secret
 # GITHUB_PROD_CALLBACK_URL=https://yourdomain.com/api/v1/wiki/auth/github/callback
-
-FRONTEND_URL=http://localhost:5173
-NODE_ENV=development
 ```
 
 ### 3. Frontend
@@ -136,9 +142,25 @@ VITE_OPEN_CATEGORY_COOKIE=cpkSidebarOpenCategory
 
 ## 🧪 Testing
 
-**Backend:** `cd server && npm test` (all) | `npm run test:unit` | `npm run test:integration`
+**Backend:**
+```bash
+cd server
+npm test                  # all tests
+npm run test:unit         # unit tests only
+npm run test:integration  # integration tests only
+npm run test:coverage     # with coverage report
+npm run test:serial       # run all tests serially (--runInBand)
+```
 
-**Frontend:** `cd client && npm test`
+**Frontend:**
+```bash
+cd client
+npm test                  # Vitest (unit/component)
+npm run test:coverage     # with coverage report
+npm run test:e2e          # Playwright E2E
+npm run test:e2e:ui       # Playwright with UI mode
+npm run test:e2e:report   # show last Playwright report
+```
 
 ## 📂 Project Structure
 
@@ -157,37 +179,57 @@ wiki_CPK/
 │   │   ├── services/    # API (Axios)
 │   │   ├── styles/      # CSS
 │   │   ├── utils/       # Helpers
+│   │   ├── workers/     # Web Workers
 │   │   └── tests/       # Vitest
-│   └── public/          # Static
+│   ├── e2e/             # Playwright E2E tests
+│   └── public/          # Static assets
 ├── server/              # Express (Node.js)
-│   ├── config/          # Config (Passport/DB/Cloudinary/Env)
+│   ├── config/          # Config (Passport/DB/Cloudinary/Redis/Env)
 │   ├── constants/       # Global constants (roles.js)
-│   ├── errors/          # Error classes
-│   ├── middleware/      # Global middleware (authorizeRoles.js, authentication.js, etc)
-│   ├── modules/         # Domain modules (Auth/Wiki/Characters/etc)
-│   │   └── [module]/
-│   │       ├── [name].controller.js
-│   │       ├── [name].route.js
-│   │       ├── [name].service.js
-│   │       ├── [name].model.js
-│   │       └── strategies/   # Modular OAuth lazy-strategies (google, twitter, discord, github)
-│   ├── schemas/         # Zod validation
+│   ├── errors/          # Error classes (CustomAPIError, AuthError, WikiError, etc.)
+│   ├── middleware/      # Global middleware (authentication.js, authorizeRoles.js,
+│   │                    #   optionalAuth.js, cache.js, leakyBucket.js,
+│   │                    #   validateRequest.js, error-handler.js, etc.)
+│   ├── modules/         # Domain modules
+│   │   ├── auth/
+│   │   │   ├── auth.controller.js
+│   │   │   ├── auth.route.js
+│   │   │   ├── auth.service.js
+│   │   │   ├── user.model.js
+│   │   │   └── strategies/  # Lazy OAuth strategies (google, twitter, discord, github)
+│   │   ├── wiki/
+│   │   │   ├── wiki.route.js
+│   │   │   ├── wiki.service.js
+│   │   │   └── models/      # category.model.js, movie.model.js, wiki-page.model.js
+│   │   ├── characters/
+│   │   │   ├── character.controller.js
+│   │   │   ├── character.route.js
+│   │   │   ├── character.service.js
+│   │   │   ├── character.model.js
+│   │   │   ├── character.constants.js
+│   │   │   └── character.utils.js
+│   │   └── soundtrack/
+│   │       ├── soundtrack.controller.js
+│   │       ├── soundtrack.route.js
+│   │       ├── soundtrack.service.js
+│   │       └── sound-track.model.js
+│   ├── schemas/         # Zod validation (auth, character, soundtrack)
 │   ├── scripts/         # Backup & utility scripts
-│   ├── tests/           # Jest/Supertest
-│   ├── utils/           # Helpers (security, logger)
-│   └── server.js        # Entry + Socket.io
+│   ├── tests/           # Jest/Supertest (unit/, integration/, security/, utils/)
+│   ├── utils/           # Helpers (logger.js, security.js)
+│   └── server.js        # Entry point + Socket.io
 └── README.md
 ```
 
-## � Key Concepts
+## 🔑 Key Concepts
 
 ### Authentication & Security
-- **Multi-factor OAuth:** Supports Google, X (Twitter), Discord, and GitHub out of the box.
+- **Multi-factor OAuth:** Supports Google, X (Twitter), Discord, and GitHub out of the box. All providers are optional.
 - **Argon2 Hashing:** Industry-standard password hashing for local accounts.
 - **JWT Token Strategy:** Access tokens (15m) + Refresh tokens (30d) for secure, scalable authentication.
 - **Role-Based Access Control (RBAC):** Granular permission management for protected routes.
-- **Session Persistence:** Redis-backed sessions ensure user continuity across server restarts.
-- **Hardened Security:** CSRF protection (Secure/Lax cookies), timing-safe token validations, XSS sanitization, and structured security event logging.
+- **Session Persistence:** Redis-backed sessions ensure user continuity across server restarts. App runs without Redis (degraded mode).
+- **Hardened Security:** CSRF protection (Secure/Lax cookies), timing-safe token validations, XSS sanitization, leaky-bucket rate limiting, and structured security event logging.
 
 ### Content & Media
 - **Synchronized Lyrics:** Real-time highlight + auto-scroll lyrics (Japanese/Romaji/Vietnamese) synced to millisecond precision.
@@ -200,8 +242,8 @@ wiki_CPK/
 - **Type-Safe Config:** Zod validation ensures all environment variables are correct at startup.
 - **Real-time Updates:** Socket.io for live user counter and interactive features.
 - **Input Sanitization:** Protection against ReDoS, NoSQL injection, and malformed payloads.
-- **Error Hierarchy:** Structured error classes for consistent API responses.
+- **Error Hierarchy:** Structured error classes for consistent API responses (`CustomAPIError` → `AuthError`, `WikiError`, `BadRequestError`, `NotFoundError`, `ValidationError`, `UnauthenticatedError`, `UnauthorizedError`, `SoundtrackError`).
 
-## �📜 License
+## 📜 License
 
 Educational/personal use. "Chou Kaguya Hime" content © respective owners.

@@ -1,6 +1,5 @@
 const passport = require('passport')
 
-// Strategies
 require('../modules/auth/strategies/google')
 require('../modules/auth/strategies/twitter')
 require('../modules/auth/strategies/discord')
