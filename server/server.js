@@ -29,6 +29,7 @@ const wikiRouter = require('./modules/wiki/wiki.route')
 const nextTrackRouter = require('./modules/soundtrack/soundtrack.route')
 const characterRouter = require('./modules/characters/character.route')
 const authRouter = require('./modules/auth/auth.route')
+const legalRouter = require('./modules/legal/legal.route')
 
 // Allowed Origins & Options
 const isProd = envConfig.NODE_ENV === 'production'
@@ -146,6 +147,7 @@ app.use('/api/v1/wiki', wikiRouter)
 app.use('/api/v1/wiki/soundtrack', nextTrackRouter)
 app.use('/api/v1/wiki/characters', characterRouter)
 app.use('/api/v1/wiki/auth', authRouter)
+app.use('/api/v1/legal', legalRouter)
 
 // 3. Error Handling
 app.use(notFoundMiddleware)
