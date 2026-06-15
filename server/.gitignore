@@ -2,6 +2,7 @@
 .env
 seed.js
 add-movie-trailers.js
+add-soundtracks.js
 addLyrics/
 addOfficialUrls/
 server.log
