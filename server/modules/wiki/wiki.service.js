@@ -28,8 +28,10 @@ const fetchSidebarData = async () => {
       let pages
 
       if (category.slug === 'soundtrack') {
-        // Return actual tracks as sidebar entries
-        const tracks = await Soundtrack.find({})
+        // Return actual tracks as sidebar entries, excluding tracks 16 to 27
+        const tracks = await Soundtrack.find({
+          $or: [{ trackNumber: { $lt: 16 } }, { trackNumber: { $gt: 27 } }]
+        })
           .select('title slug trackNumber')
           .sort({ trackNumber: 1 })
 
@@ -78,28 +80,8 @@ const fetchPageBySlug = async (slug) => {
   return page
 }
 
-// --- Controllers (Merged) ---
-
-const getSidebar = asyncWrapper(async (req, res) => {
-  const categories = await fetchSidebarData()
-  res.status(200).json({ categories })
-})
-
-const getMovieInfo = asyncWrapper(async (req, res) => {
-  const movie = await fetchMovieData('Chou Kaguya Hime')
-  res.status(200).json({ movie })
-})
-
-const getPageBySlug = asyncWrapper(async (req, res) => {
-  const page = await fetchPageBySlug(req.params.slug)
-  res.status(200).json(page)
-})
-
 module.exports = {
   fetchMovieData,
   fetchSidebarData,
   fetchPageBySlug,
-  getSidebar,
-  getMovieInfo,
-  getPageBySlug,
 }

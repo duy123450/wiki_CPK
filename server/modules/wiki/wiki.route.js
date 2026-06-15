@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const { getSidebar, getMovieInfo, getPageBySlug } = require('./wiki.service')
+const { getSidebar, getMovieInfo, getPageBySlug } = require('./wiki.controller')
 const { leakyBucketLimiter } = require('../../middleware/leakyBucket')
 const redisClient = require('../../config/redis')
 

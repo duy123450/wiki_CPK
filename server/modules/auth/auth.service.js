@@ -24,6 +24,7 @@ const buildTokenResponse = async (user) => {
     return {
         user: buildAuthResponse(user),
         accessToken,    // canonical key — api.js reads this
+        token: accessToken, // alias expected by tests and legacy clients
         refreshToken,
     }
 }

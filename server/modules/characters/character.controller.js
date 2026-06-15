@@ -12,7 +12,7 @@ const getCharacterBySlug = asyncWrapper(async (req, res) => {
 })
 
 const getCharacterRoles = asyncWrapper(async (req, res) => {
-  const roles = characterService.fetchCharacterRoles()
+  const roles = await characterService.fetchCharacterRoles()
   res.status(200).json({ roles })
 })
 

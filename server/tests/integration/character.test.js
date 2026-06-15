@@ -125,4 +125,17 @@ describe('Character API', () => {
       expect(c).toHaveProperty('voiceActor', 'Actor')
     })
   })
+
+  describe('GET /roles', () => {
+    it('returns character roles successfully', async () => {
+      await seedChar(movie._id, { role: 'Protagonist' })
+      await seedChar(movie._id, { role: 'Antagonist', name: 'Villain', slug: 'villain' })
+
+      const res = await request(app).get(`${BASE}/roles`)
+      expect(res.status).toBe(200)
+      expect(res.body).toHaveProperty('roles')
+      expect(res.body.roles).toContain('Protagonist')
+      expect(res.body.roles).toContain('Antagonist')
+    })
+  })
 })

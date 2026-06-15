@@ -15,7 +15,8 @@ A full-stack **MERN** (MongoDB, Express, React, Node.js) web application—compr
 
 ## 🚀 Features
 
-- **Wiki Management:** Movies, characters, categories, soundtracks.
+- **Wiki Management:** Movies, characters, categories, soundtracks, and legal documents.
+- **Legal Management:** Version-controlled legal documents (Terms of Use, Privacy Policy) with dual-locale support (EN/VI) and dynamic API-based resolution.
 - **Advanced Authentication:**
   - Local login with **Argon2** hashing.
   - OAuth: **Google**, **X (Twitter)** (API v2), **Discord**, **GitHub**.
@@ -36,7 +37,7 @@ A full-stack **MERN** (MongoDB, Express, React, Node.js) web application—compr
   - **Security:** Rate limiting (leaky bucket), input sanitization (ReDoS/NoSQL), file constraints.
   - **Modular Backend:** Domain-driven modules.
   - **Error Hierarchy:** Custom classes (`CustomAPIError`, `AuthError`, `BadRequestError`, `NotFoundError`, `ValidationError`, `WikiError`, `UnauthenticatedError`, `UnauthorizedError`, `SoundtrackError`).
-  - **Testing:** Jest/Supertest (backend), Vitest/RTL + Playwright E2E (frontend).
+  - **Testing:** 352 tests — Jest/Supertest (backend), Vitest/RTL + Playwright E2E (frontend).
 
 ## 🛠️ Tech Stack
 
@@ -198,6 +199,7 @@ wiki_CPK/
 │   │   │   ├── user.model.js
 │   │   │   └── strategies/  # Lazy OAuth strategies (google, twitter, discord, github)
 │   │   ├── wiki/
+│   │   │   ├── wiki.controller.js
 │   │   │   ├── wiki.route.js
 │   │   │   ├── wiki.service.js
 │   │   │   └── models/      # category.model.js, movie.model.js, wiki-page.model.js
@@ -208,12 +210,17 @@ wiki_CPK/
 │   │   │   ├── character.model.js
 │   │   │   ├── character.constants.js
 │   │   │   └── character.utils.js
-│   │   └── soundtrack/
-│   │       ├── soundtrack.controller.js
-│   │       ├── soundtrack.route.js
-│   │       ├── soundtrack.service.js
-│   │       └── sound-track.model.js
-│   ├── schemas/         # Zod validation (auth, character, soundtrack)
+│   │   ├── soundtrack/
+│   │   │   ├── soundtrack.controller.js
+│   │   │   ├── soundtrack.route.js
+│   │   │   ├── soundtrack.service.js
+│   │   │   └── sound-track.model.js
+│   │   └── legal/
+│   │       ├── legal.controller.js
+│   │       ├── legal.route.js
+│   │       ├── legal.service.js
+│   │       └── legal-document.model.js
+│   ├── schemas/         # Zod validation (auth, character, soundtrack, legal)
 │   ├── scripts/         # Backup & utility scripts
 │   ├── tests/           # Jest/Supertest (unit/, integration/, security/, utils/)
 │   ├── utils/           # Helpers (logger.js, security.js)
@@ -238,11 +245,17 @@ wiki_CPK/
 - **Cloudinary Asset Management:** Secure image hosting with crop prevention and CDN delivery.
 
 ### Architecture
-- **Domain-Driven Design:** Modular backend organized by feature (Auth, Wiki, Characters, Soundtrack).
+- **Domain-Driven Design:** Modular backend organized by feature (Auth, Wiki, Characters, Soundtrack, Legal).
 - **Type-Safe Config:** Zod validation ensures all environment variables are correct at startup.
 - **Real-time Updates:** Socket.io for live user counter and interactive features.
 - **Input Sanitization:** Protection against ReDoS, NoSQL injection, and malformed payloads.
 - **Error Hierarchy:** Structured error classes for consistent API responses (`CustomAPIError` → `AuthError`, `WikiError`, `BadRequestError`, `NotFoundError`, `ValidationError`, `UnauthenticatedError`, `UnauthorizedError`, `SoundtrackError`).
+
+### Legal Documents
+- **Version-Controlled Policies:** Each `LegalDocument` has `type`, `version`, `effectiveDate`, and `isPublished` fields enabling soft-update workflows without breaking live docs.
+- **Dual-Locale (EN/VI):** Both `en` and `vi` locales stored in a single MongoDB document; the controller resolves the locale from `?lang=` query param first, then from `Accept-Language` header.
+- **Leaky-Bucket Rate Limiting:** The `/api/v1/legal` route uses the same leaky bucket Redis middleware as the rest of the API for consistent rate-limiting behaviour.
+- **Frontend Hook:** `useLegalDocument(type, lang)` resolves the backend URL dynamically from `VITE_API_BASE_URL` (strips `/api/v1/wiki` suffix), so it works in both dev proxy and production.
 
 ## 📜 License
 

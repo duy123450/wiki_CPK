@@ -33,6 +33,7 @@ if (envConfig.NODE_ENV !== 'test') {
   // Mock redis for tests
   redisClient.get = async () => null
   redisClient.setEx = async () => 'OK'
+  redisClient.eval = async () => 1
   redisClient.isOpen = true
 }
 

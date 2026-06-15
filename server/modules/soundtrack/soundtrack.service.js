@@ -50,7 +50,10 @@ const fetchTracksByMovie = async (movieId, user) => {
   const safeMovieId = String(movieId)
   const privileged = isPrivilegedUser(user)
 
-  const query = Soundtrack.find({ movie: safeMovieId })
+  const query = Soundtrack.find({ 
+    movie: safeMovieId,
+    $or: [{ trackNumber: { $lt: 16 } }, { trackNumber: { $gt: 27 } }]
+  })
     .populate('movie', 'title')
     .sort({ trackNumber: 1 })
 
@@ -65,7 +68,10 @@ const fetchTracksByMovie = async (movieId, user) => {
 const assertTrackWithinBoundary = async (track, movieId, user) => {
   if (isPrivilegedUser(user)) return
 
-  const allowedIds = await Soundtrack.find({ movie: String(movieId) })
+  const allowedIds = await Soundtrack.find({ 
+    movie: String(movieId),
+    $or: [{ trackNumber: { $lt: 16 } }, { trackNumber: { $gt: 27 } }]
+  })
     .sort({ trackNumber: 1 })
     .limit(PUBLIC_TRACK_LIMIT)
     .select('_id')
@@ -103,14 +109,21 @@ const getNextTrackLogic = async (params, user) => {
     return { mode, track: formatTrack(currentTrack), restart: true }
   }
 
-  const totalTracks = await Soundtrack.countDocuments({ movie: movieId })
+  const totalTracks = await Soundtrack.countDocuments({ 
+    movie: movieId,
+    $or: [{ trackNumber: { $lt: 16 } }, { trackNumber: { $gt: 27 } }]
+  })
   if (totalTracks === 1) {
     return { mode, track: formatTrack(currentTrack), restart: true }
   }
 
   if (mode === 'shuffle') {
     const privileged = isPrivilegedUser(user)
-    const matchStage = { movie: currentTrack.movie?._id ?? safeMovieId, _id: { $ne: currentTrack._id } }
+    const matchStage = { 
+      movie: currentTrack.movie?._id ?? safeMovieId, 
+      _id: { $ne: currentTrack._id },
+      $or: [{ trackNumber: { $lt: 16 } }, { trackNumber: { $gt: 27 } }]
+    }
 
     const pipeline = privileged
       ? [{ $match: matchStage }, { $sample: { size: 1 } }]
@@ -134,11 +147,15 @@ const getNextTrackLogic = async (params, user) => {
   if (mode === 'sequential') {
     let nextTrack = await Soundtrack.findOne({
       movie: movieId,
-      trackNumber: currentTrack.trackNumber + 1,
-    }).populate('movie', 'title')
+      trackNumber: { $gt: currentTrack.trackNumber },
+      $or: [{ trackNumber: { $lt: 16 } }, { trackNumber: { $gt: 27 } }]
+    }).sort({ trackNumber: 1 }).populate('movie', 'title')
 
     if (!nextTrack) {
-      nextTrack = await Soundtrack.findOne({ movie: movieId })
+      nextTrack = await Soundtrack.findOne({ 
+        movie: movieId,
+        $or: [{ trackNumber: { $lt: 16 } }, { trackNumber: { $gt: 27 } }]
+      })
         .populate('movie', 'title')
         .sort({ trackNumber: 1 })
     }
@@ -158,13 +175,17 @@ const getNextTrackLogic = async (params, user) => {
 }
 
 const fetchTrackBySlug = async (slug, user) => {
-  let track = await Soundtrack.findOne({ slug }).populate('movie', 'title')
+  let track = await Soundtrack.findOne({ 
+    slug,
+    $or: [{ trackNumber: { $lt: 16 } }, { trackNumber: { $gt: 27 } }]
+  }).populate('movie', 'title')
 
   if (!track) {
     const escapedSlug = slug.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
     const titlePattern = escapedSlug.replace(/-/g, '[\\s\\-]')
     track = await Soundtrack.findOne({
       title: { $regex: new RegExp(`^${titlePattern}$`, 'i') },
+      $or: [{ trackNumber: { $lt: 16 } }, { trackNumber: { $gt: 27 } }]
     }).populate('movie', 'title')
   }
 
@@ -176,6 +197,7 @@ const fetchTrackBySlug = async (slug, user) => {
     const ordinal = await Soundtrack.countDocuments({
       movie: track.movie?._id ?? track.movie,
       trackNumber: { $lte: track.trackNumber },
+      $or: [{ trackNumber: { $lt: 16 } }, { trackNumber: { $gt: 27 } }]
     })
 
     if (ordinal > PUBLIC_TRACK_LIMIT) {
