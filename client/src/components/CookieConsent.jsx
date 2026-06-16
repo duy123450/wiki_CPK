@@ -7,6 +7,7 @@
  * - Once a choice is stored the banner never shows again.
  */
 import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import '../styles/CookieConsent.css'
 
 const STORAGE_KEY = 'cookie_consent'
@@ -56,10 +57,12 @@ export default function CookieConsent() {
         <p className="cookie-consent__desc">
           We use cookies to keep you signed in and improve your experience.
           You can accept or decline non-essential cookies.
+          See our <Link to="/privacy" className="cookie-consent__link">Privacy Policy</Link> and <Link to="/terms" className="cookie-consent__link">Terms of Use</Link>.
         </p>
         <p className="cookie-consent__desc cookie-consent__desc--vn">
           Chúng tôi dùng cookies để duy trì đăng nhập và cải thiện trải nghiệm.
           Bạn có thể chấp nhận hoặc từ chối cookies không thiết yếu.
+          Xem <Link to="/privacy" className="cookie-consent__link">Chính sách bảo mật</Link> và <Link to="/terms" className="cookie-consent__link">Điều khoản sử dụng</Link>.
         </p>
       </div>
 

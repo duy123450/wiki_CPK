@@ -411,8 +411,7 @@
         max-height: 200px;
         padding: 14px 14px;
     }
-
-    .footer-disclaimer-header {
+    .footer-disclaimer-header {
         flex-direction: column;
         align-items: flex-start;
     }
@@ -429,4 +428,33 @@
     .footer-disclaimer-text {
         font-size: 11px;
     }
+}
+
+
+/* ── Footer Legal Links ── */
+.footer-legal-links {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-top: 14px;
+    font-family: 'Inter', sans-serif;
+    font-size: 10.5px;
+}
+
+.footer-legal-link {
+    color: rgba(240, 232, 255, 0.4);
+    text-decoration: none;
+    transition: color 0.2s, text-shadow 0.2s;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.footer-legal-link:hover {
+    color: #c084fc;
+    text-shadow: 0 0 8px rgba(192, 132, 252, 0.35);
+}
+
+.footer-legal-divider {
+    color: rgba(240, 232, 255, 0.12);
+    user-select: none;
 }

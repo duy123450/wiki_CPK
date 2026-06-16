@@ -1,0 +1,190 @@
+/* ── Legal Page & Document Styling ────────────────────────────────────────────── */
+.legal-root {
+  min-height: 100dvh;
+  background: #05040f;
+  font-family: 'Source Sans 3', sans-serif;
+  color: #f0e8ff;
+  position: relative;
+  overflow-x: hidden;
+  width: calc(100% - var(--sidebar-current-width, 260px));
+  margin-left: var(--sidebar-current-width, 260px);
+  transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    margin-left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: clamp(32px, 5vw, 60px) clamp(16px, 5vw, 56px) 80px;
+  max-width: 100vw;
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  .legal-root {
+    width: 100%;
+    margin-left: 0;
+  }
+}
+
+/* Floating particles background matching characters page */
+.legal-particles {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.legal-particle {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(192, 132, 252, 0.4);
+  animation: legalParticleDrift var(--dur, 8s) ease-in-out infinite;
+}
+
+@keyframes legalParticleDrift {
+  0%, 100% {
+    opacity: 0.15;
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: translateY(-40px) scale(1.2);
+  }
+}
+
+.legal-card {
+  position: relative;
+  z-index: 1;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(180, 140, 255, 0.12);
+  border-radius: 16px;
+  padding: clamp(20px, 5vw, 40px);
+  max-width: 840px;
+  margin: 0 auto;
+  box-shadow: 
+    0 24px 60px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(192, 132, 252, 0.05);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.legal-lang-toggle {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.legal-lang-btn {
+  font-family: 'Inter', sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: 1px solid rgba(180, 140, 255, 0.15);
+  background: rgba(255, 255, 255, 0.02);
+  color: rgba(240, 232, 255, 0.6);
+  cursor: pointer;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.legal-lang-btn:hover:not(:disabled) {
+  border-color: rgba(192, 132, 252, 0.4);
+  color: #fff;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.legal-lang-btn:disabled {
+  border-color: #c084fc;
+  color: #c084fc;
+  background: rgba(192, 132, 252, 0.12);
+  cursor: default;
+  box-shadow: 0 0 10px rgba(192, 132, 252, 0.15);
+}
+
+.legal-title {
+  font-family: 'Inter', sans-serif;
+  font-size: clamp(24px, 4vw, 36px);
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 6px 0;
+  text-shadow: 0 0 40px rgba(192, 132, 252, 0.3);
+  line-height: 1.2;
+}
+
+.legal-meta {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  color: rgba(240, 232, 255, 0.45);
+  margin-bottom: 28px;
+  display: flex;
+  gap: 12px;
+  border-bottom: 1px solid rgba(180, 140, 255, 0.1);
+  padding-bottom: 14px;
+}
+
+.legal-summary {
+  padding: 16px 20px;
+  background: rgba(192, 132, 252, 0.05);
+  border-left: 3px solid #c084fc;
+  border-radius: 4px;
+  margin-bottom: 32px;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: rgba(240, 232, 255, 0.8);
+}
+
+.legal-summary strong {
+  color: #c084fc;
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.legal-content {
+  line-height: 1.75;
+  font-size: 14.5px;
+  color: rgba(240, 232, 255, 0.8);
+}
+
+.legal-content h2, .legal-content h3 {
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  margin-top: 36px;
+  margin-bottom: 16px;
+}
+
+.legal-content h2 {
+  font-size: clamp(18px, 3vw, 22px);
+  border-bottom: 1px solid rgba(180, 140, 255, 0.15);
+  padding-bottom: 8px;
+}
+
+.legal-content h3 {
+  font-size: 16px;
+}
+
+.legal-content p {
+  margin: 0 0 16px 0;
+}
+
+.legal-content ul, .legal-content ol {
+  margin: 0 0 20px 0;
+  padding-left: 24px;
+}
+
+.legal-content li {
+  margin-bottom: 8px;
+}
+
+.legal-content a {
+  color: #67e8f9;
+  text-decoration: none;
+  transition: color 0.18s;
+}
+
+.legal-content a:hover {
+  color: #fff;
+  text-decoration: underline;
+}

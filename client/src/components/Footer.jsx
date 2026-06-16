@@ -1,4 +1,5 @@
 import { Mail, ExternalLink } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import '../styles/Footer.css'
 
 import { QUICK_LINKS } from '../constants/ui.constants'
@@ -112,7 +113,7 @@ export default function Footer({ sidebarCollapsed }) {
               All rights to <em>Chou Kaguya Hime!</em>, its characters, story,
               artwork, and all related materials remain the exclusive property
               of their respective rights holders, including{' '}
-              <strong>FABTONE Inc.</strong> and <strong>Toy's Factory</strong>.
+              <strong>FABTONE Inc.</strong>, <strong>Toy's Factory</strong>, and others.
             </p>
             <p className="footer-disclaimer-text">
               All music featured on this site — including works by{' '}
@@ -159,8 +160,7 @@ export default function Footer({ sidebarCollapsed }) {
               Toàn bộ quyền sở hữu đối với <em>Chou Kaguya Hime!</em>, bao gồm
               nhân vật, cốt truyện, hình ảnh nghệ thuật và tất cả các nội dung
               liên quan, thuộc về các chủ sở hữu bản quyền tương ứng, trong đó
-              có <strong>FABTONE Inc.</strong> và <strong>Toy's Factory</strong>
-              .
+              có <strong>FABTONE Inc.</strong>, <strong>Toy's Factory</strong>, và nhiều bên khác.
             </p>
             <p className="footer-disclaimer-text">
               Tất cả âm nhạc được giới thiệu trên trang này — bao gồm các tác
@@ -200,6 +200,17 @@ export default function Footer({ sidebarCollapsed }) {
             sở hữu tương ứng.
           </span>
         </p>
+
+        {/* Legal Pages Links */}
+        <div className="footer-legal-links">
+          <Link to="/terms" className="footer-legal-link">
+            Terms of Use / Điều khoản sử dụng
+          </Link>
+          <span className="footer-legal-divider">•</span>
+          <Link to="/privacy" className="footer-legal-link">
+            Privacy Policy / Chính sách bảo mật
+          </Link>
+        </div>
       </div>
     </footer>
   )

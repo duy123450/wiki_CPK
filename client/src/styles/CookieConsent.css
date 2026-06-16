@@ -203,3 +203,16 @@
         font-size: 11.5px;
     }
 }
+
+/* ── Links ── */
+.cookie-consent__link {
+    color: #67e8f9;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    transition: color 0.18s;
+}
+
+.cookie-consent__link:hover {
+    color: #c084fc;
+}
+

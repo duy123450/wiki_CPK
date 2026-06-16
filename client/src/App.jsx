@@ -29,6 +29,7 @@ import NotFoundPage       from './pages/NotFoundPage'
 import AuthPage           from './pages/AuthPage'
 import WelcomePage        from './pages/WelcomePage'
 import ProfilePage        from './pages/ProfilePage'
+import LegalPage          from './pages/LegalPage'
 import Footer             from './components/Footer'
 import Playlist           from './components/Playlist'
 import CookieConsent      from './components/CookieConsent'
@@ -157,6 +158,15 @@ export default function App() {
                   />
                 </ProtectedRoute>
               }
+            />
+
+            <Route
+              path="/terms"
+              element={<LegalPage sidebarCollapsed={sidebarCollapsed} type="TERMS_OF_USE" />}
+            />
+            <Route
+              path="/privacy"
+              element={<LegalPage sidebarCollapsed={sidebarCollapsed} type="PRIVACY_POLICY" />}
             />
 
             <Route
