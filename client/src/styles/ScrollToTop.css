@@ -1,0 +1,95 @@
+/* ── Scroll-to-top floating button ── */
+.scroll-to-top-btn {
+  position: fixed;
+  bottom: 88px;
+  right: 32px;
+  z-index: 500;
+
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  border: 1px solid rgba(192, 132, 252, 0.25);
+  background: rgba(10, 11, 20, 0.75);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  color: var(--accent-purple, #c084fc);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+  outline: none;
+
+  /* Hidden by default */
+  opacity: 0;
+  transform: translateY(16px) scale(0.9);
+  pointer-events: none;
+  transition:
+    opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 0.25s ease,
+    box-shadow 0.25s ease,
+    background 0.25s ease;
+}
+
+/* Visible state */
+.scroll-to-top-btn.visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+/* Hover */
+.scroll-to-top-btn:hover {
+  border-color: rgba(192, 132, 252, 0.6);
+  background: rgba(192, 132, 252, 0.12);
+  box-shadow:
+    0 0 14px rgba(192, 132, 252, 0.35),
+    0 4px 20px rgba(0, 0, 0, 0.4);
+  transform: translateY(-2px) scale(1.05);
+}
+
+/* Active / click */
+.scroll-to-top-btn:active {
+  transform: translateY(0) scale(0.96);
+  box-shadow: 0 0 8px rgba(192, 132, 252, 0.2);
+}
+
+/* Focus ring (a11y) */
+.scroll-to-top-btn:focus-visible {
+  outline: 2px solid var(--accent-purple, #c084fc);
+  outline-offset: 3px;
+}
+
+/* ── Animated glow ring ── */
+.scroll-to-top-ring {
+  position: absolute;
+  inset: -4px;
+  border-radius: 14px;
+  border: 1px solid rgba(192, 132, 252, 0.18);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+  animation: stt-pulse 2.8s ease-in-out infinite;
+}
+
+.scroll-to-top-btn.visible .scroll-to-top-ring {
+  opacity: 1;
+}
+
+@keyframes stt-pulse {
+  0%, 100% { opacity: 0.18; transform: scale(1); }
+  50%       { opacity: 0.05; transform: scale(1.08); }
+}
+
+/* ── Mobile: shift left if sidebar is expanded ── */
+@media (max-width: 768px) {
+  .scroll-to-top-btn {
+    bottom: 80px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+  }
+}
