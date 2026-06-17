@@ -36,6 +36,8 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config
     const status = error.response?.status
+    // Capture before any clearing — true means user had an active session
+    const hadToken = !!getAccessToken()
 
     if (
       status !== 401 ||
@@ -66,7 +68,13 @@ api.interceptors.response.use(
     } catch (refreshError) {
       const refreshStatus = refreshError.response?.status
       if (refreshStatus === 401 || refreshStatus === 403 || !refreshStatus) {
-        redirectToLogin()
+        // Only hard-redirect authenticated users whose session expired.
+        // Unauthenticated visitors (no token) get silent reject — no /auth redirect.
+        if (hadToken) {
+          redirectToLogin()
+        } else {
+          clearAccessToken()
+        }
       }
       return Promise.reject(refreshError)
     }
