@@ -134,12 +134,12 @@ export const getCharacterBySlug = (slug) =>
 
 export const registerUser = (payload) => {
   const validated = validateData(registerRequestSchema, payload, 'Register')
-  return api.post('/auth/register', validated).then((res) => res.data)
+  return api.post('/auth/register', validated, { _skipAuthRefresh: true }).then((res) => res.data)
 }
 
 export const loginUser = (payload) => {
   const validated = validateData(loginSchema, payload, 'Login')
-  return api.post('/auth/login', validated).then((res) => res.data)
+  return api.post('/auth/login', validated, { _skipAuthRefresh: true }).then((res) => res.data)
 }
 
 export const getCurrentUser = () =>

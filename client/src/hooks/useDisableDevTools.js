@@ -136,26 +136,59 @@ export function useDisableDevTools({
 
     // ── 4. Resize Detection ────────────────────────────────────────
     // Docked DevTools shrink innerWidth or innerHeight while outer stays same.
+    // Require 2 consecutive hits to avoid false positives from:
+    //   - Mobile browser chrome (address bar) hiding/showing on scroll
+    //   - Sidebar open/close causing transient layout shifts
+    // Real docked DevTools keep the delta stable; transient changes clear within one tick.
+    let resizeHitCount = 0;
     const checkResize = () => {
       const wDelta = window.outerWidth  - window.innerWidth;
       const hDelta = window.outerHeight - window.innerHeight;
-      if (wDelta > threshold || hDelta > threshold) handleDetected();
+      if (wDelta > threshold || hDelta > threshold) {
+        resizeHitCount++;
+        if (resizeHitCount >= 2) handleDetected();
+      } else {
+        resizeHitCount = 0;
+      }
     };
     resizeRef.current = setInterval(checkResize, 500);
 
-    // ── 5. Getter / toString Trick ─────────────────────────────────
+    // ── 7. Console Suppression ─────────────────────────────────────────────────
+    // Override all console methods to no-ops.
+    // Prevents app logs from leaking info when DevTools is open.
+    // Originals saved for restore on cleanup.
+    // Must happen BEFORE getterDetect so the immediate runGetterCheck call
+    // doesn't reach the real console (which would cause %c / formatting side-effects).
+    if (suppressConsole) {
+      const methods = [
+        'log', 'warn', 'error', 'info', 'debug',
+        'table', 'dir', 'dirxml', 'group', 'groupEnd',
+        'groupCollapsed', 'trace', 'assert', 'count',
+        'countReset', 'time', 'timeEnd', 'timeLog',
+      ];
+      methods.forEach((method) => {
+        if (typeof console[method] === 'function') {
+          origConsoleRef.current[method] = console[method].bind(console);
+          console[method] = () => {};
+        }
+      });
+    }
+
+    // ── 5. Getter / toString Trick ─────────────────────────────────────────────
     // When DevTools is open it eagerly formats objects for display,
     // calling toString(). We override a regex's toString to detect this.
     // We poll every 2s to keep checking — DevTools could open at any time.
+    // NOTE: use plain console.log(regex) — NOT console.log('%c', regex).
+    // The %c specifier forces string conversion regardless of DevTools state
+    // (false-positive). Plain log only formats the object when DevTools is
+    // open and actively rendering the console panel.
     if (getterDetect) {
       const runGetterCheck = () => {
         const regex = /./;
         let triggered = false;
-        regex.toString = () => { triggered = true; return ''; };
-        // Intentional — this log is invisible in suppressed console
-        // but DevTools own formatter still calls toString internally
-        console.log('%c', regex);
-        // Check after microtask queue clears
+        regex.toString = () => { triggered = true; return '/./';};
+        // DevTools calls toString to display the regex; suppressed console won't.
+        console.log(regex);
         Promise.resolve().then(() => {
           if (triggered) handleDetected();
         });
@@ -179,24 +212,6 @@ export function useDisableDevTools({
       timingRef.current = setInterval(runTimingCheck, 1500);
     }
 
-    // ── 7. Console Suppression ─────────────────────────────────────
-    // Override all console methods to no-ops.
-    // Prevents app logs from leaking info when DevTools is open.
-    // Originals saved for restore on cleanup.
-    if (suppressConsole) {
-      const methods = [
-        'log', 'warn', 'error', 'info', 'debug',
-        'table', 'dir', 'dirxml', 'group', 'groupEnd',
-        'groupCollapsed', 'trace', 'assert', 'count',
-        'countReset', 'time', 'timeEnd', 'timeLog',
-      ];
-      methods.forEach((method) => {
-        if (typeof console[method] === 'function') {
-          origConsoleRef.current[method] = console[method].bind(console);
-          console[method] = () => {};
-        }
-      });
-    }
 
     // ── 8. Console.clear Loop ─────────────────────────────────────
     // Wipe console output on interval — even if user bypasses suppression.

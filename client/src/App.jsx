@@ -71,7 +71,7 @@ export default function App() {
           blockSelection={guardEnabled}
           blockDrag={guardEnabled}
           timingDetect={false}
-          getterDetect={false}
+          getterDetect={guardEnabled}
           clearConsoleMs={guardEnabled ? 1000 : 0}
         >
           <ScrollToTop />
