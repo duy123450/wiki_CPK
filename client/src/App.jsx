@@ -30,6 +30,7 @@ import AuthPage           from './pages/AuthPage'
 import WelcomePage        from './pages/WelcomePage'
 import ProfilePage        from './pages/ProfilePage'
 import LegalPage          from './pages/LegalPage'
+import AccessRestrictedPage from './pages/AccessRestrictedPage'
 import Footer             from './components/Footer'
 import Playlist           from './components/Playlist'
 import CookieConsent      from './components/CookieConsent'
@@ -59,130 +60,136 @@ export default function App() {
     // AuthContext.Provider makes auth state explicitly available tree-wide.
     // Eliminates implicit prop-chain coupling flagged as INFERRED edges.
     <AuthContext.Provider value={authState}>
-      {/* DevToolsGuard wraps the entire app tree.
-          Disabled for admins in production — they need DevTools for debugging.
-          Disabled in development via guardEnabled (import.meta.env.PROD=false). */}
-      <DevToolsGuard
-        enabled={guardEnabled}
-        suppressConsole={guardEnabled}
-        blockSelection={guardEnabled}
-        blockDrag={guardEnabled}
-        timingDetect={guardEnabled}
-        getterDetect={guardEnabled}
-        clearConsoleMs={guardEnabled ? 1000 : 0}
-      >
       <Router>
-        <ScrollToTop />
-        <>
-          {dragonCursorEnabled && <DragonCursor />}
-
-          {/*
-            Sidebar reads currentUser + onLogout from AuthContext internally.
-            Only UI-concern props passed here — collapseChange, cursor toggle.
-          */}
-          <Sidebar
-            onCollapseChange={setSidebarCollapsed}
-            onDragonCursorToggle={() => setDragonCursorEnabled((v) => !v)}
-            dragonCursorEnabled={dragonCursorEnabled}
-          />
-
-          <Routes>
-            <Route
-              path="/"
-              element={<HeroPage sidebarCollapsed={sidebarCollapsed} />}
-            />
-            <Route
-              path="/wiki/chou-kaguya-hime-overview"
-              element={<MovieOverviewPage sidebarCollapsed={sidebarCollapsed} />}
-            />
-            <Route
-              path="/wiki/characters"
-              element={<CharactersPage sidebarCollapsed={sidebarCollapsed} />}
-            />
-            <Route
-              path="/wiki/characters/:slug"
-              element={<CharacterPage sidebarCollapsed={sidebarCollapsed} />}
-            />
-            <Route
-              path="/wiki/soundtrack"
-              element={<SoundtracksPage sidebarCollapsed={sidebarCollapsed} />}
-            />
-            <Route
-              path="/wiki/soundtrack/:slug"
-              element={<SoundtrackPage sidebarCollapsed={sidebarCollapsed} />}
-            />
+        {/* DevToolsGuard wraps the entire app tree inside Router to allow pathname checks.
+            Disabled for admins in production — they need DevTools for debugging.
+            Disabled in development via guardEnabled (import.meta.env.PROD=false). */}
+        <DevToolsGuard
+          enabled={guardEnabled}
+          redirectUrl="/access-restricted"
+          suppressConsole={guardEnabled}
+          blockSelection={guardEnabled}
+          blockDrag={guardEnabled}
+          timingDetect={false}
+          getterDetect={false}
+          clearConsoleMs={guardEnabled ? 1000 : 0}
+        >
+          <ScrollToTop />
+          <>
+            {dragonCursorEnabled && <DragonCursor />}
 
             {/*
-              AuthPage still receives currentUser for its own redirect logic
-              and the auth callback handlers as explicit props.
+              Sidebar reads currentUser + onLogout from AuthContext internally.
+              Only UI-concern props passed here — collapseChange, cursor toggle.
             */}
-            <Route
-              path="/auth"
-              element={
-                <AuthPage
-                  sidebarCollapsed={sidebarCollapsed}
-                  currentUser={authUser}
-                  onAuthSuccess={authState.handleAuthSuccess}
-                  onAvatarUpdate={authState.handleAvatarUpdate}
-                  onLogout={authState.handleLogout}
-                />
-              }
+            <Sidebar
+              onCollapseChange={setSidebarCollapsed}
+              onDragonCursorToggle={() => setDragonCursorEnabled((v) => !v)}
+              dragonCursorEnabled={dragonCursorEnabled}
             />
 
-            <Route
-              path="/welcome"
-              element={
-                <WelcomePage
-                  sidebarCollapsed={sidebarCollapsed}
-                  currentUser={authUser}
-                  onAvatarUpdate={authState.handleAvatarUpdate}
-                  onLogout={authState.handleLogout}
-                />
-              }
-            />
+            <Routes>
+              <Route
+                path="/"
+                element={<HeroPage sidebarCollapsed={sidebarCollapsed} />}
+              />
+              <Route
+                path="/wiki/chou-kaguya-hime-overview"
+                element={<MovieOverviewPage sidebarCollapsed={sidebarCollapsed} />}
+              />
+              <Route
+                path="/wiki/characters"
+                element={<CharactersPage sidebarCollapsed={sidebarCollapsed} />}
+              />
+              <Route
+                path="/wiki/characters/:slug"
+                element={<CharacterPage sidebarCollapsed={sidebarCollapsed} />}
+              />
+              <Route
+                path="/wiki/soundtrack"
+                element={<SoundtracksPage sidebarCollapsed={sidebarCollapsed} />}
+              />
+              <Route
+                path="/wiki/soundtrack/:slug"
+                element={<SoundtrackPage sidebarCollapsed={sidebarCollapsed} />}
+              />
 
-            {/*
-              ProtectedRoute reads authUser from AuthContext — no currentUser prop.
-              requiredRole=null means any authenticated user can access.
-            */}
-            <Route
-              path="/profile"
-              element={
-                <ProtectedRoute requiredRole={null}>
-                  <ProfilePage
+              {/*
+                AuthPage still receives currentUser for its own redirect logic
+                and the auth callback handlers as explicit props.
+              */}
+              <Route
+                path="/auth"
+                element={
+                  <AuthPage
                     sidebarCollapsed={sidebarCollapsed}
                     currentUser={authUser}
-                    onProfileUpdate={authState.handleProfileUpdate}
+                    onAuthSuccess={authState.handleAuthSuccess}
                     onAvatarUpdate={authState.handleAvatarUpdate}
                     onLogout={authState.handleLogout}
                   />
-                </ProtectedRoute>
-              }
-            />
+                }
+              />
 
-            <Route
-              path="/terms"
-              element={<LegalPage sidebarCollapsed={sidebarCollapsed} type="TERMS_OF_USE" />}
-            />
-            <Route
-              path="/privacy"
-              element={<LegalPage sidebarCollapsed={sidebarCollapsed} type="PRIVACY_POLICY" />}
-            />
+              <Route
+                path="/welcome"
+                element={
+                  <WelcomePage
+                    sidebarCollapsed={sidebarCollapsed}
+                    currentUser={authUser}
+                    onAvatarUpdate={authState.handleAvatarUpdate}
+                    onLogout={authState.handleLogout}
+                  />
+                }
+              />
 
-            <Route
-              path="*"
-              element={<NotFoundPage sidebarCollapsed={sidebarCollapsed} />}
-            />
-          </Routes>
+              {/*
+                ProtectedRoute reads authUser from AuthContext — no currentUser prop.
+                requiredRole=null means any authenticated user can access.
+              */}
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute requiredRole={null}>
+                    <ProfilePage
+                      sidebarCollapsed={sidebarCollapsed}
+                      currentUser={authUser}
+                      onProfileUpdate={authState.handleProfileUpdate}
+                      onAvatarUpdate={authState.handleAvatarUpdate}
+                      onLogout={authState.handleLogout}
+                    />
+                  </ProtectedRoute>
+                }
+              />
 
-          <Footer sidebarCollapsed={sidebarCollapsed} />
-          <Playlist />
-          <CookieConsent />
-          <Analytics />
-          <SpeedInsights />
-        </>
+              <Route
+                path="/access-restricted"
+                element={<AccessRestrictedPage sidebarCollapsed={sidebarCollapsed} />}
+              />
+
+              <Route
+                path="/terms"
+                element={<LegalPage sidebarCollapsed={sidebarCollapsed} type="TERMS_OF_USE" />}
+              />
+              <Route
+                path="/privacy"
+                element={<LegalPage sidebarCollapsed={sidebarCollapsed} type="PRIVACY_POLICY" />}
+              />
+
+              <Route
+                path="*"
+                element={<NotFoundPage sidebarCollapsed={sidebarCollapsed} />}
+              />
+            </Routes>
+
+            <Footer sidebarCollapsed={sidebarCollapsed} />
+            <Playlist />
+            <CookieConsent />
+            <Analytics />
+            <SpeedInsights />
+          </>
+        </DevToolsGuard>
       </Router>
-      </DevToolsGuard>
     </AuthContext.Provider>
   )
 }

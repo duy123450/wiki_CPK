@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 import { useDisableDevTools } from '../hooks/useDisableDevTools';
 
 /**
@@ -53,17 +54,20 @@ export function DevToolsGuard({
   timingDetect      = true,
   getterDetect      = true,
 }) {
+  const location = useLocation();
+  const isBypassed = location.pathname === '/auth' || location.pathname === '/access-restricted';
+
   useDisableDevTools({
-    enabled,
+    enabled: enabled && !isBypassed,
     threshold,
     redirectUrl,
     debuggerMs,
-    suppressConsole,
-    blockSelection,
-    blockDrag,
-    clearConsoleMs,
-    timingDetect,
-    getterDetect,
+    suppressConsole: suppressConsole && !isBypassed,
+    blockSelection: blockSelection && !isBypassed,
+    blockDrag: blockDrag && !isBypassed,
+    clearConsoleMs: isBypassed ? 0 : clearConsoleMs,
+    timingDetect: timingDetect && !isBypassed,
+    getterDetect: getterDetect && !isBypassed,
   });
 
   // No DOM wrapper — renders children unchanged
@@ -71,3 +75,4 @@ export function DevToolsGuard({
 }
 
 export default DevToolsGuard;
+
