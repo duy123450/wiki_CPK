@@ -1,5 +1,6 @@
 import { useCallback } from 'react'
 import { useAppDispatch } from '../store/hooks'
+import { API_BASE_URL } from '../services/api'
 import {
     clearAllSoundtracksCache,
     clearSoundtrackCache,
@@ -27,7 +28,8 @@ import {
  *   - refreshAllCharacters(): Refresh all characters
  *   - refreshCharacter(slug): Refresh a single character
  *   - refreshCharacterMovie(): Refresh character movie details
- *   - refreshAll(): Refresh everything
+ *   - clearServerCache(): Clear Redis cache on server (admin only)
+ *   - refreshAll(): Refresh everything locally
  */
 export function useRefreshData() {
     const dispatch = useAppDispatch()
@@ -60,10 +62,30 @@ export function useRefreshData() {
         dispatch(fetchCharacterMovie())
     }, [dispatch])
 
-    const refreshAll = useCallback(() => {
+    const clearServerCache = useCallback(async () => {
+        try {
+            // Clear Redis cache on server (admin only)
+            await fetch(`${API_BASE_URL}/wiki/soundtrack/cache/clear`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                },
+            })
+            console.log('Server-side Redis cache cleared')
+        } catch (err) {
+            console.error('Failed to clear server cache:', err)
+        }
+    }, [])
+
+    const refreshAll = useCallback(async () => {
+        // Clear local Redux cache
         dispatch(clearSoundtrackCacheAll())
         dispatch(clearAllCharacterCache())
-    }, [dispatch])
+
+        // Clear Redis cache on server (if admin)
+        await clearServerCache()
+    }, [dispatch, clearServerCache])
 
     return {
         refreshAllSoundtracks,
@@ -72,6 +94,7 @@ export function useRefreshData() {
         refreshAllCharacters,
         refreshCharacter,
         refreshCharacterMovie,
+        clearServerCache,
         refreshAll,
     }
 }

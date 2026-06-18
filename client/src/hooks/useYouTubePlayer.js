@@ -103,6 +103,8 @@ export default function useYouTubePlayer(tracks, movie) {
 
   const startProgressTick = useCallback(() => {
     clearInterval(progressInterval.current)
+    let lastCheckTime = Date.now()
+
     progressInterval.current = setInterval(() => {
       const player = ytPlayerRef.current
       if (!ytReadyRef.current || !player || isSeekingRef.current) return
@@ -116,16 +118,46 @@ export default function useYouTubePlayer(tracks, movie) {
       } catch {
         return
       }
+
+      // ── Detect stuck/frozen playback ────────────────────────────────────
+      // If player state is PLAYING but time hasn't changed in 2+ seconds,
+      // the playback is stuck — try to recover
+      const now = Date.now()
+      const timeSinceLastCheck = (now - lastCheckTime) / 1000
+      lastCheckTime = now
+
+      try {
+        const playerState = player.getPlayerState()
+        if (playerState === window.YT.PlayerState.PLAYING && isPlaying) {
+          // Should be advancing, check if we're actually progressing
+          if (timeSinceLastCheck > 1.5) {
+            // We haven't received new time data in a while
+            // This might indicate a stuck player
+            console.warn(
+              'Player appears stuck: no time update for',
+              timeSinceLastCheck.toFixed(1),
+              'seconds'
+            )
+          }
+        }
+      } catch (e) {
+        // Ignore errors checking player state
+      }
+
       const elapsed = cur - track.startTime
       const duration = track.endTime - track.startTime
       setProgress(Math.min(100, Math.max(0, (elapsed / duration) * 100)))
       setCurrentTime(Math.max(0, Math.round(elapsed * 100) / 100))
+
+      // When track ends, trigger auto-advance (with 0.5s buffer)
       if (cur >= track.endTime - 0.5) {
         clearInterval(progressInterval.current)
+        // Ensure we don't trigger multiple auto-advances for the same track
+        setIsPlaying(false)
         handleAutoAdvance()
       }
     }, 100)
-  }, [])
+  }, [handleAutoAdvance, isPlaying])
 
   const handleAutoAdvance = useCallback(async () => {
     if (advanceInFlightRef.current) return
@@ -148,22 +180,84 @@ export default function useYouTubePlayer(tracks, movie) {
         mode,
         movieId: movie._id,
       })
+
+      if (!data?.track) {
+        console.warn('Server returned no track data during auto-advance')
+        handleAutoAdvanceFallback(mode, idx, tracks.length)
+        return
+      }
+
       const nextIdx = resolveTrackIndex(data.track._id)
-      if (nextIdx !== -1) playTrackAtIndex(nextIdx, /* pushHistory */ true)
+      if (nextIdx !== -1) {
+        playTrackAtIndex(nextIdx, /* pushHistory */ true)
+      } else {
+        // Track not found in local array — fallback to sequential navigation
+        console.warn(
+          'Next track not found in local array. Track ID:',
+          data.track._id,
+          'Falling back to sequential mode.'
+        )
+        handleAutoAdvanceFallback(mode, idx, tracks.length)
+      }
     } catch (err) {
       console.error('Auto-advance failed:', err)
+      // On error, fallback to sequential navigation
+      handleAutoAdvanceFallback(mode, idx, tracks.length)
     } finally {
       advanceInFlightRef.current = false
     }
   }, [])
+
+  // Fallback handler when the server response can't be resolved or API fails
+  const handleAutoAdvanceFallback = useCallback((mode, currentIdx, tracksLength) => {
+    if (!tracksLength) return
+    let nextIdx
+
+    if (mode === 'infinite') {
+      // Loop mode: play current track again (or first if at end)
+      nextIdx = currentIdx < tracksLength ? currentIdx : 0
+    } else if (mode === 'shuffle') {
+      // Shuffle mode: pick a random track
+      nextIdx = Math.floor(Math.random() * tracksLength)
+    } else {
+      // Sequential: play next track (loop at end)
+      nextIdx = (currentIdx + 1) % tracksLength
+    }
+
+    playTrackAtIndex(nextIdx, /* pushHistory */ true)
+  }, [playTrackAtIndex])
 
   // pushHistory: whether to push this play onto the shuffle history stack.
   // When navigating *back* through history we pass false so we don't corrupt it.
   const playTrackAtIndex = useCallback(
     (idx, pushHistory = true) => {
       const tracks = tracksRef.current
+
+      // Validate index bounds
+      if (idx < 0 || idx >= tracks.length) {
+        console.error(
+          `Invalid track index: ${idx}. Valid range: 0-${tracks.length - 1}`
+        )
+        return
+      }
+
       const track = tracks[idx]
-      if (!track) return
+      if (!track) {
+        console.error(`Track at index ${idx} is null or undefined`)
+        return
+      }
+
+      // Validate track has required YouTube data
+      if (!track.youtubeId || track.startTime === undefined || track.endTime === undefined) {
+        console.error(`Track at index ${idx} missing YouTube data:`, {
+          youtubeId: track.youtubeId,
+          startTime: track.startTime,
+          endTime: track.endTime,
+          title: track.title,
+        })
+        return
+      }
+
       clearInterval(progressInterval.current)
       advanceInFlightRef.current = false
       currentIdxRef.current = idx
@@ -184,13 +278,20 @@ export default function useYouTubePlayer(tracks, movie) {
       }
 
       if (ytReadyRef.current && ytPlayerRef.current) {
-        ytPlayerRef.current.loadVideoById({
-          videoId: track.youtubeId,
-          startSeconds: track.startTime,
-          endSeconds: track.endTime,
-        })
-        setIsPlaying(true)
-        startProgressTick()
+        try {
+          ytPlayerRef.current.loadVideoById({
+            videoId: track.youtubeId,
+            startSeconds: track.startTime,
+            endSeconds: track.endTime,
+          })
+          setIsPlaying(true)
+          startProgressTick()
+        } catch (err) {
+          console.error('Error loading video:', err)
+          // Try to continue anyway
+          setIsPlaying(true)
+          startProgressTick()
+        }
       }
     },
     [startProgressTick]
@@ -226,16 +327,28 @@ export default function useYouTubePlayer(tracks, movie) {
             ytPlayerRef.current?.setVolume(volumeRef.current)
           },
           onStateChange: (e) => {
-            if (e.data === window.YT.PlayerState.PLAYING) {
+            const state = e.data
+            if (state === window.YT.PlayerState.PLAYING) {
               setIsPlaying(true)
               startProgressTick()
-            } else if (e.data === window.YT.PlayerState.PAUSED) {
+            } else if (state === window.YT.PlayerState.PAUSED) {
               setIsPlaying(false)
               clearInterval(progressInterval.current)
-            } else if (e.data === window.YT.PlayerState.ENDED) {
+            } else if (state === window.YT.PlayerState.ENDED) {
+              // Track naturally ended — trigger auto-advance
               clearInterval(progressInterval.current)
+              setIsPlaying(false)
               handleAutoAdvance()
+            } else if (state === window.YT.PlayerState.UNSTARTED || state === window.YT.PlayerState.BUFFERING) {
+              // Video is loading/buffering — this is normal, let it continue
+            } else if (state === window.YT.PlayerState.CUED) {
+              // Video is cued but not playing — this is also normal
             }
+          },
+          onError: (e) => {
+            console.error('YouTube Player Error:', e.data)
+            // On error, try to auto-advance to next track
+            handleAutoAdvance()
           },
         },
       })
@@ -322,19 +435,40 @@ export default function useYouTubePlayer(tracks, movie) {
       // No cached future — fetch a fresh random track.
       try {
         const track = tracks[currentIdxRef.current]
+        if (!track) return
         const data = await fetchNextTrack({
           currentTrackId: track._id,
           mode: 'shuffle',
           movieId: movie._id,
         })
+
+        if (!data?.track) {
+          console.warn('Server returned no track during shuffle next')
+          // Fallback: pick random track locally
+          const randomIdx = Math.floor(Math.random() * tracks.length)
+          playTrackAtIndex(randomIdx, /* pushHistory */ true)
+          return
+        }
+
         const nextIdx = resolveTrackIndex(data.track._id)
-        if (nextIdx !== -1) playTrackAtIndex(nextIdx, /* pushHistory */ true)
+        if (nextIdx !== -1) {
+          playTrackAtIndex(nextIdx, /* pushHistory */ true)
+        } else {
+          console.warn('Shuffle next track not found. Picking random local track.')
+          // Fallback: pick random track locally
+          const randomIdx = Math.floor(Math.random() * tracks.length)
+          playTrackAtIndex(randomIdx, /* pushHistory */ true)
+        }
       } catch (err) {
         console.error('Shuffle next failed:', err)
+        // Fallback: just pick a random track locally
+        const randomIdx = Math.floor(Math.random() * tracks.length)
+        playTrackAtIndex(randomIdx, /* pushHistory */ true)
       }
       return
     }
 
+    // Sequential: just go to next track
     playTrackAtIndex((currentIdxRef.current + 1) % tracks.length)
   }, [playTrackAtIndex])
 
@@ -367,8 +501,19 @@ export default function useYouTubePlayer(tracks, movie) {
       if (cursor > 0) {
         // Go back one step in history.
         const prevIdx = history[cursor - 1]
-        shuffleHistoryCursorRef.current = cursor - 1
-        playTrackAtIndex(prevIdx, /* pushHistory */ false)
+        if (prevIdx >= 0 && prevIdx < tracks.length) {
+          shuffleHistoryCursorRef.current = cursor - 1
+          playTrackAtIndex(prevIdx, /* pushHistory */ false)
+        } else {
+          console.warn('Invalid history index:', prevIdx)
+          // Fallback: restart current track
+          const track = tracks[currentIdxRef.current]
+          if (track && ytReadyRef.current && ytPlayerRef.current) {
+            ytPlayerRef.current.seekTo(track.startTime, true)
+            setCurrentTime(0)
+            setProgress(0)
+          }
+        }
       } else {
         // Nothing further back — just restart the current track.
         const track = tracks[currentIdxRef.current]
@@ -382,9 +527,12 @@ export default function useYouTubePlayer(tracks, movie) {
     }
 
     // ── Sequential / loop mode ───────────────────────────────────────────────
-    playTrackAtIndex(
-      (currentIdxRef.current - 1 + tracks.length) % tracks.length
-    )
+    const prevIdx = (currentIdxRef.current - 1 + tracks.length) % tracks.length
+    if (prevIdx >= 0 && prevIdx < tracks.length) {
+      playTrackAtIndex(prevIdx)
+    } else {
+      console.warn('Invalid prev index calculated:', prevIdx, 'tracks.length:', tracks.length)
+    }
   }, [playTrackAtIndex])
 
   const handleSeekChange = useCallback((e) => {
