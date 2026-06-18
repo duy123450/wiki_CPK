@@ -166,6 +166,55 @@ export default function useYouTubePlayer(tracks, movie) {
     }, 100)
   }, [isPlaying])
 
+  const handleAutoAdvance = useCallback(async () => {
+    if (advanceInFlightRef.current) return
+    const tracks = tracksRef.current
+    const movie = movieRef.current
+    const idx = currentIdxRef.current
+    if (!tracks.length || !movie) return
+    const track = tracks[idx]
+    if (!track) return
+    const mode = isLoopRef.current
+      ? 'infinite'
+      : isShuffleRef.current
+        ? 'shuffle'
+        : 'sequential'
+
+    advanceInFlightRef.current = true
+    try {
+      const data = await fetchNextTrack({
+        currentTrackId: track._id,
+        mode,
+        movieId: movie._id,
+      })
+
+      if (!data?.track) {
+        console.warn('Server returned no track data during auto-advance')
+        handleAutoAdvanceFallback(mode, idx, tracks.length)
+        return
+      }
+
+      const nextIdx = resolveTrackIndex(data.track._id)
+      if (nextIdx !== -1) {
+        playTrackAtIndexRef.current?.(nextIdx, /* pushHistory */ true)
+      } else {
+        // Track not found in local array — fallback to sequential navigation
+        console.warn(
+          'Next track not found in local array. Track ID:',
+          data.track._id,
+          'Falling back to sequential mode.'
+        )
+        handleAutoAdvanceFallback(mode, idx, tracks.length)
+      }
+    } catch (err) {
+      console.error('Auto-advance failed:', err)
+      // On error, fallback to sequential navigation
+      handleAutoAdvanceFallback(mode, idx, tracks.length)
+    } finally {
+      advanceInFlightRef.current = false
+    }
+  }, [])
+
   // Fallback handler when the server response can't be resolved or API fails
   const handleAutoAdvanceFallback = useCallback((mode, currentIdx, tracksLength) => {
     if (!tracksLength) return
