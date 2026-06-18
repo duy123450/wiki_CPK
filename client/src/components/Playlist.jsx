@@ -195,6 +195,19 @@ export default function Playlist() {
   const [isExpanded, setIsExpanded] = useState(false)
   const [activeTab, setActiveTab] = useState('cover')
 
+  // ── Filter tracks for normal users (hide tracks 16-27) ───────────────────
+  // Normal users can only access tracks with trackNumber < 16 or > 27.
+  // This is also enforced on the server-side in multiple places:
+  // - fetchTracksByMovie: filters the API response
+  // - fetchNextTrack: validates track access before returning
+  // - handleAutoAdvance: only allows transitions to accessible tracks
+  // Both client and server filtering ensures no bypass is possible.
+  const accessibleTracks = useMemo(() => {
+    if (accessTier === 'admin') return tracks
+    // Normal users: only see tracks with trackNumber < 16 or > 27
+    return tracks.filter((t) => t.trackNumber < 16 || t.trackNumber > 27)
+  }, [tracks, accessTier])
+
   // Kick off fetches on mount (thunks bail early if data already cached)
   useEffect(() => {
     dispatch(fetchSoundtrackMovie())
@@ -248,9 +261,9 @@ export default function Playlist() {
     handleLoopToggle,
     handleVolumeChange,
     isSeekingRef,
-  } = useYouTubePlayer(tracks, movie)
+  } = useYouTubePlayer(accessibleTracks, movie)
 
-  const currentTrack = tracks[currentIdx]
+  const currentTrack = accessibleTracks[currentIdx]
   const duration = currentTrack
     ? currentTrack.endTime - currentTrack.startTime
     : 0
@@ -539,10 +552,10 @@ export default function Playlist() {
             {/* ─── TRACK LIST ─── */}
             <div className="pl-panel-tracks">
               <div className="pl-tracks-header">
-                <span>Tracks ({tracks.length})</span>
+                <span>Tracks ({accessibleTracks.length})</span>
               </div>
               <div className="pl-track-list">
-                {tracks.map((t, i) => (
+                {accessibleTracks.map((t, i) => (
                   <div
                     key={t._id}
                     className={`pl-track-row ${i === currentIdx ? 'pl-track-row--active' : ''}`}
