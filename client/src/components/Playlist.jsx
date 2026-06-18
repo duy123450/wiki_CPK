@@ -188,6 +188,9 @@ export default function Playlist() {
   const allStatus = useAppSelector((s) => s.soundtracks.allStatus)
   const allError = useAppSelector((s) => s.soundtracks.allError)
   const movieStatus = useAppSelector((s) => s.soundtracks.movieStatus)
+  const authUser = useAppSelector((s) => s.auth.user)
+  const isRestoringSession = useAppSelector((s) => s.auth.isRestoringSession)
+  const accessTier = authUser?.role === 'admin' ? 'admin' : 'public'
 
   const [isExpanded, setIsExpanded] = useState(false)
   const [activeTab, setActiveTab] = useState('cover')
@@ -198,8 +201,10 @@ export default function Playlist() {
   }, [dispatch])
 
   useEffect(() => {
-    if (movie?._id) dispatch(fetchAllSoundtracks(movie._id))
-  }, [dispatch, movie])
+    if (movie?._id && !isRestoringSession) {
+      dispatch(fetchAllSoundtracks({ movieId: movie._id, accessTier }))
+    }
+  }, [dispatch, movie?._id, accessTier, isRestoringSession])
 
   useEffect(() => {
     if (!isExpanded) return undefined

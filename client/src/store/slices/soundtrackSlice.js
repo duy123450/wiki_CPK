@@ -18,13 +18,21 @@ export const fetchSoundtrack = createAsyncThunk(
 
 export const fetchAllSoundtracks = createAsyncThunk(
   'soundtracks/fetchAll',
-  async (movieId, { rejectWithValue, getState }) => {
-    const cached = getState().soundtracks.all
-    if (cached.length > 0) return cached
+  async (arg, { rejectWithValue, getState }) => {
+    const movieId = typeof arg === 'object' ? arg.movieId : arg
+    const accessTier = typeof arg === 'object' ? arg.accessTier : 'public'
+    const state = getState().soundtracks
+    if (state.all.length > 0 && state.allAccessTier === accessTier) {
+      return { tracks: state.all, accessTier }
+    }
+
     try {
       const data = await fetchSoundtracks(movieId)
       // Handle both array (after validation normalization) and {tracks} format
-      return Array.isArray(data) ? data : data.tracks || []
+      return {
+        tracks: Array.isArray(data) ? data : data.tracks || [],
+        accessTier,
+      }
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || err.message)
     }
@@ -52,6 +60,7 @@ const initialState = {
   all: [],
   allStatus: 'idle',
   allError: null,
+  allAccessTier: null,
   movie: null,
   movieStatus: 'idle',
 }
@@ -82,7 +91,8 @@ const soundtrackSlice = createSlice({
       })
       .addCase(fetchAllSoundtracks.fulfilled, (state, action) => {
         state.allStatus = 'succeeded'
-        state.all = action.payload
+        state.all = action.payload.tracks
+        state.allAccessTier = action.payload.accessTier
       })
       .addCase(fetchAllSoundtracks.rejected, (state, action) => {
         state.allStatus = 'failed'

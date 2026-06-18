@@ -7,6 +7,13 @@ const PUBLIC_TRACK_LIMIT = 15
 const isPrivilegedUser = (user) =>
   process.env.NODE_ENV === 'development' || (user && user.role === ROLES.ADMIN)
 
+const publicTrackFilter = {
+  $or: [{ trackNumber: { $lt: 16 } }, { trackNumber: { $gt: 27 } }],
+}
+
+const buildAccessibleTrackFilter = (user) =>
+  isPrivilegedUser(user) ? {} : publicTrackFilter
+
 const normalizeMovie = (movie) => {
   if (!movie || !movie.title) return null
   return {
@@ -50,9 +57,9 @@ const fetchTracksByMovie = async (movieId, user) => {
   const safeMovieId = String(movieId)
   const privileged = isPrivilegedUser(user)
 
-  const query = Soundtrack.find({ 
+  const query = Soundtrack.find({
     movie: safeMovieId,
-    $or: [{ trackNumber: { $lt: 16 } }, { trackNumber: { $gt: 27 } }]
+    ...buildAccessibleTrackFilter(user),
   })
     .populate('movie', 'title')
     .sort({ trackNumber: 1 })
@@ -68,9 +75,9 @@ const fetchTracksByMovie = async (movieId, user) => {
 const assertTrackWithinBoundary = async (track, movieId, user) => {
   if (isPrivilegedUser(user)) return
 
-  const allowedIds = await Soundtrack.find({ 
+  const allowedIds = await Soundtrack.find({
     movie: String(movieId),
-    $or: [{ trackNumber: { $lt: 16 } }, { trackNumber: { $gt: 27 } }]
+    ...publicTrackFilter,
   })
     .sort({ trackNumber: 1 })
     .limit(PUBLIC_TRACK_LIMIT)
@@ -109,9 +116,9 @@ const getNextTrackLogic = async (params, user) => {
     return { mode, track: formatTrack(currentTrack), restart: true }
   }
 
-  const totalTracks = await Soundtrack.countDocuments({ 
+  const totalTracks = await Soundtrack.countDocuments({
     movie: movieId,
-    $or: [{ trackNumber: { $lt: 16 } }, { trackNumber: { $gt: 27 } }]
+    ...buildAccessibleTrackFilter(user),
   })
   if (totalTracks === 1) {
     return { mode, track: formatTrack(currentTrack), restart: true }
@@ -119,10 +126,10 @@ const getNextTrackLogic = async (params, user) => {
 
   if (mode === 'shuffle') {
     const privileged = isPrivilegedUser(user)
-    const matchStage = { 
-      movie: currentTrack.movie?._id ?? safeMovieId, 
+    const matchStage = {
+      movie: currentTrack.movie?._id ?? safeMovieId,
       _id: { $ne: currentTrack._id },
-      $or: [{ trackNumber: { $lt: 16 } }, { trackNumber: { $gt: 27 } }]
+      ...buildAccessibleTrackFilter(user),
     }
 
     const pipeline = privileged
@@ -148,13 +155,13 @@ const getNextTrackLogic = async (params, user) => {
     let nextTrack = await Soundtrack.findOne({
       movie: movieId,
       trackNumber: { $gt: currentTrack.trackNumber },
-      $or: [{ trackNumber: { $lt: 16 } }, { trackNumber: { $gt: 27 } }]
+      ...buildAccessibleTrackFilter(user),
     }).sort({ trackNumber: 1 }).populate('movie', 'title')
 
     if (!nextTrack) {
-      nextTrack = await Soundtrack.findOne({ 
+      nextTrack = await Soundtrack.findOne({
         movie: movieId,
-        $or: [{ trackNumber: { $lt: 16 } }, { trackNumber: { $gt: 27 } }]
+        ...buildAccessibleTrackFilter(user),
       })
         .populate('movie', 'title')
         .sort({ trackNumber: 1 })
@@ -175,9 +182,9 @@ const getNextTrackLogic = async (params, user) => {
 }
 
 const fetchTrackBySlug = async (slug, user) => {
-  let track = await Soundtrack.findOne({ 
+  let track = await Soundtrack.findOne({
     slug,
-    $or: [{ trackNumber: { $lt: 16 } }, { trackNumber: { $gt: 27 } }]
+    ...buildAccessibleTrackFilter(user),
   }).populate('movie', 'title')
 
   if (!track) {
@@ -185,7 +192,7 @@ const fetchTrackBySlug = async (slug, user) => {
     const titlePattern = escapedSlug.replace(/-/g, '[\\s\\-]')
     track = await Soundtrack.findOne({
       title: { $regex: new RegExp(`^${titlePattern}$`, 'i') },
-      $or: [{ trackNumber: { $lt: 16 } }, { trackNumber: { $gt: 27 } }]
+      ...buildAccessibleTrackFilter(user),
     }).populate('movie', 'title')
   }
 
@@ -197,7 +204,7 @@ const fetchTrackBySlug = async (slug, user) => {
     const ordinal = await Soundtrack.countDocuments({
       movie: track.movie?._id ?? track.movie,
       trackNumber: { $lte: track.trackNumber },
-      $or: [{ trackNumber: { $lt: 16 } }, { trackNumber: { $gt: 27 } }]
+      ...publicTrackFilter,
     })
 
     if (ordinal > PUBLIC_TRACK_LIMIT) {
