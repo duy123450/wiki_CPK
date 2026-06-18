@@ -5,8 +5,8 @@ const isProd = envConfig.NODE_ENV === 'production'
 
 const refreshCookieOptions = {
   httpOnly: true,
-  secure: true,
-  sameSite: 'lax',
+  secure: isProd,
+  sameSite: isProd ? 'none' : 'lax',
   maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
   path: '/api/v1/wiki/auth',
 }
