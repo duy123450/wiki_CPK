@@ -53,6 +53,19 @@ const characterSlice = createSlice({
       delete state.status[slug]
       delete state.error[slug]
     },
+    clearMovieCache(state) {
+      state.movie = null
+      state.movieStatus = 'idle'
+      state.movieError = null
+    },
+    clearAllCharacterCache(state) {
+      state.bySlug = {}
+      state.status = {}
+      state.error = {}
+      state.movie = null
+      state.movieStatus = 'idle'
+      state.movieError = null
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -88,5 +101,5 @@ const characterSlice = createSlice({
   },
 })
 
-export const { clearCharacterCache } = characterSlice.actions
+export const { clearCharacterCache, clearMovieCache, clearAllCharacterCache } = characterSlice.actions
 export default characterSlice.reducer

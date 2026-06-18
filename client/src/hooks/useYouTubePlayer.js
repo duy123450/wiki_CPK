@@ -4,13 +4,37 @@ import { fetchNextTrack } from '../services/api'
 import { loadYouTubeAPI } from '../utils/youtubeUtils'
 
 export default function useYouTubePlayer(tracks, movie) {
+  // Persist shuffle/loop state in localStorage to survive hook re-initialization
+  const SHUFFLE_KEY = 'yt-player-shuffle'
+  const LOOP_KEY = 'yt-player-loop'
+  const VOLUME_KEY = 'yt-player-volume'
+
   const [currentIdx, setCurrentIdx] = useState(0)
   const [isPlaying, setIsPlaying] = useState(false)
-  const [isShuffle, setIsShuffle] = useState(false)
-  const [isLoop, setIsLoop] = useState(false)
+  const [isShuffle, setIsShuffle] = useState(() => {
+    try {
+      return localStorage.getItem(SHUFFLE_KEY) === 'true'
+    } catch {
+      return false
+    }
+  })
+  const [isLoop, setIsLoop] = useState(() => {
+    try {
+      return localStorage.getItem(LOOP_KEY) === 'true'
+    } catch {
+      return false
+    }
+  })
   const [progress, setProgress] = useState(0)
   const [currentTime, setCurrentTime] = useState(0)
-  const [volume, setVolume] = useState(70)
+  const [volume, setVolume] = useState(() => {
+    try {
+      const stored = localStorage.getItem(VOLUME_KEY)
+      return stored ? parseFloat(stored) : 70
+    } catch {
+      return 70
+    }
+  })
 
   const ytPlayerRef = useRef(null)
   const ytReadyRef = useRef(false)
@@ -47,7 +71,29 @@ export default function useYouTubePlayer(tracks, movie) {
   }, [isShuffle])
   useEffect(() => {
     volumeRef.current = volume
+    try {
+      localStorage.setItem(VOLUME_KEY, volume.toString())
+    } catch {
+      /**/
+    }
   }, [volume])
+
+  // ── Persist shuffle and loop modes to localStorage ────────────────────────
+  useEffect(() => {
+    try {
+      localStorage.setItem(SHUFFLE_KEY, isShuffle.toString())
+    } catch {
+      /**/
+    }
+  }, [isShuffle])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(LOOP_KEY, isLoop.toString())
+    } catch {
+      /**/
+    }
+  }, [isLoop])
 
   function resolveTrackIndex(trackId) {
     return tracksRef.current.findIndex(

@@ -68,7 +68,32 @@ const initialState = {
 const soundtrackSlice = createSlice({
   name: 'soundtracks',
   initialState,
-  reducers: {},
+  reducers: {
+    clearAllSoundtracksCache(state) {
+      state.all = []
+      state.allStatus = 'idle'
+      state.allError = null
+    },
+    clearSoundtrackCache(state, action) {
+      delete state.bySlug[action.payload]
+      delete state.status[action.payload]
+      delete state.error[action.payload]
+    },
+    clearMovieCache(state) {
+      state.movie = null
+      state.movieStatus = 'idle'
+    },
+    clearSoundtrackCacheAll(state) {
+      state.bySlug = {}
+      state.status = {}
+      state.error = {}
+      state.all = []
+      state.allStatus = 'idle'
+      state.allError = null
+      state.movie = null
+      state.movieStatus = 'idle'
+    },
+  },
   extraReducers: (builder) => {
     builder
       // Single track by slug
@@ -111,5 +136,12 @@ const soundtrackSlice = createSlice({
       })
   },
 })
+
+export const {
+  clearAllSoundtracksCache,
+  clearSoundtrackCache,
+  clearMovieCache,
+  clearSoundtrackCacheAll
+} = soundtrackSlice.actions
 
 export default soundtrackSlice.reducer
