@@ -364,7 +364,9 @@ export default function useYouTubePlayer(tracks, movie) {
   const handleShuffleToggle = useCallback(() => {
     setIsShuffle((prev) => {
       const next = !prev
+      isShuffleRef.current = next
       if (next) {
+        isLoopRef.current = false
         setIsLoop(false)
         // Seed the history with the currently playing track so prev works
         // immediately after enabling shuffle.
@@ -378,7 +380,11 @@ export default function useYouTubePlayer(tracks, movie) {
   const handleLoopToggle = useCallback(() => {
     setIsLoop((prev) => {
       const next = !prev
-      if (next) setIsShuffle(false)
+      isLoopRef.current = next
+      if (next) {
+        isShuffleRef.current = false
+        setIsShuffle(false)
+      }
       return next
     })
   }, [])
