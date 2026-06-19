@@ -1,43 +1,43 @@
 # Wiki CPK (Chou Kaguya Hime)
 
-A full-stack **MERN** (MongoDB, Express, React, Node.js) web application—comprehensive wiki for "Chou Kaguya Hime" featuring character profiles, movie information, and an integrated music player with synchronized lyrics.
+🎬 **Personal full-stack project.** A MERN wiki for "Chou Kaguya Hime" — built solo to explore modern web dev (React, Node, MongoDB, real-time socket.io, OAuth, multimedia integration).
+
+## 🤔 Why?
+
+Solo passion project to:
+- **Learn full-stack**: React (frontend) + Express (backend) + MongoDB + real-time updates
+- **Build for fun**: Organize character/movie/music data for a series I love
+- **Experiment**: JWT auth, OAuth, synchronized lyrics, YouTube integration, Docker, deployment
+- **Polish skills**: Testing (Jest, Vitest, Playwright), error handling, security (rate limiting, input sanitization), modular architecture
+
+No deadline. No team. Just code, ship, iterate. 🚀
 
 ## 📖 Table of Contents
 
-- [🚀 Features](#-features)
+- [🚀 What's In Here](#-whats-in-here)
 - [🛠️ Tech Stack](#️-tech-stack)
+- [🏗️ Architecture](#️-architecture)
 - [📦 Installation](#-installation)
 - [🏃 Running the Application](#-running-the-application)
+- [📡 API Overview](#-api-overview)
 - [🧪 Testing](#-testing)
 - [📂 Project Structure](#-project-structure)
 - [🔑 Key Concepts](#-key-concepts)
 - [📜 License](#-license)
 
-## 🚀 Features
+## 🚀 What's In Here
 
-- **Wiki Management:** Movies, characters, categories, soundtracks, and legal documents.
-- **Legal Management:** Version-controlled legal documents (Terms of Use, Privacy Policy) with dual-locale support (EN/VI) and dynamic API-based resolution.
-- **Advanced Authentication:**
-  - Local login with **Argon2** hashing.
-  - OAuth: **Google**, **X (Twitter)** (API v2), **Discord**, **GitHub**.
-  - Session management with **JWT** (Access/Refresh tokens) and **Redis** for session backing.
-  - Account conflict prevention vs OAuth hijacking.
-  - **RBAC:** Permission management for restricted routes.
-- **Real-time Interaction:**
-  - **Live User Counter:** Tracks connected clients via **Socket.io**.
-  - Interactive UI + live indicators.
-- **Multimedia Integration:**
-  - **Soundtrack Player:** YouTube IFrame API—background play, shuffle history, loop modes, timeline progress.
-  - **Synchronized Lyrics:** Real-time highlight + auto-scroll (JP/Romaji) synced to playback milliseconds.
-  - **Karaoke + Translation Engine:** Nested Mongoose `LyricSchema`—dual-language (JP/Romaji + VN) line-synced rendering.
-  - **Asset Management:** Image hosting + crop-prevention via **Cloudinary**.
-- **Responsive UI:** React + Vanilla CSS.
-- **Robust Architecture:**
-  - **Validation:** Zod schemas for env vars + API payloads (backend & frontend).
-  - **Security:** Rate limiting (leaky bucket), input sanitization (ReDoS/NoSQL), file constraints.
-  - **Modular Backend:** Domain-driven modules.
-  - **Error Hierarchy:** Custom classes (`CustomAPIError`, `AuthError`, `BadRequestError`, `NotFoundError`, `ValidationError`, `WikiError`, `UnauthenticatedError`, `UnauthorizedError`, `SoundtrackError`).
-  - **Testing:** 352 tests — Jest/Supertest (backend), Vitest/RTL + Playwright E2E (frontend).
+- **Wiki Management:** Characters, movies, categories, soundtracks, legal docs—all queryable and filterable.
+- **Authentication:**
+  - Local: Email + Argon2-hashed password
+  - OAuth: Google, X (Twitter), Discord, GitHub (all optional)
+  - JWT tokens (15m access, 30d refresh)
+  - Role-based access control (RBAC) for admin routes
+- **Real-time Updates:** Live user counter + socket.io
+- **Music Player:** YouTube iframe, shuffle/loop, timeline control
+- **Synchronized Lyrics:** Millisecond-precise lyrics highlight + auto-scroll (Japanese, Romaji, Vietnamese)
+- **Responsive UI:** React + CSS
+- **Solid fundamentals:** Zod validation, rate limiting, input sanitization, custom error classes, 352+ tests
 
 ## 🛠️ Tech Stack
 
@@ -45,11 +45,68 @@ A full-stack **MERN** (MongoDB, Express, React, Node.js) web application—compr
 
 **Backend:** Node.js | Express | MongoDB (Mongoose) | Redis | Zod | Socket.io | Passport.js | Argon2/JWT/Helmet/CORS | Multer/Cloudinary | Jest/Supertest
 
+## 🏗️ Architecture
+
+**High-Level Flow:**
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                          Browser (Client)                       │
+│  React (Vite) + RTK + React Router + Socket.io-client           │
+│  - Auth: JWT tokens stored in localStorage                      │
+│  - Real-time: User counter, live indicators via Socket.io       │
+│  - UI: Components in /src/components, Pages in /src/pages       │
+└─────────────────────────────────────────────────────────────────┘
+                              ↕ HTTP + WebSocket
+┌─────────────────────────────────────────────────────────────────┐
+│                     Express API (Backend)                       │
+│  Node.js + Express + Socket.io + Passport.js                    │
+│  - Routes: /api/v1/wiki/* (wiki, auth, characters, etc.)        │
+│  - Auth: JWT + OAuth (Google, X, Discord, GitHub)               │
+│  - Rate Limiting: Leaky bucket middleware (Redis)               │
+│  - Middleware: Auth, RBAC, validation, error handling           │
+│  - Modules: Modular by domain (auth/, wiki/, characters/, etc.) │
+└─────────────────────────────────────────────────────────────────┘
+                              ↕ Mongoose ODM
+┌─────────────────────────────────────────────────────────────────┐
+│                  MongoDB (Data Layer)                           │
+│  - Collections: users, characters, movies, soundtracks, etc.    │
+│  - Relationships: Nested schemas (e.g., lyrics in soundtracks)  │
+│  - Indexes: Optimized for queries and sorting                   │
+└─────────────────────────────────────────────────────────────────┘
+
+Optional Services:
+- Redis: Session storage + rate-limiting cache
+- Cloudinary: Image hosting & CDN
+- OAuth Providers: Google, X (Twitter), Discord, GitHub
+- YouTube API: Soundtrack playback (iframe)
+```
+
+**Request-Response Cycle:**
+
+```
+User Action → React Component → Axios HTTP → Express Route
+  ↓                                                ↓
+Validation (Zod) ← ← ← ← ← ← ← ← ← ← ← ← ← ← Error Handler
+  ↓
+Middleware (Auth, RBAC, Rate Limit)
+  ↓
+Service (Business Logic) ← MongoDB Query
+  ↓
+Controller (Format Response)
+  ↓
+JSON Response → React State (Redux/Context) → Re-render
+```
+
+---
+
 ## 📦 Installation
 
-**Prerequisites:** Node.js (v16+), MongoDB (Atlas or local), Cloudinary account.
+**Prerequisites:** Node.js 16+, MongoDB (local or Atlas)
 
-> **Redis** and all **OAuth providers** are optional — the app degrades gracefully without them (no caching/session store without Redis; social login disabled without OAuth keys). Only `MONGO_URI`, `SESSION_SECRET`, `JWT_ACCESS_SECRET`, and `JWT_REFRESH_SECRET` are required for a minimal first run.
+**Optional:** Redis (for sessions), Cloudinary (image hosting), OAuth keys
+
+App works without them — just configure `.env` and run.
 
 ### 1. Clone
 
@@ -141,9 +198,51 @@ VITE_OPEN_CATEGORY_COOKIE=cpkSidebarOpenCategory
 
 **Frontend:** `cd client && npm run dev`
 
+## 📡 API Overview
+
+All endpoints are prefixed with `/api/v1/wiki`. See [server/modules/](server/modules/) for full route definitions.
+
+| Module                | Endpoint                      | Methods | Description                                 |
+| --------------------- | ----------------------------- | ------- | ------------------------------------------- |
+| **Auth**        | `/auth/register`            | POST    | Register with email/password                |
+|                       | `/auth/login`               | POST    | Login with email/password                   |
+|                       | `/auth/logout`              | POST    | Logout (invalidate JWT)                     |
+|                       | `/auth/{provider}`          | GET     | OAuth redirect (google/x/discord/github)    |
+|                       | `/auth/{provider}/callback` | GET     | OAuth callback handler                      |
+| **Characters**  | `/characters`               | GET     | List all characters (paginated, filterable) |
+|                       | `/characters/{id}`          | GET     | Get character by ID                         |
+|                       | `/characters`               | POST    | Create character (admin only)               |
+|                       | `/characters/{id}`          | PATCH   | Update character (admin only)               |
+|                       | `/characters/{id}`          | DELETE  | Delete character (admin only)               |
+| **Wiki/Movies** | `/movies`                   | GET     | List all movies                             |
+|                       | `/movies/{id}`              | GET     | Get movie details                           |
+|                       | `/categories`               | GET     | List wiki categories                        |
+| **Soundtracks** | `/soundtracks`              | GET     | List all soundtracks                        |
+|                       | `/soundtracks/{id}`         | GET     | Get soundtrack + lyrics                     |
+| **Legal**       | `/legal/{type}`             | GET     | Get legal document (tos, privacy, etc.)     |
+|                       |                               |         | Query params:`?lang=en` or `?lang=vi`   |
+
+**Headers:**
+
+- `Authorization: Bearer {accessToken}` — Required for protected routes
+- `Accept-Language: en` or `vi` — Optional language preference
+
+**Response Format:**
+
+```json
+{
+  "success": true,
+  "message": "Operation successful",
+  "data": { /* payload */ }
+}
+```
+
+---
+
 ## 🧪 Testing
 
 **Backend:**
+
 ```bash
 cd server
 npm test                  # all tests
@@ -154,6 +253,7 @@ npm run test:serial       # run all tests serially (--runInBand)
 ```
 
 **Frontend:**
+
 ```bash
 cd client
 npm test                  # Vitest (unit/component)
@@ -231,6 +331,7 @@ wiki_CPK/
 ## 🔑 Key Concepts
 
 ### Authentication & Security
+
 - **Multi-factor OAuth:** Supports Google, X (Twitter), Discord, and GitHub out of the box. All providers are optional.
 - **Argon2 Hashing:** Industry-standard password hashing for local accounts.
 - **JWT Token Strategy:** Access tokens (15m) + Refresh tokens (30d) for secure, scalable authentication.
@@ -239,12 +340,14 @@ wiki_CPK/
 - **Hardened Security:** CSRF protection (Secure/Lax cookies), timing-safe token validations, XSS sanitization, leaky-bucket rate limiting, and structured security event logging.
 
 ### Content & Media
+
 - **Synchronized Lyrics:** Real-time highlight + auto-scroll lyrics (Japanese/Romaji/Vietnamese) synced to millisecond precision.
 - **Karaoke Support:** Nested MongoDB schemas enable line-by-line dual-language rendering.
 - **YouTube Integration:** IFrame API for background playback, shuffle, loop modes, and timeline control.
 - **Cloudinary Asset Management:** Secure image hosting with crop prevention and CDN delivery.
 
 ### Architecture
+
 - **Domain-Driven Design:** Modular backend organized by feature (Auth, Wiki, Characters, Soundtrack, Legal).
 - **Type-Safe Config:** Zod validation ensures all environment variables are correct at startup.
 - **Real-time Updates:** Socket.io for live user counter and interactive features.
@@ -252,6 +355,7 @@ wiki_CPK/
 - **Error Hierarchy:** Structured error classes for consistent API responses (`CustomAPIError` → `AuthError`, `WikiError`, `BadRequestError`, `NotFoundError`, `ValidationError`, `UnauthenticatedError`, `UnauthorizedError`, `SoundtrackError`).
 
 ### Legal Documents
+
 - **Version-Controlled Policies:** Each `LegalDocument` has `type`, `version`, `effectiveDate`, and `isPublished` fields enabling soft-update workflows without breaking live docs.
 - **Dual-Locale (EN/VI):** Both `en` and `vi` locales stored in a single MongoDB document; the controller resolves the locale from `?lang=` query param first, then from `Accept-Language` header.
 - **Leaky-Bucket Rate Limiting:** The `/api/v1/legal` route uses the same leaky bucket Redis middleware as the rest of the API for consistent rate-limiting behaviour.
@@ -259,4 +363,4 @@ wiki_CPK/
 
 ## 📜 License
 
-Educational/personal use. "Chou Kaguya Hime" content © respective owners.
+Personal/educational. "Chou Kaguya Hime" content © respective owners.
