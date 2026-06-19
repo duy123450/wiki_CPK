@@ -1,20 +1,11 @@
 const { fetchSidebarData, fetchMovieData, fetchPageBySlug } = require('../../modules/wiki/wiki.service');
 const { getSidebar, getMovieInfo, getPageBySlug } = require('../../modules/wiki/wiki.controller');
+const { createMocks, createMocksWithParams } = require('../utils/mockFactory');
 
 jest.mock('../../modules/wiki/wiki.service');
 
 describe('Wiki Controller', () => {
-  let mockReq;
-  let mockRes;
-  let mockNext;
-
   beforeEach(() => {
-    mockReq = { params: {} };
-    mockRes = {
-      status: jest.fn().mockReturnThis(),
-      json: jest.fn(),
-    };
-    mockNext = jest.fn();
     jest.clearAllMocks();
   });
 
@@ -22,12 +13,13 @@ describe('Wiki Controller', () => {
     it('should return categories', async () => {
       const mockCategories = [{ name: 'Test' }];
       fetchSidebarData.mockResolvedValue(mockCategories);
+      const { req, res } = createMocks();
 
-      await getSidebar(mockReq, mockRes, mockNext);
+      await getSidebar(req, res);
 
       expect(fetchSidebarData).toHaveBeenCalled();
-      expect(mockRes.status).toHaveBeenCalledWith(200);
-      expect(mockRes.json).toHaveBeenCalledWith({ categories: mockCategories });
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({ categories: mockCategories });
     });
   });
 
@@ -35,26 +27,27 @@ describe('Wiki Controller', () => {
     it('should return movie info', async () => {
       const mockMovie = { title: 'Movie' };
       fetchMovieData.mockResolvedValue(mockMovie);
+      const { req, res } = createMocks();
 
-      await getMovieInfo(mockReq, mockRes, mockNext);
+      await getMovieInfo(req, res);
 
       expect(fetchMovieData).toHaveBeenCalledWith('Chou Kaguya Hime');
-      expect(mockRes.status).toHaveBeenCalledWith(200);
-      expect(mockRes.json).toHaveBeenCalledWith({ movie: mockMovie });
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({ movie: mockMovie });
     });
   });
 
   describe('getPageBySlug', () => {
     it('should return page by slug', async () => {
       const mockPage = { title: 'Page' };
-      mockReq.params.slug = 'test-slug';
       fetchPageBySlug.mockResolvedValue(mockPage);
+      const { req, res } = createMocksWithParams({ slug: 'test-slug' });
 
-      await getPageBySlug(mockReq, mockRes, mockNext);
+      await getPageBySlug(req, res);
 
       expect(fetchPageBySlug).toHaveBeenCalledWith('test-slug');
-      expect(mockRes.status).toHaveBeenCalledWith(200);
-      expect(mockRes.json).toHaveBeenCalledWith(mockPage);
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith(mockPage);
     });
   });
 });

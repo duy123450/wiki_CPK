@@ -1,64 +1,15 @@
 /**
  * Unit tests for character service helper functions.
  *
- * We test the pure logic (sortByCanonicalOrder, nameToSlug, formatCharacter)
- * by requiring the module and extracting the internals.
- * Since only fetchAllCharacters & fetchCharacterBySlug are exported,
- * we re-implement and test the same logic inline.
+ * Tests pure logic: sortByCanonicalOrder, nameToSlug, formatCharacter
+ * These helpers are defined in ../utils/characterTestHelpers.js
  */
 
-// ─── Re-create the pure helpers from character.service.js ─────────────────────
-// These mirror the private functions exactly so we can unit-test them.
-
-const CHARACTER_ORDER = [
-  'Sakayori Iroha',
-  'Kaguya',
-  'Runami Yachiyo',
-  'Ayatsumugi Roka',
-  'Isayama Mami',
-  'Sakayori Asahi',
-  'Komazawa Rai',
-  'Komazawa Noi',
-  'inuDoge',
-  'Fushi',
-]
-
-const sortByCanonicalOrder = (characters) => {
-  const indexMap = new Map(
-    CHARACTER_ORDER.map((name, i) => [name.toLowerCase(), i])
-  )
-  return [...characters].sort((a, b) => {
-    const ai = indexMap.get(a.name.toLowerCase()) ?? Number.MAX_SAFE_INTEGER
-    const bi = indexMap.get(b.name.toLowerCase()) ?? Number.MAX_SAFE_INTEGER
-    if (ai !== bi) return ai - bi
-    return a.name.localeCompare(b.name)
-  })
-}
-
-const nameToSlug = (name) =>
-  name
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '')
-
-const formatCharacter = (char) => ({
-  _id: char._id,
-  name: char.name,
-  slug: char.slug || nameToSlug(char.name),
-  role: char.role,
-  description: char.description ?? null,
-  origin: char.origin ?? null,
-  abilities: char.abilities ?? [],
-  relationships: (char.relationships ?? []).map((rel) => ({
-    ...rel,
-    targetId: rel.targetId ?? null,
-  })),
-  image: char.image ?? [],
-  voiceActor: char.voiceActor ?? null,
-  movie: char.movie,
-})
-
-// ─── Tests ────────────────────────────────────────────────────────────────────
+const {
+  sortByCanonicalOrder,
+  nameToSlug,
+  formatCharacter,
+} = require('../utils/characterTestHelpers')
 
 describe('Character Helpers', () => {
   // ── sortByCanonicalOrder ──────────────────────────────────────────────────

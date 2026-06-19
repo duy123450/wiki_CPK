@@ -1,34 +1,24 @@
 const { getLegalDocument } = require('../../modules/legal/legal.controller');
 const { fetchLegalDocument } = require('../../modules/legal/legal.service');
+const { createMocksWithParams, createMocksWithQuery } = require('../utils/mockFactory');
 
 jest.mock('../../modules/legal/legal.service');
 
 describe('Legal Controller', () => {
-  let mockReq;
-  let mockRes;
-
   beforeEach(() => {
-    mockReq = {
-      params: { type: 'TERMS_OF_USE' },
-      query: {},
-      headers: {}
-    };
-    mockRes = {
-      json: jest.fn(),
-      status: jest.fn().mockReturnThis()
-    };
     jest.clearAllMocks();
   });
 
   describe('getLegalDocument', () => {
     it('should return 404 if document is not found', async () => {
       fetchLegalDocument.mockResolvedValue(null);
+      const { req, res } = createMocksWithParams({ type: 'TERMS_OF_USE' });
 
-      await getLegalDocument(mockReq, mockRes);
+      await getLegalDocument(req, res);
 
       expect(fetchLegalDocument).toHaveBeenCalledWith('TERMS_OF_USE', 'en');
-      expect(mockRes.status).toHaveBeenCalledWith(404);
-      expect(mockRes.json).toHaveBeenCalledWith({ error: 'Not found' });
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.json).toHaveBeenCalledWith({ error: 'Not found' });
     });
 
     it('should return document data correctly formatted', async () => {
@@ -43,12 +33,12 @@ describe('Legal Controller', () => {
           }
         }
       };
-
       fetchLegalDocument.mockResolvedValue(mockDoc);
+      const { req, res } = createMocksWithParams({ type: 'TERMS_OF_USE' });
 
-      await getLegalDocument(mockReq, mockRes);
+      await getLegalDocument(req, res);
 
-      expect(mockRes.json).toHaveBeenCalledWith({
+      expect(res.json).toHaveBeenCalledWith({
         type: 'TERMS_OF_USE',
         version: '1.0',
         effectiveDate: '2023-01-01T00:00:00.000Z',
@@ -59,15 +49,15 @@ describe('Legal Controller', () => {
 
     it('should return 500 on server error', async () => {
       fetchLegalDocument.mockRejectedValue(new Error('DB error'));
+      const { req, res } = createMocksWithParams({ type: 'TERMS_OF_USE' });
 
-      await getLegalDocument(mockReq, mockRes);
+      await getLegalDocument(req, res);
 
-      expect(mockRes.status).toHaveBeenCalledWith(500);
-      expect(mockRes.json).toHaveBeenCalledWith({ error: 'Server error' });
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({ error: 'Server error' });
     });
 
     it('should respect lang=en query parameter and call service with en', async () => {
-      mockReq.query = { lang: 'en' };
       const mockDoc = {
         type: 'TERMS_OF_USE',
         version: '1.0',
@@ -77,8 +67,12 @@ describe('Legal Controller', () => {
         }
       };
       fetchLegalDocument.mockResolvedValue(mockDoc);
+      const { req, res } = createMocksWithParams(
+        { type: 'TERMS_OF_USE' },
+        { query: { lang: 'en' } }
+      );
 
-      await getLegalDocument(mockReq, mockRes);
+      await getLegalDocument(req, res);
 
       expect(fetchLegalDocument).toHaveBeenCalledWith('TERMS_OF_USE', 'en');
     });
