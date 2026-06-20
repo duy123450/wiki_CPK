@@ -7,7 +7,7 @@
 ### Architecture (4 Core Suites)
 ```
 server/tests/
-├── integration/          # 11 files: auth, character, wiki, soundtrack, OAuth, sessions
+├── integration/          # 12 files: auth, character, wiki, soundtrack, OAuth, sessions, socket-sync
 ├── unit/                 # 15 files: helpers, controllers, services, models, middleware
 ├── security/             # 2 files: fuzzing + enhancements
 └── Playwright E2E        # client/e2e/: auth-flow, wiki-navigation
@@ -18,6 +18,7 @@ server/tests/
 |----------|-------|
 | **OAuth** | google-auth, discord-auth, twitter-auth, oauth-contract (integration × 4 + unit × 3) |
 | **Sessions/Concurrency** | redis-session, redis-mongodb-concurrency (integration × 1 + unit × 1) |
+| **Socket/Real-time** | socket-player-sync (integration × 1) |
 | **Lyric Schema** | lyric-schema-boundary (unit) |
 | **Security** | redos-nosql-fuzzing, security-enhancements (security × 2) |
 | **Core Features** | auth, character, wiki, legal, soundtrack (integration + unit) |
