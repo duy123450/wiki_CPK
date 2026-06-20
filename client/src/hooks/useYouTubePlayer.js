@@ -48,6 +48,10 @@ export default function useYouTubePlayer(tracks, movie) {
   const isSeekingRef = useRef(false)
   const advanceInFlightRef = useRef(false)
   const volumeRef = useRef(70)
+  const isPlayingRef = useRef(false)
+
+  // Stable ref so startProgressTick can be called without being a dep
+  const startProgressTickRef = useRef(null)
 
   // ── Shuffle history stack ──────────────────────────────────────────────────
   // Stores the index of every track played, so prev can walk it back.
@@ -126,19 +130,14 @@ export default function useYouTubePlayer(tracks, movie) {
       }
 
       // ── Detect stuck/frozen playback ────────────────────────────────────
-      // If player state is PLAYING but time hasn't changed in 2+ seconds,
-      // the playback is stuck — try to recover
       const now = Date.now()
       const timeSinceLastCheck = (now - lastCheckTime) / 1000
       lastCheckTime = now
 
       try {
         const playerState = player.getPlayerState()
-        if (playerState === window.YT.PlayerState.PLAYING && isPlaying) {
-          // Should be advancing, check if we're actually progressing
+        if (playerState === window.YT.PlayerState.PLAYING && isPlayingRef.current) {
           if (timeSinceLastCheck > 1.5) {
-            // We haven't received new time data in a while
-            // This might indicate a stuck player
             console.warn(
               'Player appears stuck: no time update for',
               timeSinceLastCheck.toFixed(1),
@@ -158,13 +157,13 @@ export default function useYouTubePlayer(tracks, movie) {
       // When track ends, trigger auto-advance (with 0.5s buffer)
       if (cur >= track.endTime - 0.5) {
         clearInterval(progressInterval.current)
-        // Ensure we don't trigger multiple auto-advances for the same track
         setIsPlaying(false)
+        isPlayingRef.current = false
         // Call through ref to avoid circular dependency
         handleAutoAdvanceRef.current?.()
       }
     }, 100)
-  }, [isPlaying])
+  }, []) // no deps — reads everything via refs
 
   const handleAutoAdvance = useCallback(async () => {
     if (advanceInFlightRef.current) return
@@ -292,16 +291,18 @@ export default function useYouTubePlayer(tracks, movie) {
             endSeconds: track.endTime,
           })
           setIsPlaying(true)
-          startProgressTick()
+          isPlayingRef.current = true
+          startProgressTickRef.current?.()
         } catch (err) {
           console.error('Error loading video:', err)
           // Try to continue anyway
           setIsPlaying(true)
-          startProgressTick()
+          isPlayingRef.current = true
+          startProgressTickRef.current?.()
         }
       }
     },
-    [startProgressTick]
+    [] // startProgressTick is now stable; called via startProgressTickRef
   )
 
   // ── Update function refs to break circular dependencies ─────────────────────
@@ -312,6 +313,10 @@ export default function useYouTubePlayer(tracks, movie) {
   useEffect(() => {
     playTrackAtIndexRef.current = playTrackAtIndex
   }, [playTrackAtIndex])
+
+  useEffect(() => {
+    startProgressTickRef.current = startProgressTick
+  }, [startProgressTick])
 
   useEffect(() => {
     if (!tracks.length) return
@@ -346,14 +351,17 @@ export default function useYouTubePlayer(tracks, movie) {
             const state = e.data
             if (state === window.YT.PlayerState.PLAYING) {
               setIsPlaying(true)
-              startProgressTick()
+              isPlayingRef.current = true
+              startProgressTickRef.current?.()
             } else if (state === window.YT.PlayerState.PAUSED) {
               setIsPlaying(false)
+              isPlayingRef.current = false
               clearInterval(progressInterval.current)
             } else if (state === window.YT.PlayerState.ENDED) {
               // Track naturally ended — trigger auto-advance
               clearInterval(progressInterval.current)
               setIsPlaying(false)
+              isPlayingRef.current = false
               // Call through ref to avoid circular dependency
               handleAutoAdvanceRef.current?.()
             } else if (state === window.YT.PlayerState.UNSTARTED || state === window.YT.PlayerState.BUFFERING) {
@@ -376,7 +384,7 @@ export default function useYouTubePlayer(tracks, movie) {
     return () => {
       clearInterval(progressInterval.current)
     }
-  }, [tracks, startProgressTick])
+  }, [tracks]) // removed startProgressTick dep — called via stable ref now
 
   const handlePlayPause = useCallback(() => {
     if (!ytReadyRef.current || !ytPlayerRef.current) return
@@ -397,12 +405,12 @@ export default function useYouTubePlayer(tracks, movie) {
         } else {
           player.playVideo()
         }
-        startProgressTick()
+        startProgressTickRef.current?.()
       }
     } catch (err) {
       console.error('PlayPause error:', err)
     }
-  }, [startProgressTick])
+  }, [])
 
   // ── Keyboard shortcut: Spacebar to play/pause ──────────────────────────────
   useEffect(() => {

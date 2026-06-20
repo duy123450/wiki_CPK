@@ -1,4 +1,5 @@
 const { CustomAPIError } = require('../../errors/custom-error')
+const { createMocks } = require('../utils/mockFactory')
 
 // ─── asyncWrapper ─────────────────────────────────────────────────────────────
 const asyncWrapper = require('../../middleware/async')
@@ -9,21 +10,6 @@ const notFound = require('../../middleware/not-found')
 // ─── errorHandler ─────────────────────────────────────────────────────────────
 const errorHandler = require('../../middleware/error-handler')
 
-// ─── Helpers: mock req/res/next ───────────────────────────────────────────────
-const mockReq = (overrides = {}) => ({
-  originalUrl: '/api/v1/test',
-  ...overrides,
-})
-
-const mockRes = () => {
-  const res = {}
-  res.status = jest.fn().mockReturnValue(res)
-  res.json = jest.fn().mockReturnValue(res)
-  return res
-}
-
-const mockNext = () => jest.fn()
-
 // ─── Tests ────────────────────────────────────────────────────────────────────
 
 describe('Middleware', () => {
@@ -32,10 +18,7 @@ describe('Middleware', () => {
     it('should call the wrapped function with req, res, next', async () => {
       const fn = jest.fn().mockResolvedValue(undefined)
       const wrapped = asyncWrapper(fn)
-
-      const req = mockReq()
-      const res = mockRes()
-      const next = mockNext()
+      const { req, res, next } = createMocks()
 
       await wrapped(req, res, next)
 
@@ -46,10 +29,7 @@ describe('Middleware', () => {
       const testError = new Error('Something broke')
       const fn = jest.fn().mockRejectedValue(testError)
       const wrapped = asyncWrapper(fn)
-
-      const req = mockReq()
-      const res = mockRes()
-      const next = mockNext()
+      const { req, res, next } = createMocks()
 
       await wrapped(req, res, next)
 
@@ -59,10 +39,7 @@ describe('Middleware', () => {
     it('should NOT call next when the function succeeds', async () => {
       const fn = jest.fn().mockResolvedValue(undefined)
       const wrapped = asyncWrapper(fn)
-
-      const req = mockReq()
-      const res = mockRes()
-      const next = mockNext()
+      const { req, res, next } = createMocks()
 
       await wrapped(req, res, next)
 
@@ -73,9 +50,7 @@ describe('Middleware', () => {
   // ── notFound ──────────────────────────────────────────────────────────────
   describe('notFound middleware', () => {
     it('should call next with a CustomAPIError', () => {
-      const req = mockReq({ originalUrl: '/api/v1/nonexistent' })
-      const res = mockRes()
-      const next = mockNext()
+      const { req, res, next } = createMocks()
 
       notFound(req, res, next)
 
@@ -86,9 +61,7 @@ describe('Middleware', () => {
     })
 
     it('should include the request URL in the error message', () => {
-      const req = mockReq({ originalUrl: '/api/v1/missing-page' })
-      const res = mockRes()
-      const next = mockNext()
+      const { req, res, next } = createMocks({ originalUrl: '/api/v1/missing-page' })
 
       notFound(req, res, next)
 
@@ -101,9 +74,7 @@ describe('Middleware', () => {
   describe('errorHandlerMiddleware', () => {
     it('should handle CustomAPIError and return its statusCode + message', () => {
       const err = new CustomAPIError('Custom error message', 403)
-      const req = mockReq()
-      const res = mockRes()
-      const next = mockNext()
+      const { req, res, next } = createMocks()
 
       errorHandler(err, req, res, next)
 
@@ -123,9 +94,7 @@ describe('Middleware', () => {
           slug: { message: 'Slug is required' },
         },
       }
-      const req = mockReq()
-      const res = mockRes()
-      const next = mockNext()
+      const { req, res, next } = createMocks()
 
       errorHandler(err, req, res, next)
 
@@ -141,9 +110,7 @@ describe('Middleware', () => {
         value: 'invalid-id-123',
         message: 'Cast to ObjectId failed',
       }
-      const req = mockReq()
-      const res = mockRes()
-      const next = mockNext()
+      const { req, res, next } = createMocks()
 
       errorHandler(err, req, res, next)
 
@@ -158,9 +125,7 @@ describe('Middleware', () => {
         keyValue: { email: 'test@example.com' },
         message: 'Duplicate key',
       }
-      const req = mockReq()
-      const res = mockRes()
-      const next = mockNext()
+      const { req, res, next } = createMocks()
 
       errorHandler(err, req, res, next)
 
@@ -174,9 +139,7 @@ describe('Middleware', () => {
       const err = {
         message: 'Operation xyz buffered query timed out after 10000ms',
       }
-      const req = mockReq()
-      const res = mockRes()
-      const next = mockNext()
+      const { req, res, next } = createMocks()
 
       errorHandler(err, req, res, next)
 
@@ -189,9 +152,7 @@ describe('Middleware', () => {
       const err = {
         message: 'Something completely unexpected',
       }
-      const req = mockReq()
-      const res = mockRes()
-      const next = mockNext()
+      const { req, res, next } = createMocks()
 
       errorHandler(err, req, res, next)
 
@@ -206,9 +167,7 @@ describe('Middleware', () => {
 
     it('should call next if user has permitted role', () => {
       const middleware = authorizePermissions('admin', 'editor')
-      const req = mockReq({ user: { role: 'admin' } })
-      const res = mockRes()
-      const next = mockNext()
+      const { req, res, next } = createMocks({ user: { role: 'admin' } })
 
       middleware(req, res, next)
 
@@ -218,9 +177,7 @@ describe('Middleware', () => {
 
     it('should throw UnauthorizedError if user role is not permitted', () => {
       const middleware = authorizePermissions('admin')
-      const req = mockReq({ user: { role: 'user' } })
-      const res = mockRes()
-      const next = mockNext()
+      const { req, res, next } = createMocks({ user: { role: 'user' } })
 
       expect(() => middleware(req, res, next)).toThrow(UnauthorizedError)
       expect(next).not.toHaveBeenCalled()
@@ -228,9 +185,7 @@ describe('Middleware', () => {
 
     it('should throw UnauthorizedError if req.user is undefined', () => {
       const middleware = authorizePermissions('admin')
-      const req = mockReq() // no user
-      const res = mockRes()
-      const next = mockNext()
+      const { req, res, next } = createMocks()
 
       expect(() => middleware(req, res, next)).toThrow(UnauthorizedError)
       expect(next).not.toHaveBeenCalled()

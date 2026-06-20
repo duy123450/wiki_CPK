@@ -1,18 +1,10 @@
 /**
  * Unit tests for auth service helper: buildAuthResponse()
  *
- * This is a private function inside auth.service.js.
- * We mirror the logic here for isolated testing.
+ * Tests the response object that filters out sensitive fields.
  */
 
-const buildAuthResponse = (user) => ({
-  id: user._id,
-  username: user.username,
-  email: user.email,
-  role: user.role,
-  avatar: user.avatar,
-  createdAt: user.createdAt,
-})
+const { buildAuthResponse } = require('../utils/authServiceHelpers')
 
 describe('Auth Helpers', () => {
   describe('buildAuthResponse()', () => {

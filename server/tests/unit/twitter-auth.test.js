@@ -1,4 +1,5 @@
 const User = require('../../modules/auth/user.model')
+const { buildTwitterProfile } = require('../utils/authTestHelpers')
 
 process.env.JWT_ACCESS_SECRET = 'test-access-secret-key-for-jest'
 process.env.JWT_REFRESH_SECRET = 'test-refresh-secret-key-for-jest'
@@ -7,14 +8,6 @@ process.env.JWT_REFRESH_LIFETIME = '30d'
 process.env.NODE_ENV = 'test'
 
 const { twitterLoginUser } = require('../../modules/auth/auth.service')
-
-const buildMockTwitterProfile = (overrides = {}) => ({
-  id: 'twitter-uid-987654',
-  displayName: 'Twitter User',
-  username: 'twitteruser',
-  photos: [{ value: 'https://pbs.twimg.com/profile_images/photo.jpg' }],
-  ...overrides,
-})
 
 describe('twitterLoginUser()', () => {
   describe('input validation', () => {
@@ -26,14 +19,14 @@ describe('twitterLoginUser()', () => {
 
     it('should throw 400 when profile id is missing', async () => {
       await expect(
-        twitterLoginUser({ displayName: 'User', username: 'user' })
+        twitterLoginUser({ data: { username: 'user' } })
       ).rejects.toThrow('Twitter profile is required')
     })
   })
 
   describe('new user (no existing account)', () => {
     it('should create a new user and return auth tokens', async () => {
-      const result = await twitterLoginUser(buildMockTwitterProfile())
+      const result = await twitterLoginUser(buildTwitterProfile())
 
       expect(result).toHaveProperty('user')
       expect(result).toHaveProperty('accessToken')
@@ -45,7 +38,7 @@ describe('twitterLoginUser()', () => {
 
     it('should auto-generate a username from Twitter displayName', async () => {
       const result = await twitterLoginUser(
-        buildMockTwitterProfile({ displayName: 'John Doe' })
+        buildTwitterProfile({ data: { name: 'John Doe' } })
       )
 
       expect(result.user.username).toMatch(/^John_Doe_/)
@@ -53,7 +46,7 @@ describe('twitterLoginUser()', () => {
 
     it('should normalize diacritics in displayName to generate username', async () => {
       const result = await twitterLoginUser(
-        buildMockTwitterProfile({ displayName: 'Phạm Đăng' })
+        buildTwitterProfile({ displayName: 'Phạm Đăng' })
       )
 
       expect(result.user.username).toMatch(/^Pham_Dang_/)
@@ -61,7 +54,7 @@ describe('twitterLoginUser()', () => {
 
     it('should use Twitter username if displayName not provided', async () => {
       const result = await twitterLoginUser(
-        buildMockTwitterProfile({
+        buildTwitterProfile({
           displayName: undefined,
           username: 'xuser123',
         })
@@ -71,7 +64,7 @@ describe('twitterLoginUser()', () => {
     })
 
     it('should set avatar from Twitter profile photo', async () => {
-      const result = await twitterLoginUser(buildMockTwitterProfile())
+      const result = await twitterLoginUser(buildTwitterProfile())
 
       expect(result.user.avatar.url).toBe(
         'https://pbs.twimg.com/profile_images/photo.jpg'
@@ -80,7 +73,7 @@ describe('twitterLoginUser()', () => {
     })
 
     it('should generate email from username and xId', async () => {
-      const profile = buildMockTwitterProfile({
+      const profile = buildTwitterProfile({
         displayName: 'Jane',
         id: '12345',
       })
@@ -90,7 +83,7 @@ describe('twitterLoginUser()', () => {
     })
 
     it('should store xId on the new user', async () => {
-      await twitterLoginUser(buildMockTwitterProfile())
+      await twitterLoginUser(buildTwitterProfile({ id: 'twitter-uid-987654' }))
 
       const dbUser = await User.findOne({ xId: 'twitter-uid-987654' })
       expect(dbUser).toBeDefined()
@@ -99,7 +92,7 @@ describe('twitterLoginUser()', () => {
     })
 
     it('should not require password for Twitter-only users', async () => {
-      await twitterLoginUser(buildMockTwitterProfile())
+      await twitterLoginUser(buildTwitterProfile({ id: 'twitter-uid-987654' }))
 
       const dbUser = await User.findOne({ xId: 'twitter-uid-987654' })
       expect(dbUser.password).toBeUndefined()
@@ -115,7 +108,7 @@ describe('twitterLoginUser()', () => {
         avatar: { url: 'https://old-avatar.jpg', public_id: 'old' },
       })
 
-      const result = await twitterLoginUser(buildMockTwitterProfile())
+      const result = await twitterLoginUser(buildTwitterProfile({ id: 'twitter-uid-987654' }))
 
       expect(result.user.username).toBe('existing_twitter')
 
@@ -130,7 +123,7 @@ describe('twitterLoginUser()', () => {
         xId: 'twitter-uid-987654',
       })
 
-      const result = await twitterLoginUser(buildMockTwitterProfile())
+      const result = await twitterLoginUser(buildTwitterProfile({ id: 'twitter-uid-987654' }))
 
       expect(result.user.id.toString()).toBe(user._id.toString())
       expect(result.user.username).toBe('existing_twitter')
@@ -140,7 +133,7 @@ describe('twitterLoginUser()', () => {
   describe('avatar handling', () => {
     it('should use default avatar if profile photo is missing', async () => {
       const result = await twitterLoginUser(
-        buildMockTwitterProfile({ photos: [] })
+        buildTwitterProfile({ photos: [] })
       )
 
       expect(result.user.avatar.public_id).toBe('twitter-avatar')
@@ -149,7 +142,7 @@ describe('twitterLoginUser()', () => {
     it('should truncate long display names in username', async () => {
       const longName = 'Very Long Display Name That Should Be Truncated'
       const result = await twitterLoginUser(
-        buildMockTwitterProfile({ displayName: longName })
+        buildTwitterProfile({ displayName: longName })
       )
 
       expect(result.user.username.length).toBeLessThanOrEqual(20)
@@ -159,10 +152,10 @@ describe('twitterLoginUser()', () => {
   describe('email generation', () => {
     it('should generate unique email per xId', async () => {
       const result1 = await twitterLoginUser(
-        buildMockTwitterProfile({ id: 'id-1', username: 'user1' })
+        buildTwitterProfile({ id: 'id-1', username: 'user1' })
       )
       const result2 = await twitterLoginUser(
-        buildMockTwitterProfile({ id: 'id-2', username: 'user2' })
+        buildTwitterProfile({ id: 'id-2', username: 'user2' })
       )
 
       expect(result1.user.email).not.toBe(result2.user.email)

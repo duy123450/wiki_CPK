@@ -3,7 +3,7 @@
  * Provides reusable test data generators for all test suites
  */
 
-const faker = require('@faker-js/faker').default;
+const { faker } = require('@faker-js/faker');
 
 class TestFixtures {
     /**
