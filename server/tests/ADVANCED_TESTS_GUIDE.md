@@ -2,18 +2,27 @@
 
 4 comprehensive Jest/Supertest test templates for wiki_CPK MERN app. OAuth mocking, Redis/MongoDB concurrency, lyric schema boundaries, ReDoS/NoSQL injection fuzzing.
 
-## Files Created
+## Test Inventory
 
+### Architecture (4 Core Suites)
 ```
 server/tests/
-├── integration/
-│   ├── oauth-contract.test.js              # OAuth provider mocking (Google, Discord, X, GitHub)
-│   └── redis-mongodb-concurrency.test.js   # Session cache + DB sync under load
-├── unit/
-│   └── lyric-schema-boundary.test.js       # Nested schema edge cases
-└── security/
-    └── redos-nosql-fuzzing.test.js         # Injection + DoS attacks
+├── integration/          # 11 files: auth, character, wiki, soundtrack, OAuth, sessions
+├── unit/                 # 15 files: helpers, controllers, services, models, middleware
+├── security/             # 2 files: fuzzing + enhancements
+└── Playwright E2E        # client/e2e/: auth-flow, wiki-navigation
 ```
+
+### Real Files (Quick Reference)
+| Category | Files |
+|----------|-------|
+| **OAuth** | google-auth, discord-auth, twitter-auth, oauth-contract (integration × 4 + unit × 3) |
+| **Sessions/Concurrency** | redis-session, redis-mongodb-concurrency (integration × 1 + unit × 1) |
+| **Lyric Schema** | lyric-schema-boundary (unit) |
+| **Security** | redos-nosql-fuzzing, security-enhancements (security × 2) |
+| **Core Features** | auth, character, wiki, legal, soundtrack (integration + unit) |
+| **E2E Flows** | auth-flow.spec.js, wiki-navigation.spec.js (Playwright, client/e2e/) |
+| **Utilities** | middleware, helpers, models, errors, controllers (unit) |
 
 ## Quick Setup
 
@@ -29,20 +38,30 @@ npm install --save-dev nock redis-mock
 ### Run Tests
 
 ```bash
-# Run all
-npm test
+# Server tests (all)
+cd server && npm test
 
-# Run specific suite
-npm test -- oauth-contract.test.js
-npm test -- redis-mongodb-concurrency.test.js
-npm test -- lyric-schema-boundary.test.js
-npm test -- redos-nosql-fuzzing.test.js
-
-# Run with coverage
+# Server tests + coverage
 npm test -- --coverage
 
-# Run specific describe block
+# Specific suite (unit, integration, security)
+npm test -- --testPathPattern=integration
+npm test -- --testPathPattern=security
+
+# Specific test file
+npm test -- auth.test.js
+
+# Specific describe block
 npm test -- --testNamePattern="OAuth Contract"
+
+# E2E tests (client)
+cd client && npm run test:e2e
+
+# E2E headed mode (watch browser)
+npm run test:e2e -- --headed
+
+# All tests (full stack)
+cd server && npm test && cd ../client && npm run test:e2e
 ```
 
 ## Suite Breakdown
@@ -174,6 +193,38 @@ npm test -- --testNamePattern="OAuth Contract"
 - String replacement to remove operators
 - Strict type validation
 
+### 5. End-to-End Testing (Playwright) (`client/e2e/`)
+
+**Purpose:** Real browser; full user flows (auth → feature interaction).
+
+**Coverage:**
+- OAuth login flows (Google, Discord, X, GitHub)
+- Wiki character navigation + search
+- Session persistence + logout
+- Error states + edge cases
+- Page load performance
+
+**Key Tests:**
+- `auth-flow.spec.js`: OAuth redirect → callback → logged-in state
+- `wiki-navigation.spec.js`: Browse characters, filter, pagination
+
+**Run E2E Tests:**
+```bash
+cd client
+npm run test:e2e
+
+# Headed mode (see browser)
+npm run test:e2e -- --headed
+
+# Debug specific spec
+npm run test:e2e -- wiki-navigation.spec.js --debug
+```
+
+**Notes:**
+- Slower than unit/integration but validates full stack
+- Requires dev server running or static build
+- Complements server tests; catches integration gaps
+
 ## Database Lifecycle
 
 ### beforeAll
@@ -191,13 +242,14 @@ npm test -- --testNamePattern="OAuth Contract"
 
 ## Performance Expectations
 
-| Suite | Duration | Tests |
-|-------|----------|-------|
-| OAuth Contract | ~2-3s | 12 |
-| Redis/MongoDB | ~5-8s | 13 |
-| Lyric Boundary | ~1-2s | 25 |
-| ReDoS/NoSQL Fuzzing | ~3-4s | 30+ |
-| **Total** | **~15-20s** | **80+** |
+| Suite | Duration | Tests | Notes |
+|-------|----------|-------|-------|
+| Unit (server) | ~3-5s | 50+ | Fastest; mocked dependencies |
+| Integration | ~8-12s | 30+ | DB/Redis I/O + real OAuth mocks |
+| Security | ~2-3s | 10+ | ReDoS + fuzzing payloads |
+| **Server Total** | **~15-20s** | **90+** | npm test in server/ |
+| E2E (Playwright) | ~20-30s | 2 flows | Headless browser; client/e2e/ |
+| **Full Suite** | **~40-60s** | **100+** | npm test (server) + npm run test:e2e (client) |
 
 ## Integration with CI/CD
 
@@ -212,8 +264,20 @@ test:
       image: redis:latest
   steps:
     - uses: actions/checkout@v3
-    - run: cd server && npm test -- --coverage
-    - run: npm test -- --testPathPattern=redos-nosql
+    
+    # Server tests
+    - run: cd server && npm install && npm test -- --coverage
+    - run: npm test -- --testPathPattern=security
+    
+    # E2E tests
+    - run: cd client && npm install && npm run build
+    - run: npx playwright install
+    - run: npm run test:e2e
+    
+    # Upload coverage
+    - uses: codecov/codecov-action@v3
+      with:
+        files: ./server/coverage/coverage-final.json
 ```
 
 ## Key Assertions
@@ -263,6 +327,16 @@ expect(response.status).not.toBe(500); // Handled gracefully
 - Reduce payload sizes
 - Lower timeout threshold
 - Use `--bail` to stop on first fail
+
+**E2E tests timeout or fail to connect:**
+- Ensure dev server running: `npm run dev` (client)
+- Check Playwright binaries: `npx playwright install`
+- Increase timeout in playwright.config.js: `timeout: 30000`
+- Use `--headed` to debug interactively
+
+**E2E OAuth mocks not intercepting:**
+- Playwright doesn't use nock; requires real OAuth or mock API server
+- Alternative: Stub frontend OAuth with test credentials
 
 ## Extending Tests
 
