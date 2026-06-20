@@ -26,5 +26,7 @@ dist-ssr
 .env
 
 .vercel
+playwright-report/
+test-results/
 
 *.png
