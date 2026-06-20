@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import '../styles/Playlist.css'
 import useYouTubePlayer from '../hooks/useYouTubePlayer'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
@@ -190,23 +190,12 @@ export default function Playlist() {
   const movieStatus = useAppSelector((s) => s.soundtracks.movieStatus)
   const authUser = useAppSelector((s) => s.auth.user)
   const isRestoringSession = useAppSelector((s) => s.auth.isRestoringSession)
-  const accessTier = authUser?.role === 'admin' ? 'admin' : 'public'
+  // accessibleTracks: use all tracks returned by the server.
+  // The server already handles access control (dev mode / admin role).
+  const accessibleTracks = tracks
 
   const [isExpanded, setIsExpanded] = useState(false)
   const [activeTab, setActiveTab] = useState('cover')
-
-  // ── Filter tracks for normal users (hide tracks 16-27) ───────────────────
-  // Normal users can only access tracks with trackNumber < 16 or > 27.
-  // This is also enforced on the server-side in multiple places:
-  // - fetchTracksByMovie: filters the API response
-  // - fetchNextTrack: validates track access before returning
-  // - handleAutoAdvance: only allows transitions to accessible tracks
-  // Both client and server filtering ensures no bypass is possible.
-  const accessibleTracks = useMemo(() => {
-    if (accessTier === 'admin') return tracks
-    // Normal users: only see tracks with trackNumber < 16 or > 27
-    return tracks.filter((t) => t.trackNumber < 16 || t.trackNumber > 27)
-  }, [tracks, accessTier])
 
   // Kick off fetches on mount (thunks bail early if data already cached)
   useEffect(() => {

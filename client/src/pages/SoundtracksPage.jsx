@@ -126,7 +126,12 @@ export default function SoundtracksPage({ sidebarCollapsed }) {
     setSearch(val)
   }, [])
 
-  const filtered = tracks.filter((t) => {
+  // Tracks 16–27 are restricted from public-facing pages
+  const publicTracks = tracks.filter(
+    (t) => t.trackNumber < 16 || t.trackNumber > 27
+  )
+
+  const filtered = publicTracks.filter((t) => {
     const matchesSearch =
       !search ||
       t.title?.toLowerCase().includes(search.toLowerCase()) ||
@@ -135,6 +140,7 @@ export default function SoundtracksPage({ sidebarCollapsed }) {
     const matchesType = typeFilter === 'All' || t.trackType === typeFilter
     return matchesSearch && matchesType
   })
+
 
   const loading = status === 'idle' || status === 'loading'
 
@@ -158,7 +164,7 @@ export default function SoundtracksPage({ sidebarCollapsed }) {
         <SearchBar value={search} onChange={handleSearch} />
         <TypePills active={typeFilter} onSelect={setTypeFilter} />
         <p className="st-count">
-          Showing <strong>{filtered.length}</strong> of <strong>{tracks.length}</strong> tracks
+          Showing <strong>{filtered.length}</strong> of <strong>{publicTracks.length}</strong> tracks
         </p>
       </div>
 

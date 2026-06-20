@@ -157,6 +157,12 @@ export default function SoundtrackPage({ sidebarCollapsed }) {
   const [selectedYtId, setSelectedYtId] = useState(null)
   const [selectedStartTime, setSelectedStartTime] = useState(0)
 
+  // Tracks 16–27 are restricted from public-facing pages
+  const isRestricted =
+    track?.trackNumber != null &&
+    track.trackNumber >= 16 &&
+    track.trackNumber <= 27
+
   // Reset selected YT ID when track changes
   useEffect(() => {
     setSelectedYtId(null)
@@ -218,10 +224,10 @@ export default function SoundtrackPage({ sidebarCollapsed }) {
 
       {loading ? (
         <Skeleton />
-      ) : error ? (
+      ) : error || isRestricted ? (
         <div className="strk-error">
           <span className="strk-error-glyph">♩</span>
-          <p>{error}</p>
+          <p>{isRestricted ? 'This track is not available.' : error}</p>
           <Link to="/wiki/soundtrack" className="strk-back-link">← Back to Soundtrack</Link>
         </div>
       ) : track ? (

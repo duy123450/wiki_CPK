@@ -1,11 +1,12 @@
 const Soundtrack = require('./sound-track.model')
+const envConfig = require('../../config/env.config')
 const { WikiError, ValidationError, NotFoundError, UnauthorizedError } = require('../../errors')
 const { ROLES } = require('../../constants/roles')
 
 const PUBLIC_TRACK_LIMIT = 15
 
 const isPrivilegedUser = (user) =>
-  process.env.NODE_ENV === 'development' || (user && user.role === ROLES.ADMIN)
+  envConfig.NODE_ENV === 'development' || (user && user.role === ROLES.ADMIN)
 
 const publicTrackFilter = {
   $or: [{ trackNumber: { $lt: 16 } }, { trackNumber: { $gt: 27 } }],
