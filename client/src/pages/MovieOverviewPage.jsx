@@ -119,9 +119,8 @@ export default function MovieOverviewPage({ sidebarCollapsed }) {
   const trailers = useMemo(() => {
     const urls = movie?.details?.trailerUrl ?? []
     return urls
-      .slice(0, 3)
       .map((t, i) => ({
-        label: t?.label || TRAILER_LABELS[i],
+        label: t?.label || TRAILER_LABELS[i] || `Trailer #${i + 1}`,
         ytId: getYoutubeId(t?.url),
       }))
       .filter((t) => t.ytId)

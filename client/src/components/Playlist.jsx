@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import '../styles/Playlist.css'
 import useYouTubePlayer from '../hooks/useYouTubePlayer'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
@@ -188,8 +188,8 @@ export default function Playlist() {
   const allStatus = useAppSelector((s) => s.soundtracks.allStatus)
   const allError = useAppSelector((s) => s.soundtracks.allError)
   const movieStatus = useAppSelector((s) => s.soundtracks.movieStatus)
-  const authUser = useAppSelector((s) => s.auth.user)
   const isRestoringSession = useAppSelector((s) => s.auth.isRestoringSession)
+
   // accessibleTracks: use all tracks returned by the server.
   // The server already handles access control (dev mode / admin role).
   const accessibleTracks = tracks
@@ -204,9 +204,10 @@ export default function Playlist() {
 
   useEffect(() => {
     if (movie?._id && !isRestoringSession) {
-      dispatch(fetchAllSoundtracks({ movieId: movie._id, accessTier }))
+      dispatch(fetchAllSoundtracks({ movieId: movie._id, accessTier: 'privileged' }))
     }
-  }, [dispatch, movie?._id, accessTier, isRestoringSession])
+  }, [dispatch, movie?._id, isRestoringSession])
+
 
   useEffect(() => {
     if (!isExpanded) return undefined
