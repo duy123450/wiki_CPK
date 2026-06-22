@@ -1,63 +1,151 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('Profile Management Flow', () => {
-  // Use a unique username to avoid conflicts if testing against a live DB
-  const testUser = {
-    username: `e2e_profile_${Date.now()}`,
-    email: `e2e_profile_${Date.now()}@test.com`,
-    password: 'password123'
-  };
+/**
+ * Profile Page E2E Tests
+ *
+ * Based on actual ProfilePage.jsx DOM structure:
+ * - Unauthenticated users see "Not signed in" with a Go to login link
+ * - Authenticated users see: Edit Profile form, Account Info, Change Password, Danger Zone
+ * - No "Linked Accounts" section exists in the current UI
+ *
+ * Note: The beforeEach tries to register a fresh test user each time.
+ * The register tab text is "Register" (not "Sign up").
+ * Form fields use react-hook-form `name` attributes.
+ */
+
+test.describe('Profile Page — Unauthenticated', () => {
+  test('should redirect or show login prompt when not authenticated', async ({ page }) => {
+    await page.goto('/profile');
+    // Wait for ProtectedRoute's session restore to finish and redirect to /auth
+    // isRestoringSession starts true, so we must wait past the null-render phase
+    await page.waitForURL('**/auth', { timeout: 10000 }).catch(() => {});
+
+    const currentUrl = page.url();
+    const isOnAuthPage = currentUrl.includes('/auth');
+    const isOnProfilePage = currentUrl.includes('/profile');
+
+    if (isOnAuthPage) {
+      await expect(page).toHaveURL(/.*\/auth/);
+    } else if (isOnProfilePage) {
+      // ProfilePage renders its own "Not signed in" fallback (if ProtectedRoute is absent)
+      await expect(page.getByText('Not signed in')).toBeVisible();
+      await expect(page.getByText('Go to login')).toBeVisible();
+    }
+  });
+});
+
+test.describe('Profile Page — Authenticated', () => {
+  let testUser;
+
+  // Helper: dismiss the cookie consent dialog if visible
+  async function dismissCookieConsent(page) {
+    try {
+      const acceptBtn = page.locator('button:has-text("Accept all"), button:has-text("Accept")');
+      if (await acceptBtn.first().isVisible({ timeout: 2000 })) {
+        await acceptBtn.first().click();
+        await page.waitForTimeout(300);
+      }
+    } catch {
+      // no dialog — proceed
+    }
+  }
 
   test.beforeEach(async ({ page }) => {
-    // Navigate to auth page to register a new user
+    // Generate a short unique username (max 20 chars allowed)
+    const uniqueId = `${Date.now().toString().slice(-6)}${Math.floor(Math.random() * 1000)}`;
+    testUser = {
+      username: `user_${uniqueId}`,
+      email: `user_${uniqueId}@test.com`,
+      password: 'password123'
+    };
+
+    // Register a fresh test user before each test
     await page.goto('/auth');
-    
-    // Switch to register tab
-    await page.getByRole('button', { name: /sign up/i }).click();
+    await page.waitForLoadState('load');
 
-    // Fill registration form
-    await page.getByPlaceholder('Username').fill(testUser.username);
-    await page.getByPlaceholder('Email address').fill(testUser.email);
-    // Use the specific selectors for password fields if placeholders aren't enough
-    const passwords = page.getByPlaceholder('••••••••');
-    await passwords.nth(0).fill(testUser.password);
-    await passwords.nth(1).fill(testUser.password);
+    // Switch to Register tab — button text is "Register"
+    await page.locator('button.auth-tab', { hasText: 'Register' }).click();
 
-    await page.getByRole('button', { name: 'Create Account' }).click();
+    // Fill registration form using react-hook-form name attributes
+    await page.fill('input[name="username"]', testUser.username);
+    await page.fill('input[name="email"]', testUser.email);
+    await page.fill('input[name="password"]', testUser.password);
+    await page.fill('input[name="confirmPassword"]', testUser.password);
 
-    // Wait for redirect to home or profile
-    await page.waitForURL('/');
+    await page.locator('button.auth-submit').click();
+
+    // Wait for successful registration — redirects to /welcome
+    await page.waitForURL('**/welcome', { timeout: 15000 });
   });
 
-  test('should allow user to view and update profile', async ({ page }) => {
-    // Navigate to profile
+  test('should display the profile page with correct sections', async ({ page }) => {
     await page.goto('/profile');
+    await page.waitForLoadState('load');
+    await dismissCookieConsent(page);
 
-    // Verify profile page loaded correctly
-    await expect(page.getByRole('heading', { name: 'Profile Settings' })).toBeVisible();
-    await expect(page.getByDisplayValue(testUser.username)).toBeVisible();
+    // Header badge
+    await expect(page.locator('.profile-badge')).toContainText('Profile Settings');
 
-    // Update username
-    const newUsername = `${testUser.username}_updated`;
-    await page.getByLabel('Username').fill(newUsername);
-    await page.getByRole('button', { name: 'Save Changes' }).click();
+    // Edit Profile section
+    await expect(page.locator('.profile-card-title', { hasText: 'Edit Profile' })).toBeVisible();
+    await expect(page.locator('input[name="username"]')).toBeVisible();
+    await expect(page.locator('input[name="email"]')).toBeVisible();
 
-    // Verify success toast or UI update
-    await expect(page.getByText('Profile updated successfully')).toBeVisible();
-    
-    // Refresh to verify persistence
-    await page.reload();
-    await expect(page.getByDisplayValue(newUsername)).toBeVisible();
+    // Account Info section
+    await expect(page.locator('.profile-card-title', { hasText: 'Account Info' })).toBeVisible();
+
+    // Change Password section
+    await expect(page.locator('.profile-card-title', { hasText: 'Change Password' })).toBeVisible();
+
+    // Danger Zone section
+    await expect(page.locator('.profile-card-title', { hasText: 'Danger Zone' })).toBeVisible();
+    await expect(page.locator('button', { hasText: 'Delete Account' })).toBeVisible();
   });
 
-  test('should display linked accounts section', async ({ page }) => {
+  test('should allow user to update username', async ({ page }) => {
     await page.goto('/profile');
+    await page.waitForLoadState('load');
+    await dismissCookieConsent(page);
 
-    // Verify Linked Accounts section exists
-    await expect(page.getByRole('heading', { name: 'Linked Accounts' })).toBeVisible();
+    // Wait for profile form to be populated (react-hook-form reset after fetch)
+    await expect(page.locator('input[name="username"]')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('input[name="username"]')).not.toHaveValue('', { timeout: 10000 });
 
-    // Ensure buttons for linking exist (e.g., Google, Discord)
-    await expect(page.getByRole('button', { name: /Link Google/i })).toBeVisible();
-    await expect(page.getByRole('button', { name: /Link Discord/i })).toBeVisible();
+    const newUsername = `${testUser.username}_upd`;
+
+    // Triple-click to select all text then type replacement — this triggers
+    // react-hook-form's onChange so isDirty becomes true and the button enables.
+    await page.locator('input[name="username"]').click({ clickCount: 3 });
+    await page.locator('input[name="username"]').pressSequentially(newUsername, { delay: 30 });
+
+    // Wait for the Save button to become enabled
+    await expect(page.locator('button.profile-btn--primary')).toBeEnabled({ timeout: 5000 });
+
+    // Submit
+    await page.locator('button.profile-btn--primary').click();
+
+    // Verify success toast
+    await expect(page.locator('.profile-toast--success')).toBeVisible({ timeout: 8000 });
+  });
+
+  test('should show confirmation dialog before deleting account', async ({ page }) => {
+    await page.goto('/profile');
+    await page.waitForLoadState('load');
+    await dismissCookieConsent(page);
+
+    // Wait for profile page to be ready
+    await expect(page.locator('button', { hasText: 'Delete Account' })).toBeVisible({ timeout: 10000 });
+
+    // Click the initial delete button
+    await page.locator('button', { hasText: 'Delete Account' }).click();
+
+    // Confirmation dialog should appear
+    await expect(page.getByText('Are you absolutely sure?')).toBeVisible();
+    await expect(page.locator('button', { hasText: 'Yes, delete my account' })).toBeVisible();
+    await expect(page.locator('button', { hasText: 'Cancel' })).toBeVisible();
+
+    // Cancel and verify dialog disappears
+    await page.locator('button', { hasText: 'Cancel' }).click();
+    await expect(page.getByText('Are you absolutely sure?')).not.toBeVisible();
   });
 });

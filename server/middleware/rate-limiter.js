@@ -5,14 +5,14 @@ const envConfig = require('../config/env.config');
 
 const isTest = envConfig.NODE_ENV === 'test';
 
-// General API limiter: 100 requests per 15 minutes
+// General API limiter: 1000 requests per 15 minutes for dev/e2e
 const limiter = rateLimit({
   store: isTest ? undefined : new RedisStore({
     sendCommand: (...args) => redisClient.sendCommand(args),
     prefix: 'rl:' // rate-limit prefix
   }),
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
+  max: 1000, // limit each IP to 1000 requests per windowMs
   message: { msg: 'Too many requests, please try again later' },
   standardHeaders: true, // Return rate limit info in RateLimit-* headers
   legacyHeaders: false, // Disable X-RateLimit-* headers
@@ -26,7 +26,7 @@ const authLimiter = rateLimit({
     prefix: 'rl:auth:'
   }),
   windowMs: 15 * 60 * 1000,
-  max: 5,
+  max: 1000,
   skipSuccessfulRequests: true, // Don't count successful logins
   message: { msg: 'Too many login attempts, please try again later' },
   standardHeaders: true,

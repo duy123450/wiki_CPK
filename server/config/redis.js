@@ -6,7 +6,8 @@ const redisClient = createClient({
   pingInterval: 10000,
   socket: {
     family: 4,
-    tls: envConfig.REDIS_URL.startsWith('rediss://')
+    tls: envConfig.REDIS_URL.startsWith('rediss://'),
+    connectTimeout: 5000
   }
 })
 

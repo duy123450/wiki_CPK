@@ -13,7 +13,7 @@ test.describe('Wiki Player Flow System Tests', () => {
     }
 
     await trackLink.click();
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
 
     // Verify player controls
     const playBtn = page.locator('button.play, button[aria-label="Play"]');

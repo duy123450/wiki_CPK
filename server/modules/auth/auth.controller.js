@@ -78,6 +78,7 @@ const githubLoginCallback = async (req, res) => {
 }
 
 const refresh = async (req, res) => {
+  console.log('[DEBUG] /auth/refresh cookies:', req.cookies);
   const result = await authService.refreshAccessToken(req.cookies?.refreshToken)
   res.status(200).json(result)
 }
