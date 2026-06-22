@@ -115,4 +115,13 @@ SoundtrackSchema.virtual('embedUrl').get(function () {
   return `https://www.youtube.com/embed/${this.youtubeId}?start=${this.startTime}&end=${this.endTime}&autoplay=1`
 })
 
+SoundtrackSchema.pre('save', async function() {
+  if (this.isModified('movie')) {
+    const movieExists = await mongoose.model('Movie').exists({ _id: this.movie });
+    if (!movieExists) {
+      throw new Error(`Movie with id ${this.movie} does not exist`);
+    }
+  }
+})
+
 module.exports = mongoose.model('Soundtrack', SoundtrackSchema)

@@ -93,4 +93,21 @@ MovieSchema.virtual('soundtracks', {
   foreignField: 'movie',
 })
 
+// Cascade delete characters and soundtracks when a movie is deleted
+MovieSchema.pre(['findOneAndDelete', 'deleteOne'], { document: false, query: true }, async function() {
+  const docToUpdate = await this.model.findOne(this.getQuery());
+  if (docToUpdate) {
+    const movieId = docToUpdate._id;
+    await mongoose.model('Character').deleteMany({ movie: movieId });
+    await mongoose.model('Soundtrack').deleteMany({ movie: movieId });
+  }
+})
+
+// Also handle document-level remove/deleteOne
+MovieSchema.pre('deleteOne', { document: true, query: false }, async function() {
+  const movieId = this._id;
+  await mongoose.model('Character').deleteMany({ movie: movieId });
+  await mongoose.model('Soundtrack').deleteMany({ movie: movieId });
+})
+
 module.exports = mongoose.model('Movie', MovieSchema)

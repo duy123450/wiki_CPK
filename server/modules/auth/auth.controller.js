@@ -99,7 +99,7 @@ const updateProfile = async (req, res) => {
 }
 
 const logout = async (req, res) => {
-  await authService.logoutUser(req.cookies?.refreshToken)
+  await authService.logoutUser(req.cookies?.refreshToken, req.user)
   res.clearCookie('refreshToken', refreshCookieOptions)
   res.status(200).json({ message: 'Logged out successfully' })
 }

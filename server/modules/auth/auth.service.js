@@ -153,7 +153,11 @@ const googleLoginUser = async (profile) => {
     if (existingByEmail) {
         if (!existingByEmail.googleId) {
             existingByEmail.googleId = profile.id
+            if (!existingByEmail.avatar?.url) {
+                existingByEmail.avatar = { url: profile.photos?.[0]?.value, public_id: 'google-avatar' }
+            }
             await existingByEmail.save()
+            logSecurityEvent('OAUTH_LINKED', { userId: existingByEmail._id, provider: 'google' })
             return buildTokenResponse(existingByEmail)
         } else {
             throw new AuthError('email_taken_other_method', 409)
@@ -182,8 +186,19 @@ const twitterLoginUser = async (profile) => {
     const name = profile.displayName || profile.username || 'x_user'
     const email = profile.emails?.[0]?.value?.toLowerCase() || `${name.replace(/\s+/g, '').toLowerCase()}_${profile.id}@twitter.local`
 
-    if (await User.findOne({ email })) {
-        throw new AuthError('email_taken_other_method', 409)
+    const existingByEmail = await User.findOne({ email })
+    if (existingByEmail) {
+        if (!existingByEmail.xId) {
+            existingByEmail.xId = profile.id
+            if (!existingByEmail.avatar?.url) {
+                existingByEmail.avatar = { url: profile.photos?.[0]?.value, public_id: 'twitter-avatar' }
+            }
+            await existingByEmail.save()
+            logSecurityEvent('OAUTH_LINKED', { userId: existingByEmail._id, provider: 'twitter' })
+            return buildTokenResponse(existingByEmail)
+        } else {
+            throw new AuthError('email_taken_other_method', 409)
+        }
     }
 
     const suffix = '_' + profile.id.slice(-4)
@@ -222,7 +237,17 @@ const discordLoginUser = async (profile) => {
     if (email) {
         const existingByEmail = await User.findOne({ email })
         if (existingByEmail) {
-            throw new AuthError('email_taken_other_method', 409)
+            if (!existingByEmail.discordId) {
+                existingByEmail.discordId = discordId
+                if (!existingByEmail.avatar?.url) {
+                    existingByEmail.avatar = { url: picture || undefined, public_id: 'discord-avatar' }
+                }
+                await existingByEmail.save()
+                logSecurityEvent('OAUTH_LINKED', { userId: existingByEmail._id, provider: 'discord' })
+                return buildTokenResponse(existingByEmail)
+            } else {
+                throw new AuthError('email_taken_other_method', 409)
+            }
         }
     }
 
@@ -260,7 +285,17 @@ const githubLoginUser = async (profile) => {
     if (email) {
         const existingByEmail = await User.findOne({ email })
         if (existingByEmail) {
-            throw new AuthError('email_taken_other_method', 409)
+            if (!existingByEmail.githubId) {
+                existingByEmail.githubId = githubId
+                if (!existingByEmail.avatar?.url) {
+                    existingByEmail.avatar = { url: picture || undefined, public_id: 'github-avatar' }
+                }
+                await existingByEmail.save()
+                logSecurityEvent('OAUTH_LINKED', { userId: existingByEmail._id, provider: 'github' })
+                return buildTokenResponse(existingByEmail)
+            } else {
+                throw new AuthError('email_taken_other_method', 409)
+            }
         }
     }
 
@@ -316,7 +351,20 @@ const refreshAccessToken = async (refreshToken) => {
     }
 }
 
-const logoutUser = async (refreshToken) => {
+const logoutUser = async (refreshToken, userTokenPayload) => {
+    // 1. Blacklist the access token
+    if (userTokenPayload && userTokenPayload.jti) {
+        const ttl = 15 * 60 // 15 min remaining lifetime
+        await redisClient.setEx(`blacklist:${userTokenPayload.jti}`, ttl, 'true')
+    }
+
+    // 2. Clear refresh token from database and log security event
+    if (userTokenPayload && userTokenPayload.userId) {
+        await User.findByIdAndUpdate(userTokenPayload.userId, { refreshToken: null })
+        logSecurityEvent('USER_LOGOUT', { userId: userTokenPayload.userId, jti: userTokenPayload.jti })
+    }
+
+    // 3. Blacklist refresh token if provided
     if (!refreshToken) return
     const jwt = require('jsonwebtoken')
     try {

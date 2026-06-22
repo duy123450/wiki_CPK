@@ -38,6 +38,7 @@
     "passport-google-oauth20": "^2.0.0",
     "passport-jwt": "^4.0.1",
     "passport-twitter-oauth2": "^2.1.1",
+    "rate-limit-redis": "^5.0.0",
     "redis": "^5.12.1",
     "socket.io": "^4.8.3",
     "zod": "^4.4.3"

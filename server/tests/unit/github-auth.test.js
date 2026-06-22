@@ -89,18 +89,21 @@ describe('githubLoginUser()', () => {
   })
 
   describe('account linking (existing email user)', () => {
-    it('should throw 409 if email is already taken by another method', async () => {
+    it('should link to existing account if email matches', async () => {
       await User.create({
         username: 'emailuser',
         email: 'githubuser@example.com',
         password: 'password123',
       })
 
-      await expect(
-        githubLoginUser(
-          buildGitHubProfile({ emails: [{ value: 'githubuser@example.com' }] })
-        )
-      ).rejects.toHaveProperty('message', 'email_taken_other_method')
+      const result = await githubLoginUser(
+        buildGitHubProfile({ emails: [{ value: 'githubuser@example.com' }] })
+      )
+      
+      expect(result.user.username).toBe('emailuser')
+
+      const dbUser = await User.findOne({ email: 'githubuser@example.com' })
+      expect(dbUser.githubId).toBeDefined()
     })
   })
 })

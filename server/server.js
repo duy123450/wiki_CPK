@@ -128,18 +128,16 @@ app.use(
   })
 )
 app.set('trust proxy', 1)
-app.use(rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 300,
-  handler: (req, res, next, options) => {
-    logSecurityEvent('RATE_LIMIT_EXCEEDED', { ip: req.ip, path: req.originalUrl })
-    res.status(options.statusCode).send(options.message)
-  }
-})
-)
+const { limiter } = require('./middleware/rate-limiter')
+app.use(limiter)
 app.use(express.json({ limit: '10kb' }))
 app.use(cookieParser())
 app.use(cors(corsOptions))
+
+const { generateCsrfToken, validateCsrfToken } = require('./middleware/csrf')
+app.use(generateCsrfToken)
+app.use(validateCsrfToken)
+
 app.use(passport.initialize())
 
 // 2. Routes

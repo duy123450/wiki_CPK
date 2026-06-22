@@ -69,21 +69,19 @@ describe('discordLoginUser()', () => {
     })
   })
 
-  describe('account conflict (email exists)', () => {
-    it('should throw email_taken_other_method if email registered via local/other', async () => {
+  describe('account linking (existing email user)', () => {
+    it('should link to existing account if email matches', async () => {
       await User.create({
         username: 'local_user',
         email: 'discorduser@example.com',
         password: 'password123',
       })
 
-      await expect(
-        discordLoginUser(buildDiscordProfile({ email: 'discorduser@example.com' }))
-      ).rejects.toThrow('email_taken_other_method')
+      const result = await discordLoginUser(buildDiscordProfile({ email: 'discorduser@example.com' }))
+      expect(result.user.username).toBe('local_user')
 
-      // Verify no discordId linked
       const dbUser = await User.findOne({ email: 'discorduser@example.com' })
-      expect(dbUser.discordId).toBeUndefined()
+      expect(dbUser.discordId).toBeDefined()
     })
   })
 })

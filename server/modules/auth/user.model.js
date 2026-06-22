@@ -102,8 +102,9 @@ UserSchema.methods.comparePassword = async function (candidatePassword) {
 }
 
 UserSchema.methods.createAccessToken = function () {
+  const jti = crypto.randomUUID()
   return jwt.sign(
-    { userId: this._id, name: this.username, role: this.role },
+    { userId: this._id, name: this.username, role: this.role, jti },
     envConfig.JWT_ACCESS_SECRET,
     { expiresIn: envConfig.JWT_ACCESS_LIFETIME || '15m' }
   )

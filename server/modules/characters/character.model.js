@@ -90,4 +90,13 @@ CharacterSchema.index({ name: 'text', 'description.summary': 'text' })
 CharacterSchema.index({ role: 1 })
 CharacterSchema.index({ movie: 1 })
 
+CharacterSchema.pre('save', async function() {
+  if (this.isModified('movie')) {
+    const movieExists = await mongoose.model('Movie').exists({ _id: this.movie });
+    if (!movieExists) {
+      throw new Error(`Movie with id ${this.movie} does not exist`);
+    }
+  }
+})
+
 module.exports = mongoose.model('Character', CharacterSchema)

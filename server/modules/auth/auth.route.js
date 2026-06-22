@@ -55,12 +55,7 @@ router.use('/discord', oauthSession)
 router.use('/github', oauthSession)
 
 // ─── Rate limiting ─────────────────────────────────────────────────────────────
-const rateLimit = require('express-rate-limit')
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: envConfig.NODE_ENV === 'test' ? 1000 : 5,
-  message: { msg: 'Too many authentication attempts, please try again after 15 minutes' },
-})
+const { authLimiter } = require('../../middleware/rate-limiter')
 
 // ─── Controller methods ────────────────────────────────────────────────────────
 const {
