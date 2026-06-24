@@ -26,7 +26,7 @@ const authLimiter = rateLimit({
     prefix: 'rl:auth:'
   }),
   windowMs: 15 * 60 * 1000,
-  max: 1000,
+  max: isTest ? 1000 : 5, // Strict 5 attempts in non-test envs
   skipSuccessfulRequests: true, // Don't count successful logins
   message: { msg: 'Too many login attempts, please try again later' },
   standardHeaders: true,
@@ -34,3 +34,4 @@ const authLimiter = rateLimit({
 });
 
 module.exports = { limiter, authLimiter };
+

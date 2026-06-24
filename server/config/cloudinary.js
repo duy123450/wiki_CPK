@@ -19,11 +19,28 @@ const storage = new CloudinaryStorage({
   },
 })
 
-// 3. Initialize Multer
+// 3. Initialize Multer with strict image filters
 const upload = multer({
   storage: storage,
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+  fileFilter: (req, file, cb) => {
+    // Validate MIME type
+    const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jfif']
+    if (!allowedMimeTypes.includes(file.mimetype)) {
+      return cb(new Error('Only JPEG, PNG, WEBP and JFIF image files are allowed.'), false)
+    }
+
+    // Validate file extension to prevent double-extension or mismatched extensions
+    const fileExtension = file.originalname.split('.').pop().toLowerCase()
+    const allowedExtensions = ['jpg', 'jpeg', 'png', 'webp', 'jfif']
+    if (!allowedExtensions.includes(fileExtension)) {
+      return cb(new Error('Invalid file extension.'), false)
+    }
+
+    cb(null, true)
+  }
 })
+
 
 module.exports = {
   cloudinary,

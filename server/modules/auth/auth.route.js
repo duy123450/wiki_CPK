@@ -74,9 +74,10 @@ const {
 } = authController
 
 // ─── Standard auth routes ──────────────────────────────────────────────────────
-router.post('/register', validateRequest(registerSchema), register)
+router.post('/register', authLimiter, validateRequest(registerSchema), register)
 router.post('/login', authLimiter, validateRequest(loginSchema), login)
 router.post('/refresh', authLimiter, refresh)
+
 router.post('/logout', logout)
 
 // ─── Google OAuth ──────────────────────────────────────────────────────────────
