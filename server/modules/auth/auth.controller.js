@@ -1,15 +1,6 @@
 const authService = require('./auth.service')
 const envConfig = require('../../config/env.config')
-
-const isProd = envConfig.NODE_ENV === 'production'
-
-const refreshCookieOptions = {
-  httpOnly: true,
-  secure: isProd,
-  sameSite: isProd ? 'none' : 'lax',
-  maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-  path: '/api/v1/wiki/auth',
-}
+const { refreshCookieOptions } = require('../../config/cookie')
 
 const sendAuthResponse = (res, statusCode, result) => {
   const { refreshToken, ...body } = result
