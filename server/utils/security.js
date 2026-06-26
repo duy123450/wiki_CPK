@@ -22,14 +22,24 @@ const timingSafeCompare = (a, b) => {
 
 /**
  * Wrapper for jwt.verify that uses timing-safe comparison internally (via mitigating early exits).
- * @param {string} token 
- * @param {string} secret 
- * @param {object} options 
+ *
+ * SECURITY: The `algorithms` option is always enforced to prevent the "alg:none" attack,
+ * where an attacker crafts a token with `{"alg":"none"}` in the header and no signature.
+ * Without an explicit allowlist, jsonwebtoken would accept such tokens as valid.
+ *
+ * @param {string} token
+ * @param {string} secret
+ * @param {object} options
  * @returns {object}
  */
 const timingSafeVerify = (token, secret, options = {}) => {
+  // Merge caller options but always override `algorithms` to prevent alg:none attack.
+  const safeOptions = {
+    ...options,
+    algorithms: ['HS256'],
+  };
   try {
-    return jwt.verify(token, secret, options);
+    return jwt.verify(token, secret, safeOptions);
   } catch (error) {
     throw error;
   }
