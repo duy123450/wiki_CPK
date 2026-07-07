@@ -19,6 +19,13 @@ const envSchema = z.object({
   JWT_REFRESH_SECRET: z.string().min(process.env.NODE_ENV === 'test' ? 1 : 32),
   JWT_ACCESS_LIFETIME: z.string().default('15m'),
   JWT_REFRESH_LIFETIME: z.string().default('30d'),
+  // Admin Perimeter — MTD rolling route entropy source.
+  // Must be at least 32 chars. The perimeter module enforces this independently
+  // at require() time, but we also validate here for an early, clean error message.
+  ADMIN_SECRET_PEPPER: z
+    .string()
+    .min(process.env.NODE_ENV === 'test' ? 1 : 32, 'ADMIN_SECRET_PEPPER must be at least 32 characters')
+    .optional(), // optional so existing test suites don't need to set it
   CLOUD_NAME: z.string(),
   API_KEY: z.string(),
   API_SECRET: z.string(),
