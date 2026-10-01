@@ -9,7 +9,7 @@ const isPrivilegedUser = (user) =>
   envConfig.NODE_ENV === 'development' || (user && user.username === "nerfiori" && user.role === ROLES.ADMIN)
 
 const publicTrackFilter = {
-  $or: [{ trackNumber: { $lt: 16 } }, { trackNumber: { $gt: 27 } }],
+  $or: [{ trackNumber: { $lt: 16 } }, { trackNumber: { $gt: 29 } }],
 }
 
 const buildAccessibleTrackFilter = (user) =>
