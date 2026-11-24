@@ -12,6 +12,7 @@ const passport = require('../../config/passport')
 const { upload } = require('../../config/cloudinary')
 const authController = require('./auth.controller')
 const authenticateUser = require('../../middleware/authentication')
+const optionalAuth = require('../../middleware/optionalAuth')
 const validateRequest = require('../../middleware/validateRequest')
 const {
   registerSchema,
@@ -78,7 +79,7 @@ router.post('/register', authLimiter, validateRequest(registerSchema), register)
 router.post('/login', authLimiter, validateRequest(loginSchema), login)
 router.post('/refresh', authLimiter, refresh)
 
-router.post('/logout', logout)
+router.post('/logout', optionalAuth, logout)
 
 // ─── Google OAuth ──────────────────────────────────────────────────────────────
 router.get(

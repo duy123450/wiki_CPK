@@ -352,32 +352,54 @@ const refreshAccessToken = async (refreshToken) => {
 }
 
 const logoutUser = async (refreshToken, userTokenPayload) => {
+    let refreshPayload
+    if (refreshToken) {
+        try {
+            refreshPayload = timingSafeVerify(refreshToken, envConfig.JWT_REFRESH_SECRET)
+        } catch {
+            // Token is already invalid or expired.
+        }
+    }
+
     // 1. Blacklist the access token
     if (userTokenPayload && userTokenPayload.jti) {
-        const ttl = 15 * 60 // 15 min remaining lifetime
-        await redisClient.setEx(`blacklist:${userTokenPayload.jti}`, ttl, 'true')
-    }
-
-    // 2. Clear refresh token from database and log security event
-    if (userTokenPayload && userTokenPayload.userId) {
-        await User.findByIdAndUpdate(userTokenPayload.userId, { refreshToken: null })
-        logSecurityEvent('USER_LOGOUT', { userId: userTokenPayload.userId, jti: userTokenPayload.jti })
-    }
-
-    // 3. Blacklist refresh token if provided
-    if (!refreshToken) return
-    const jwt = require('jsonwebtoken')
-    try {
-        const payload = timingSafeVerify(refreshToken, envConfig.JWT_REFRESH_SECRET)
-        if (payload.jti) {
-            // Exp is in seconds, get remaining time
-            const remaining = payload.exp - Math.floor(Date.now() / 1000)
-            if (remaining > 0) {
-                await redisClient.setEx(`blacklist:${payload.jti}`, remaining, '1')
-            }
+        const ttl = userTokenPayload.exp
+            ? userTokenPayload.exp - Math.floor(Date.now() / 1000)
+            : 15 * 60
+        if (ttl > 0) {
+            await redisClient.setEx(`blacklist:${userTokenPayload.jti}`, ttl, 'true')
         }
-    } catch (err) {
-        // Token already invalid or expired, do nothing
+    }
+
+    // 2. Revoke only the refresh token that belongs to this user and is still stored.
+    const userIdsMatch =
+        !userTokenPayload?.userId ||
+        String(userTokenPayload.userId) === String(refreshPayload?.userId)
+    let refreshTokenRevoked = false
+    if (refreshPayload?.userId && userIdsMatch) {
+        const user = await User.findOneAndUpdate(
+            { _id: refreshPayload.userId, refreshToken },
+            { refreshToken: null }
+        )
+        refreshTokenRevoked = Boolean(user)
+    }
+
+    const userId = userTokenPayload?.userId ||
+        (refreshTokenRevoked ? refreshPayload?.userId : undefined)
+    if (userId) {
+        logSecurityEvent('USER_LOGOUT', {
+            userId,
+            jti: userTokenPayload?.jti ||
+                (refreshTokenRevoked ? refreshPayload?.jti : undefined),
+        })
+    }
+
+    // 3. Blacklist the refresh token for its remaining lifetime
+    if (refreshTokenRevoked && refreshPayload?.jti) {
+        const remaining = refreshPayload.exp - Math.floor(Date.now() / 1000)
+        if (remaining > 0) {
+            await redisClient.setEx(`blacklist:${refreshPayload.jti}`, remaining, '1')
+        }
     }
 }
 

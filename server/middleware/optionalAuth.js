@@ -12,7 +12,13 @@ const optionalAuth = (req, _res, next) => {
 
   try {
     const payload = timingSafeVerify(token, envConfig.JWT_ACCESS_SECRET)
-    req.user = { userId: payload.userId, name: payload.name, role: payload.role }
+    req.user = {
+      userId: payload.userId,
+      name: payload.name,
+      role: payload.role,
+      jti: payload.jti,
+      exp: payload.exp,
+    }
   } catch {
     // Invalid token — treat as unauthenticated guest; do not error out.
   }

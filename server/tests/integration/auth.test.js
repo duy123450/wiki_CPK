@@ -165,6 +165,35 @@ describe('Auth API Integration Tests', () => {
       expect(res.body.user.email).toBe(validUser.email)
     })
 
+    it('should not log refresh-token contents', async () => {
+      const registerRes = await request(app)
+        .post(`${BASE}/register`)
+        .send(validUser)
+      const refreshCookie = registerRes.headers['set-cookie'].find((cookie) =>
+        cookie.startsWith('refreshToken=')
+      )
+      const refreshToken = refreshCookie
+        .split(';')[0]
+        .slice('refreshToken='.length)
+      const logSpy = jest.spyOn(console, 'log').mockImplementation(() => {})
+
+      try {
+        const res = await request(app)
+          .post(`${BASE}/refresh`)
+          .set('Cookie', refreshCookie)
+
+        expect(res.status).toBe(200)
+        const logOutput = JSON.stringify(logSpy.mock.calls)
+        expect(logOutput).not.toContain(refreshToken)
+        expect(logOutput).not.toContain('refreshToken')
+        expect(logSpy).toHaveBeenCalledWith('[DEBUG] /auth/refresh request', {
+          hasRefreshCookie: true,
+        })
+      } finally {
+        logSpy.mockRestore()
+      }
+    })
+
     it('should reject when refresh cookie is missing', async () => {
       const res = await request(app).post(`${BASE}/refresh`)
 
