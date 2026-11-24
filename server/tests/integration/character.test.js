@@ -3,6 +3,7 @@ const mongoose = require('mongoose')
 
 const Movie = require('../../modules/wiki/models/movie.model')
 const Character = require('../../modules/characters/character.model')
+const redisClient = require('../../config/redis')
 
 let app
 
@@ -137,5 +138,40 @@ describe('Character API', () => {
       expect(res.body.roles).toContain('Protagonist')
       expect(res.body.roles).toContain('Antagonist')
     })
+  })
+
+  it('does not expose the placeholder POST route or invalidate character cache', async () => {
+    const previousNodeEnv = process.env.NODE_ENV
+    process.env.NODE_ENV = 'production'
+    const readySpy = jest
+      .spyOn(redisClient, 'isReady', 'get')
+      .mockReturnValue(true)
+    const scanSpy = jest
+      .spyOn(redisClient, 'scan')
+      .mockResolvedValue({
+        cursor: 0,
+        keys: ['cache:characters:/api/v1/wiki/characters'],
+      })
+    const deleteSpy = jest.spyOn(redisClient, 'del').mockResolvedValue(1)
+
+    try {
+      const characterCount = await Character.countDocuments()
+      const res = await request(app)
+        .post(BASE)
+        .set('Cookie', 'XSRF-TOKEN=test-csrf-token')
+        .set('x-csrf-token', 'test-csrf-token')
+        .send({})
+
+      expect(res.status).toBe(404)
+      expect(res.body.msg).toContain('Route not found')
+      expect(await Character.countDocuments()).toBe(characterCount)
+      expect(scanSpy).not.toHaveBeenCalled()
+      expect(deleteSpy).not.toHaveBeenCalled()
+    } finally {
+      process.env.NODE_ENV = previousNodeEnv
+      readySpy.mockRestore()
+      scanSpy.mockRestore()
+      deleteSpy.mockRestore()
+    }
   })
 })
