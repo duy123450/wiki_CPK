@@ -9,6 +9,9 @@ process.env.JWT_REFRESH_LIFETIME = '30d'
 
 const Movie = require('../../modules/wiki/models/movie.model')
 const Soundtrack = require('../../modules/soundtrack/sound-track.model')
+const User = require('../../modules/auth/user.model')
+const redisClient = require('../../config/redis')
+const { ROLES } = require('../../constants/roles')
 
 let app
 
@@ -36,6 +39,27 @@ const seedTrack = async (movieId, ov = {}) =>
     movie: movieId,
     ...ov,
   })
+
+const enableCacheInvalidation = () => {
+  const previousNodeEnv = process.env.NODE_ENV
+  process.env.NODE_ENV = 'production'
+  const readySpy = jest.spyOn(redisClient, 'isReady', 'get').mockReturnValue(true)
+  const scanSpy = jest
+    .spyOn(redisClient, 'scan')
+    .mockResolvedValue({ cursor: 0, keys: [] })
+  const deleteSpy = jest.spyOn(redisClient, 'del').mockResolvedValue(0)
+
+  return {
+    scanSpy,
+    deleteSpy,
+    restore: () => {
+      process.env.NODE_ENV = previousNodeEnv
+      readySpy.mockRestore()
+      scanSpy.mockRestore()
+      deleteSpy.mockRestore()
+    },
+  }
+}
 
 describe('Soundtrack API', () => {
   let movie
@@ -208,6 +232,85 @@ describe('Soundtrack API', () => {
       expect(res.body.track).toBeDefined()
       expect(res.body.track.title).toBe('Insert Song One')
       expect(res.body.track._id.toString()).toBe(track._id.toString())
+    })
+  })
+
+  describe('POST /cache/clear', () => {
+    it('does not invalidate cache for an unauthorized request', async () => {
+      const cache = enableCacheInvalidation()
+
+      try {
+        const res = await request(app)
+          .post(`${BASE}/cache/clear`)
+          .set('Cookie', 'XSRF-TOKEN=test-csrf-token')
+          .set('x-csrf-token', 'test-csrf-token')
+
+        expect(res.status).toBe(403)
+        expect(res.body).toEqual({ message: 'Admins only' })
+        expect(cache.scanSpy).not.toHaveBeenCalled()
+        expect(cache.deleteSpy).not.toHaveBeenCalled()
+      } finally {
+        cache.restore()
+      }
+    })
+
+    it('invalidates soundtrack cache for an authorized admin', async () => {
+      const cache = enableCacheInvalidation()
+      const keys = [
+        'cache:soundtracks:public:/api/v1/wiki/soundtrack?movieId=1',
+        'cache:soundtracks:privileged:/api/v1/wiki/soundtrack?movieId=1',
+      ]
+      let resolveDeletedKeys
+      const deletedKeys = new Promise((resolve) => {
+        resolveDeletedKeys = resolve
+      })
+
+      try {
+        cache.scanSpy.mockResolvedValue({ cursor: 0, keys })
+        cache.deleteSpy.mockImplementation(async (keysToDelete) => {
+          resolveDeletedKeys(keysToDelete)
+          return keysToDelete.length
+        })
+
+        const admin = await User.create({
+          username: 'soundtrackadmin',
+          email: 'soundtrackadmin@test.com',
+          password: 'password123',
+          role: ROLES.ADMIN,
+        })
+        const res = await request(app)
+          .post(`${BASE}/cache/clear`)
+          .set('Authorization', `Bearer ${admin.createAccessToken()}`)
+          .set('Cookie', 'XSRF-TOKEN=test-csrf-token')
+          .set('x-csrf-token', 'test-csrf-token')
+
+        expect(res.status).toBe(200)
+        expect(res.body).toEqual({ message: 'Soundtrack cache cleared' })
+        expect(await deletedKeys).toEqual(keys)
+        expect(cache.scanSpy).toHaveBeenCalledWith(
+          0,
+          expect.objectContaining({ MATCH: 'cache:soundtracks:*' })
+        )
+      } finally {
+        cache.restore()
+      }
+    })
+
+    it('does not invalidate cache when the request body is malformed', async () => {
+      const cache = enableCacheInvalidation()
+
+      try {
+        const res = await request(app)
+          .post(`${BASE}/cache/clear`)
+          .set('Content-Type', 'application/json')
+          .send('{')
+
+        expect(res.status).toBe(400)
+        expect(cache.scanSpy).not.toHaveBeenCalled()
+        expect(cache.deleteSpy).not.toHaveBeenCalled()
+      } finally {
+        cache.restore()
+      }
     })
   })
 })

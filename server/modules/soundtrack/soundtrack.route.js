@@ -27,6 +27,14 @@ const soundtrackCacheTier = (req) => {
 // This ensures stale data from direct MongoDB Atlas updates is purged quickly
 const CACHE_TTL = envConfig.NODE_ENV === 'development' ? 300 : 600
 
+const authorizeCacheClear = (req, res, next) => {
+  const isDev = envConfig.NODE_ENV === 'development'
+  if (!isDev && req.user?.role !== ROLES.ADMIN) {
+    return res.status(403).json({ message: 'Admins only' })
+  }
+  next()
+}
+
 // GET /api/v1/wiki/soundtrack/next
 router.get(
   '/next',
@@ -58,12 +66,14 @@ router.get(
 
 // POST /api/v1/wiki/soundtrack/cache/clear (admin only)
 // Manual endpoint to clear soundtrack cache immediately after direct MongoDB Atlas updates
-router.post('/cache/clear', optionalAuth, invalidateCache('soundtracks'), (req, res) => {
-  const isDev = envConfig.NODE_ENV === 'development'
-  if (!isDev && req.user?.role !== ROLES.ADMIN) {
-    return res.status(403).json({ message: 'Admins only' })
+router.post(
+  '/cache/clear',
+  optionalAuth,
+  authorizeCacheClear,
+  invalidateCache('soundtracks'),
+  (_req, res) => {
+    res.status(200).json({ message: 'Soundtrack cache cleared' })
   }
-  res.status(200).json({ message: 'Soundtrack cache cleared' })
-})
+)
 
 module.exports = router
