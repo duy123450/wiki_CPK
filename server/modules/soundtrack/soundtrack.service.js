@@ -6,7 +6,8 @@ const { ROLES } = require('../../constants/roles')
 const PUBLIC_TRACK_LIMIT = 15
 
 const isPrivilegedUser = (user) =>
-  envConfig.NODE_ENV === 'development' || (user && user.username === "nerfiori" && user.role === ROLES.ADMIN)
+  envConfig.NODE_ENV === 'development' ||
+  (user && user.name === 'nerfiori' && user.role === ROLES.ADMIN)
 
 const publicTrackFilter = {
   $or: [{ trackNumber: { $lt: 16 } }, { trackNumber: { $gt: 29 } }],
