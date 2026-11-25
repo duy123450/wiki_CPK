@@ -37,6 +37,7 @@ module.exports = function requireGitHubOAuthConfig(req, res, next) {
         clientSecret,
         callbackURL,
         scope: ['user:email'],
+        state: true,
         customHeaders: {
           'User-Agent': 'Wiki-CPK-App',
         },

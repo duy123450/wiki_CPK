@@ -1,5 +1,6 @@
 const request = require('supertest')
 const mongoose = require('mongoose')
+const jwt = require('jsonwebtoken')
 
 process.env.NODE_ENV = 'test'
 process.env.JWT_ACCESS_SECRET = 'test-access-secret-key-for-jest'
@@ -250,6 +251,168 @@ describe('Soundtrack API', () => {
         expect(cache.scanSpy).not.toHaveBeenCalled()
         expect(cache.deleteSpy).not.toHaveBeenCalled()
       } finally {
+        cache.restore()
+      }
+    })
+
+    it('does not invalidate cache when Redis blacklist lookup throws', async () => {
+      const cache = enableCacheInvalidation()
+      const getSpy = jest
+        .spyOn(redisClient, 'get')
+        .mockRejectedValue(new Error('Redis unavailable'))
+
+      try {
+        const admin = await User.create({
+          username: 'redis-failure-admin',
+          email: 'redis-failure-admin@test.com',
+          password: 'password123',
+          role: ROLES.ADMIN,
+        })
+        const token = admin.createAccessToken()
+        const decoded = jwt.decode(token)
+
+        const res = await request(app)
+          .post(`${BASE}/cache/clear`)
+          .set('Authorization', `Bearer ${token}`)
+          .set('Cookie', 'XSRF-TOKEN=test-csrf-token')
+          .set('x-csrf-token', 'test-csrf-token')
+
+        expect(res.status).toBe(403)
+        expect(res.body).toEqual({ message: 'Admins only' })
+        expect(getSpy).toHaveBeenCalledWith(`blacklist:${decoded.jti}`)
+        expect(cache.scanSpy).not.toHaveBeenCalled()
+        expect(cache.deleteSpy).not.toHaveBeenCalled()
+      } finally {
+        getSpy.mockRestore()
+        cache.restore()
+      }
+    })
+
+    it('does not authenticate an expired access token', async () => {
+      const cache = enableCacheInvalidation()
+      const getSpy = jest.spyOn(redisClient, 'get')
+
+      try {
+        const token = jwt.sign(
+          {
+            userId: 'expired-admin',
+            name: 'expired-admin',
+            role: ROLES.ADMIN,
+            jti: 'expired-access-jti',
+          },
+          'test-access-secret-key-for-jest',
+          { expiresIn: -1 }
+        )
+
+        const res = await request(app)
+          .post(`${BASE}/cache/clear`)
+          .set('Authorization', `Bearer ${token}`)
+          .set('Cookie', 'XSRF-TOKEN=test-csrf-token')
+          .set('x-csrf-token', 'test-csrf-token')
+
+        expect(res.status).toBe(403)
+        expect(res.body).toEqual({ message: 'Admins only' })
+        expect(getSpy).not.toHaveBeenCalled()
+        expect(cache.scanSpy).not.toHaveBeenCalled()
+        expect(cache.deleteSpy).not.toHaveBeenCalled()
+      } finally {
+        getSpy.mockRestore()
+        cache.restore()
+      }
+    })
+
+    it('does not authenticate an access token with a missing JTI', async () => {
+      const cache = enableCacheInvalidation()
+      const getSpy = jest.spyOn(redisClient, 'get')
+
+      try {
+        const token = jwt.sign(
+          {
+            userId: 'missing-jti-admin',
+            name: 'missing-jti-admin',
+            role: ROLES.ADMIN,
+          },
+          'test-access-secret-key-for-jest',
+          { expiresIn: '15m' }
+        )
+
+        const res = await request(app)
+          .post(`${BASE}/cache/clear`)
+          .set('Authorization', `Bearer ${token}`)
+          .set('Cookie', 'XSRF-TOKEN=test-csrf-token')
+          .set('x-csrf-token', 'test-csrf-token')
+
+        expect(res.status).toBe(403)
+        expect(res.body).toEqual({ message: 'Admins only' })
+        expect(getSpy).not.toHaveBeenCalled()
+        expect(cache.scanSpy).not.toHaveBeenCalled()
+        expect(cache.deleteSpy).not.toHaveBeenCalled()
+      } finally {
+        getSpy.mockRestore()
+        cache.restore()
+      }
+    })
+
+    it('does not authenticate an access token with a malformed JTI', async () => {
+      const cache = enableCacheInvalidation()
+      const getSpy = jest.spyOn(redisClient, 'get')
+
+      try {
+        const token = jwt.sign(
+          {
+            userId: 'malformed-jti-admin',
+            name: 'malformed-jti-admin',
+            role: ROLES.ADMIN,
+            jti: 'malformed jti',
+          },
+          'test-access-secret-key-for-jest',
+          { expiresIn: '15m' }
+        )
+
+        const res = await request(app)
+          .post(`${BASE}/cache/clear`)
+          .set('Authorization', `Bearer ${token}`)
+          .set('Cookie', 'XSRF-TOKEN=test-csrf-token')
+          .set('x-csrf-token', 'test-csrf-token')
+
+        expect(res.status).toBe(403)
+        expect(res.body).toEqual({ message: 'Admins only' })
+        expect(getSpy).not.toHaveBeenCalled()
+        expect(cache.scanSpy).not.toHaveBeenCalled()
+        expect(cache.deleteSpy).not.toHaveBeenCalled()
+      } finally {
+        getSpy.mockRestore()
+        cache.restore()
+      }
+    })
+
+    it('does not invalidate cache for a revoked admin token', async () => {
+      const cache = enableCacheInvalidation()
+      const getSpy = jest.spyOn(redisClient, 'get').mockResolvedValue('true')
+
+      try {
+        const admin = await User.create({
+          username: 'revoked-admin',
+          email: 'revoked-admin@test.com',
+          password: 'password123',
+          role: ROLES.ADMIN,
+        })
+        const token = admin.createAccessToken()
+        const decoded = jwt.decode(token)
+
+        const res = await request(app)
+          .post(`${BASE}/cache/clear`)
+          .set('Authorization', `Bearer ${token}`)
+          .set('Cookie', 'XSRF-TOKEN=test-csrf-token')
+          .set('x-csrf-token', 'test-csrf-token')
+
+        expect(res.status).toBe(403)
+        expect(res.body).toEqual({ message: 'Admins only' })
+        expect(getSpy).toHaveBeenCalledWith(`blacklist:${decoded.jti}`)
+        expect(cache.scanSpy).not.toHaveBeenCalled()
+        expect(cache.deleteSpy).not.toHaveBeenCalled()
+      } finally {
+        getSpy.mockRestore()
         cache.restore()
       }
     })

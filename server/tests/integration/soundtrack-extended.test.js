@@ -42,13 +42,14 @@ describe('Soundtrack Extended Tests', () => {
       const track = await seedTrack(movie._id, {
         title: 'Lyric Track',
         lyrics: {
+          japanese: '日本語のテスト',
           romaji: 'Tsuki no hikari',
           translation: 'Ánh trăng',
           translator: 'Translator A',
           source: 'fan-translation',
           synced: [
-            { time: 5, line: 'Tsuki no hikari', lineTranslation: 'Ánh trăng' },
-            { time: 10, line: 'Kagayaki tsuzukeru', lineTranslation: 'Vẫn sáng mãi' },
+            { time: 5, line: 'Tsuki no hikari', lineJapanese: '同期テスト一', lineTranslation: 'Ánh trăng' },
+            { time: 10, line: 'Kagayaki tsuzukeru', lineJapanese: '同期テスト二', lineTranslation: 'Vẫn sáng mãi' },
           ],
         },
       });
@@ -57,11 +58,14 @@ describe('Soundtrack Extended Tests', () => {
       expect(res.status).toBe(200);
       const { lyrics } = res.body.track;
       expect(lyrics).toBeDefined();
+      expect(lyrics.japanese).toBe('日本語のテスト');
       expect(lyrics.romaji).toBe('Tsuki no hikari');
       expect(lyrics.translation).toBe('Ánh trăng');
       expect(lyrics.synced).toHaveLength(2);
       expect(lyrics.synced[0].time).toBe(5);
+      expect(lyrics.synced[0].lineJapanese).toBe('同期テスト一');
       expect(lyrics.synced[1].line).toBe('Kagayaki tsuzukeru');
+      expect(lyrics.synced[1].lineJapanese).toBe('同期テスト二');
     });
 
     it('should default to empty lyrics when not provided', async () => {
@@ -69,9 +73,29 @@ describe('Soundtrack Extended Tests', () => {
       const res = await request(app).get(`${BASE}/${track.slug}`);
       expect(res.status).toBe(200);
       const { lyrics } = res.body.track;
+      expect(lyrics.japanese).toBe('');
       expect(lyrics.romaji).toBe('');
       expect(lyrics.translation).toBe('');
       expect(lyrics.synced).toEqual([]);
+    });
+
+    it('should normalize null Japanese lyrics without dropping other fields', async () => {
+      const track = await seedTrack(movie._id, {
+        title: 'Null Japanese Lyrics Track',
+        lyrics: {
+          japanese: null,
+          romaji: 'romaji sample',
+          synced: [{ time: 5, line: 'romaji line', lineJapanese: null }],
+        },
+      });
+
+      const res = await request(app).get(`${BASE}/${track.slug}`);
+      expect(res.status).toBe(200);
+      expect(res.body.track.lyrics).toMatchObject({
+        japanese: '',
+        romaji: 'romaji sample',
+      });
+      expect(res.body.track.lyrics.synced[0].lineJapanese).toBe('');
     });
 
     it('should store synced lyrics with correct time ordering', async () => {

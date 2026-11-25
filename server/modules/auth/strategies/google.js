@@ -25,7 +25,7 @@ module.exports = function requireGoogleOAuthConfig(req, res, next) {
 
   passport.use(
     new GoogleStrategy(
-      { clientID: clientId, clientSecret, proxy: true, callbackURL },
+      { clientID: clientId, clientSecret, proxy: true, callbackURL, state: true },
       async (accessToken, refreshToken, profile, done) => {
         try {
           return done(null, await googleLoginUser(profile))

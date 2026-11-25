@@ -113,8 +113,22 @@ describe('Soundtrack Model', () => {
 
     it('should default lyrics to empty strings', async () => {
       const track = await Soundtrack.create(validTrack())
+      expect(track.lyrics.japanese).toBe('')
       expect(track.lyrics.translation).toBe('')
       expect(track.lyrics.synced).toEqual([])
+    })
+
+    it('should accept Japanese lyrics and synchronized Japanese lines', async () => {
+      const track = await Soundtrack.create({
+        ...validTrack(),
+        lyrics: {
+          japanese: 'テスト日本語',
+          synced: [{ time: 12, line: 'romaji sample', lineJapanese: '同期テスト' }],
+        },
+      })
+
+      expect(track.lyrics.japanese).toBe('テスト日本語')
+      expect(track.lyrics.synced[0].lineJapanese).toBe('同期テスト')
     })
   })
 

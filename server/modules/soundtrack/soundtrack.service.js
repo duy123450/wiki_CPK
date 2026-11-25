@@ -23,6 +23,12 @@ const normalizeMovie = (movie) => {
   }
 }
 
+const formatSyncedLyrics = (synced = []) =>
+  synced.map((line) => ({
+    ...(typeof line?.toObject === 'function' ? line.toObject() : line),
+    lineJapanese: line?.lineJapanese ?? '',
+  }))
+
 const formatTrack = (track) => {
   if (!track) return null
   return {
@@ -40,11 +46,12 @@ const formatTrack = (track) => {
     coverImage: track.coverImage?.url ?? null,
     officialUrl: track.officialUrl ?? [],
     lyrics: {
+      japanese: track.lyrics?.japanese ?? '',
       romaji: track.lyrics?.romaji ?? '',
       translation: track.lyrics?.translation ?? '',
       translator: track.lyrics?.translator ?? '',
       source: track.lyrics?.source ?? '',
-      synced: track.lyrics?.synced ?? [],
+      synced: formatSyncedLyrics(track.lyrics?.synced),
     },
     movie: normalizeMovie(track.movie),
   }

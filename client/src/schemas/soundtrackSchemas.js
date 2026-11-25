@@ -5,12 +5,17 @@ export const PLAYBACK_MODES = ['sequential', 'shuffle', 'infinite']
 
 // ─── Shared sub-schemas ───────────────────────────────────────────────────────
 
+const syncedLyricLineSchema = z.object({
+  lineJapanese: z.string().nullish().transform((value) => value ?? ''),
+}).passthrough()
+
 const lyricsSchema = z.object({
+  japanese: z.string().nullish().transform((value) => value ?? ''),
   romaji: z.string().default(''),
   translation: z.string().default(''),
   translator: z.string().default(''),
   source: z.string().default(''),
-  synced: z.array(z.unknown()).default([]),
+  synced: z.array(z.union([syncedLyricLineSchema, z.unknown()])).default([]),
 })
 
 // Any item that doesn't match a known shape is kept as-is (z.unknown)

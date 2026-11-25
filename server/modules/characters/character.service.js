@@ -10,12 +10,7 @@ const {
 } = require('./character.utils')
 
 /**
- * Fetch characters with filtering and canonical sorting
- */
-/**
- * Fetch characters with filtering and DB-layer pagination.
- * NOTE: canonical sort is applied via JS sort on the paginated slice only,
- * since canonical order is defined by a constants array, not a DB field.
+ * Fetch matching characters in canonical order with pagination.
  */
 const fetchAllCharacters = async (query) => {
   const filter = buildCharacterFilter(query)
@@ -24,11 +19,11 @@ const fetchAllCharacters = async (query) => {
   const skip = (page - 1) * limit
 
   const [allCharacters, total] = await Promise.all([
-    Character.find(filter).populate(populateConfig).skip(skip).limit(limit).lean(),
+    Character.find(filter).populate(populateConfig).lean(),
     Character.countDocuments(filter),
   ])
 
-  const sorted = sortByCanonicalOrder(allCharacters)
+  const sorted = sortByCanonicalOrder(allCharacters).slice(skip, skip + limit)
 
   return {
     characters: sorted.map(formatCharacter),

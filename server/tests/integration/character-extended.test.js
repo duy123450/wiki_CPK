@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const app = require('../../server');
 const Movie = require('../../modules/wiki/models/movie.model');
 const Character = require('../../modules/characters/character.model');
+const { CHARACTER_ORDER } = require('../../modules/characters/character.constants');
 
 const BASE = '/api/v1/wiki/characters';
 
@@ -45,6 +46,41 @@ describe('Character Extended Tests', () => {
       const names = res.body.characters.map((c) => c.name);
       expect(names.indexOf('Sakayori Iroha')).toBeLessThan(names.indexOf('Kaguya'));
       expect(names.indexOf('Kaguya')).toBeLessThan(names.indexOf('Fushi'));
+    });
+
+    it('should preserve canonical order across pages', async () => {
+      const fushi = await seedChar(movie._id, { name: 'Fushi', slug: 'fushi-pages' });
+      const kaguya = await seedChar(movie._id, { name: 'Kaguya', slug: 'kaguya-pages' });
+      const iroha = await seedChar(movie._id, {
+        name: 'Sakayori Iroha',
+        slug: 'sakayori-iroha-pages',
+      });
+      const queryOrder = [fushi, kaguya, iroha].map((character) => character.toObject());
+      const expectedNames = CHARACTER_ORDER.filter((name) =>
+        queryOrder.some((character) => character.name === name)
+      );
+      const findSpy = jest.spyOn(Character, 'find').mockImplementation(() => {
+        const query = {
+          populate: () => query,
+          lean: async () => queryOrder,
+        };
+        return query;
+      });
+
+      try {
+        const page1 = await request(app).get(`${BASE}?page=1&limit=2`);
+        const page2 = await request(app).get(`${BASE}?page=2&limit=2`);
+
+        expect(page1.status).toBe(200);
+        expect(page2.status).toBe(200);
+        const names = [...page1.body.characters, ...page2.body.characters].map(
+          (character) => character.name
+        );
+        expect(names).toEqual(expectedNames);
+        expect(names).toEqual(['Sakayori Iroha', 'Kaguya', 'Fushi']);
+      } finally {
+        findSpy.mockRestore();
+      }
     });
 
     it('should put unknown characters at the end alphabetically', async () => {

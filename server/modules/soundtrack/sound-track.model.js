@@ -5,6 +5,7 @@ mongoose.plugin(slug)
 
 const LyricSchema = new mongoose.Schema(
   {
+    japanese: { type: String, default: '' },
     romaji: { type: String, default: '' }, // JP
     translation: { type: String, default: '' }, //  Vietnamese
     translator: { type: String, default: '' }, // Person who did the translation
@@ -15,6 +16,7 @@ const LyricSchema = new mongoose.Schema(
       {
         time: { type: Number }, // Time in seconds from start of track
         line: { type: String }, // The lyric line in Romaji
+        lineJapanese: { type: String, default: '' }, // The lyric line in Japanese
         lineTranslation: { type: String, default: '' }, // The lyric line in Vietnamese
       },
     ],

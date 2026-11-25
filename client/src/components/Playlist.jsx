@@ -428,6 +428,11 @@ export default function Playlist() {
                           className={`pl-synced-line ${l.originalIdx === activeLineIdx ? 'pl-synced-line--active' : ''}`}
                         >
                           <span className="pl-synced-text">{l.line}</span>
+                          {typeof l.lineJapanese === 'string' && l.lineJapanese.trim() && (
+                            <span className="pl-synced-translation">
+                              {l.lineJapanese}
+                            </span>
+                          )}
                           {l.lineTranslation && (
                             <span className="pl-synced-translation">
                               {l.lineTranslation}
@@ -454,6 +459,12 @@ export default function Playlist() {
                     {activeLine && (
                       <div className="pl-karaoke-sub">
                         <div className="pl-karaoke-line">{activeLine.line}</div>
+                        {typeof activeLine.lineJapanese === 'string' &&
+                          activeLine.lineJapanese.trim() && (
+                            <div className="pl-karaoke-japanese">
+                              {activeLine.lineJapanese}
+                            </div>
+                          )}
                         {activeLine.lineTranslation && (
                           <div className="pl-karaoke-romaji">
                             {activeLine.lineTranslation}

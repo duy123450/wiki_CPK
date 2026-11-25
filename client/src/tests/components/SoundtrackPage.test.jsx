@@ -34,6 +34,7 @@ const mockTrack = {
     { label: 'YouTube Music', url: 'https://music.youtube.com/watch?v=diffYtId456' },
   ],
   lyrics: {
+    japanese: '日本語のテスト',
     romaji: 'Romaji lyrics go here\nLine 2',
     translation: 'English translation goes here\nLine 2',
     translator: 'Translating Editor',
@@ -149,6 +150,7 @@ describe('SoundtrackPage', () => {
 
     // Romaji lyrics active by default
     expect(screen.getByText(/Romaji lyrics go here/)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Japanese' })).toBeInTheDocument()
     expect(screen.queryByText(/English translation goes here/)).not.toBeInTheDocument()
 
     // Switch to Translation tab
@@ -157,6 +159,58 @@ describe('SoundtrackPage', () => {
 
     expect(screen.queryByText(/Romaji lyrics go here/)).not.toBeInTheDocument()
     expect(screen.getByText(/English translation goes here/)).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Japanese' }))
+    expect(screen.getByText('日本語のテスト')).toBeInTheDocument()
+    expect(screen.queryByText(/English translation goes here/)).not.toBeInTheDocument()
+  })
+
+  it('shows Japanese-only lyrics without empty Romaji or Translation tabs', async () => {
+    useSoundtrack.mockReturnValue({
+      track: { ...mockTrack, lyrics: { japanese: '日本語のみのテスト' } },
+      loading: false,
+      error: null,
+    })
+
+    renderPage(store)
+
+    expect(screen.getByText('日本語のみのテスト')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Japanese' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Romaji' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Translation' })).not.toBeInTheDocument()
+  })
+
+  it('does not show a Japanese tab when Japanese lyrics are absent', async () => {
+    useSoundtrack.mockReturnValue({
+      track: {
+        ...mockTrack,
+        lyrics: { romaji: 'Romaji sample', translation: 'Translation sample' },
+      },
+      loading: false,
+      error: null,
+    })
+
+    renderPage(store)
+
+    expect(screen.getByRole('button', { name: 'Romaji' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Translation' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Japanese' })).not.toBeInTheDocument()
+  })
+
+  it('does not show a Japanese tab for whitespace-only lyrics', async () => {
+    useSoundtrack.mockReturnValue({
+      track: {
+        ...mockTrack,
+        lyrics: { japanese: ' \n ', romaji: 'Romaji sample' },
+      },
+      loading: false,
+      error: null,
+    })
+
+    renderPage(store)
+
+    expect(screen.getByRole('button', { name: 'Romaji' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Japanese' })).not.toBeInTheDocument()
   })
 
   it('shows skeleton loader when track is loading', async () => {

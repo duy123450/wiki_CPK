@@ -43,6 +43,7 @@ module.exports = function requireDiscordOAuthConfig(req, res, next) {
         clientSecret,
         callbackURL,
         scope: ['identify', 'email'],
+        state: true,
       },
       async (accessToken, refreshToken, profile, done) => {
         try {

@@ -465,7 +465,8 @@
     color: #fff;
 }
 
-.pl-karaoke-romaji {
+.pl-karaoke-romaji,
+.pl-karaoke-japanese {
     font-size: 12px;
     color: #1DB954;
     margin-top: 2px;

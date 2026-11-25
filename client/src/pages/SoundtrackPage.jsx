@@ -87,28 +87,31 @@ function YoutubeEmbed({ youtubeId, startTime }) {
 
 // ─── Lyrics tabs ──────────────────────────────────────────────────────────────
 const LYRIC_TABS = [
+  { key: 'japanese', label: 'Japanese' },
   { key: 'romaji', label: 'Romaji' },
   { key: 'translation', label: 'Translation' },
 ]
 
 function LyricsPanel({ lyrics }) {
   const [tab, setTab] = useState('romaji')
-  const hasRomaji = !!lyrics?.romaji?.trim()
-  const hasTrans  = !!lyrics?.translation?.trim()
-  if (!hasRomaji && !hasTrans) return null
+  const availableTabs = LYRIC_TABS.filter(({ key }) => !!lyrics?.[key]?.trim())
+  if (!availableTabs.length) return null
 
-  const activeContent = tab === 'romaji' ? lyrics.romaji : lyrics.translation
+  const activeTab = availableTabs.some(({ key }) => key === tab)
+    ? tab
+    : availableTabs[0].key
+  const activeContent = lyrics[activeTab]
 
   return (
     <div className="strk-lyrics">
       <div className="strk-lyrics-tabs">
         {LYRIC_TABS.map(({ key, label }) => {
-          const available = key === 'romaji' ? hasRomaji : hasTrans
+          const available = availableTabs.some((availableTab) => availableTab.key === key)
           if (!available) return null
           return (
             <button
               key={key}
-              className={`strk-lyrics-tab ${tab === key ? 'strk-lyrics-tab--active' : ''}`}
+              className={`strk-lyrics-tab ${activeTab === key ? 'strk-lyrics-tab--active' : ''}`}
               onClick={() => setTab(key)}
             >
               {label}
@@ -309,7 +312,9 @@ export default function SoundtrackPage({ sidebarCollapsed }) {
             )}
 
             {/* Lyrics */}
-            {(track.lyrics?.romaji || track.lyrics?.translation) && (
+            {(track.lyrics?.japanese?.trim() ||
+              track.lyrics?.romaji?.trim() ||
+              track.lyrics?.translation?.trim()) && (
               <SectionCard title="Lyrics" ornamentColor="var(--strk-purple)">
                 <LyricsPanel lyrics={track.lyrics} />
                 {track.lyrics.source && (
