@@ -153,6 +153,9 @@ const { generateCsrfToken, validateCsrfToken } = require('./middleware/csrf')
 app.use(generateCsrfToken)
 app.use(validateCsrfToken)
 
+// Prime the double-submit CSRF cookie before login/register POST requests.
+app.get('/api/v1/wiki/csrf-token', (_req, res) => res.sendStatus(204))
+
 app.use(passport.initialize())
 
 // ─── PERIMETER LAYER 2: Honeypot Tarpit ─────────────────────────────────────
