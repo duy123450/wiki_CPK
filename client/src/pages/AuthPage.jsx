@@ -194,7 +194,7 @@ export default function AuthPage({
         }
       }
     } catch (err) {
-      setError(err.response?.data?.msg || 'Authentication failed')
+      setError(err.response?.data?.msg || err.response?.data?.error || 'Authentication failed')
     } finally {
       setSubmitting(false)
     }

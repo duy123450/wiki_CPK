@@ -10,7 +10,9 @@ import {
 } from '../schemas/soundtrackSchemas'
 import { getAccessToken, setAccessToken, clearAccessToken } from './tokenStore'
 
-export const API_BASE_URL = envConfig.VITE_API_BASE_URL
+export const API_BASE_URL = import.meta.env.PROD
+  ? '/api/v1/wiki'
+  : envConfig.VITE_API_BASE_URL
 
 const redirectToLogin = () => {
   clearAccessToken()
@@ -132,13 +134,17 @@ export const getCharacterBySlug = (slug) =>
 
 // ─── Authentication ─────────────────────────────────────────────────────────
 
-export const registerUser = (payload) => {
+const ensureCsrfToken = () => api.get('/csrf-token', { _skipAuthRefresh: true })
+
+export const registerUser = async (payload) => {
   const validated = validateData(registerRequestSchema, payload, 'Register')
+  await ensureCsrfToken()
   return api.post('/auth/register', validated, { _skipAuthRefresh: true }).then((res) => res.data)
 }
 
-export const loginUser = (payload) => {
+export const loginUser = async (payload) => {
   const validated = validateData(loginSchema, payload, 'Login')
+  await ensureCsrfToken()
   return api.post('/auth/login', validated, { _skipAuthRefresh: true }).then((res) => res.data)
 }
 
