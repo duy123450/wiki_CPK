@@ -7,12 +7,14 @@ process.env.JWT_ACCESS_SECRET = 'test-access-secret-key-for-jest'
 process.env.JWT_REFRESH_SECRET = 'test-refresh-secret-key-for-jest'
 process.env.JWT_ACCESS_LIFETIME = '15m'
 process.env.JWT_REFRESH_LIFETIME = '30d'
+process.env.ADMIN_SECRET_PEPPER = 'test-admin-secret-pepper-for-jest-only'
 
 const Movie = require('../../modules/wiki/models/movie.model')
 const Soundtrack = require('../../modules/soundtrack/sound-track.model')
 const User = require('../../modules/auth/user.model')
 const redisClient = require('../../config/redis')
 const { ROLES } = require('../../constants/roles')
+const { MTD_ENABLED, getCurrentAdminPath } = require('../../modules/adminPerimeter/adminPerimeter')
 
 let app
 
@@ -21,6 +23,8 @@ beforeAll(async () => {
 })
 
 const BASE = '/api/v1/wiki/soundtrack'
+const adminCacheClearPath = () =>
+  `${MTD_ENABLED ? getCurrentAdminPath().path : '/api/v1/admin'}/soundtrack/cache/clear`
 
 const seedMovie = async () =>
   Movie.create({
@@ -236,18 +240,17 @@ describe('Soundtrack API', () => {
     })
   })
 
-  describe('POST /cache/clear', () => {
+  describe('POST /api/v1/admin/:token/soundtrack/cache/clear', () => {
     it('does not invalidate cache for an unauthorized request', async () => {
       const cache = enableCacheInvalidation()
 
       try {
         const res = await request(app)
-          .post(`${BASE}/cache/clear`)
+          .post(adminCacheClearPath())
           .set('Cookie', 'XSRF-TOKEN=test-csrf-token')
           .set('x-csrf-token', 'test-csrf-token')
 
-        expect(res.status).toBe(403)
-        expect(res.body).toEqual({ message: 'Admins only' })
+        expect(res.status).toBe(401)
         expect(cache.scanSpy).not.toHaveBeenCalled()
         expect(cache.deleteSpy).not.toHaveBeenCalled()
       } finally {
@@ -272,13 +275,12 @@ describe('Soundtrack API', () => {
         const decoded = jwt.decode(token)
 
         const res = await request(app)
-          .post(`${BASE}/cache/clear`)
+          .post(adminCacheClearPath())
           .set('Authorization', `Bearer ${token}`)
           .set('Cookie', 'XSRF-TOKEN=test-csrf-token')
           .set('x-csrf-token', 'test-csrf-token')
 
-        expect(res.status).toBe(403)
-        expect(res.body).toEqual({ message: 'Admins only' })
+        expect(res.status).toBe(401)
         expect(getSpy).toHaveBeenCalledWith(`blacklist:${decoded.jti}`)
         expect(cache.scanSpy).not.toHaveBeenCalled()
         expect(cache.deleteSpy).not.toHaveBeenCalled()
@@ -305,13 +307,12 @@ describe('Soundtrack API', () => {
         )
 
         const res = await request(app)
-          .post(`${BASE}/cache/clear`)
+          .post(adminCacheClearPath())
           .set('Authorization', `Bearer ${token}`)
           .set('Cookie', 'XSRF-TOKEN=test-csrf-token')
           .set('x-csrf-token', 'test-csrf-token')
 
-        expect(res.status).toBe(403)
-        expect(res.body).toEqual({ message: 'Admins only' })
+        expect(res.status).toBe(401)
         expect(getSpy).not.toHaveBeenCalled()
         expect(cache.scanSpy).not.toHaveBeenCalled()
         expect(cache.deleteSpy).not.toHaveBeenCalled()
@@ -337,13 +338,12 @@ describe('Soundtrack API', () => {
         )
 
         const res = await request(app)
-          .post(`${BASE}/cache/clear`)
+          .post(adminCacheClearPath())
           .set('Authorization', `Bearer ${token}`)
           .set('Cookie', 'XSRF-TOKEN=test-csrf-token')
           .set('x-csrf-token', 'test-csrf-token')
 
-        expect(res.status).toBe(403)
-        expect(res.body).toEqual({ message: 'Admins only' })
+        expect(res.status).toBe(401)
         expect(getSpy).not.toHaveBeenCalled()
         expect(cache.scanSpy).not.toHaveBeenCalled()
         expect(cache.deleteSpy).not.toHaveBeenCalled()
@@ -370,13 +370,12 @@ describe('Soundtrack API', () => {
         )
 
         const res = await request(app)
-          .post(`${BASE}/cache/clear`)
+          .post(adminCacheClearPath())
           .set('Authorization', `Bearer ${token}`)
           .set('Cookie', 'XSRF-TOKEN=test-csrf-token')
           .set('x-csrf-token', 'test-csrf-token')
 
-        expect(res.status).toBe(403)
-        expect(res.body).toEqual({ message: 'Admins only' })
+        expect(res.status).toBe(401)
         expect(getSpy).not.toHaveBeenCalled()
         expect(cache.scanSpy).not.toHaveBeenCalled()
         expect(cache.deleteSpy).not.toHaveBeenCalled()
@@ -401,13 +400,12 @@ describe('Soundtrack API', () => {
         const decoded = jwt.decode(token)
 
         const res = await request(app)
-          .post(`${BASE}/cache/clear`)
+          .post(adminCacheClearPath())
           .set('Authorization', `Bearer ${token}`)
           .set('Cookie', 'XSRF-TOKEN=test-csrf-token')
           .set('x-csrf-token', 'test-csrf-token')
 
-        expect(res.status).toBe(403)
-        expect(res.body).toEqual({ message: 'Admins only' })
+        expect(res.status).toBe(401)
         expect(getSpy).toHaveBeenCalledWith(`blacklist:${decoded.jti}`)
         expect(cache.scanSpy).not.toHaveBeenCalled()
         expect(cache.deleteSpy).not.toHaveBeenCalled()
@@ -442,7 +440,7 @@ describe('Soundtrack API', () => {
           role: ROLES.ADMIN,
         })
         const res = await request(app)
-          .post(`${BASE}/cache/clear`)
+          .post(adminCacheClearPath())
           .set('Authorization', `Bearer ${admin.createAccessToken()}`)
           .set('Cookie', 'XSRF-TOKEN=test-csrf-token')
           .set('x-csrf-token', 'test-csrf-token')
@@ -464,7 +462,7 @@ describe('Soundtrack API', () => {
 
       try {
         const res = await request(app)
-          .post(`${BASE}/cache/clear`)
+          .post(adminCacheClearPath())
           .set('Content-Type', 'application/json')
           .send('{')
 

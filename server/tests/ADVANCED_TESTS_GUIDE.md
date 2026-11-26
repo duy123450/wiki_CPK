@@ -7,7 +7,7 @@
 ### Architecture (4 Core Suites)
 ```
 server/tests/
-├── integration/          # 12 files: auth, character, wiki, soundtrack, OAuth, sessions, socket-sync
+├── integration/          # 23 files: auth, character, wiki, soundtrack, OAuth, sessions, socket-sync, Admin perimeter
 ├── unit/                 # 15 files: helpers, controllers, services, models, middleware
 ├── security/             # 2 files: fuzzing + enhancements
 └── Playwright E2E        # client/e2e/: auth-flow, wiki-navigation
@@ -21,6 +21,7 @@ server/tests/
 | **Socket/Real-time** | socket-player-sync (integration × 1) |
 | **Lyric Schema** | lyric-schema-boundary (unit) |
 | **Security** | redos-nosql-fuzzing, security-enhancements (security × 2) |
+| **Admin Perimeter** | `server/tests/integration/admin-perimeter-resource-bounds.test.js` — active-trap and registry bounds, expiry, cleanup rotation, lifecycle cleanup, and log suppression. Admin/wiki route isolation is covered in `server/tests/integration/admin.test.js`. |
 | **Core Features** | auth, character, wiki, legal, soundtrack (integration + unit) |
 | **E2E Flows** | auth-flow.spec.js, wiki-navigation.spec.js (Playwright, client/e2e/) |
 | **Utilities** | middleware, helpers, models, errors, controllers (unit) |

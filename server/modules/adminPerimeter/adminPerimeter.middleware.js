@@ -17,11 +17,16 @@
 
 const {
   validateWindowToken,
-  strikeRegistry,
   resolveIp,
+  admitTrap,
+  finalizeTrap: finalizeTrapReservation,
+  isStruck,
+  recordFrontGateBlock,
+  MAX_TRAP_HOLD_MS,
 } = require('./adminPerimeter');
 
 const { logSecurityEvent } = require('../../utils/logger');
+const redactAdminMtdToken = require('../../utils/redactAdminMtdToken');
 
 // ─── MIDDLEWARE 1 — Front-Gate Filter (One-Strike Raw-Socket Killer) ─────────
 //
@@ -40,12 +45,10 @@ const { logSecurityEvent } = require('../../utils/logger');
 const frontGateFilter = (req, _res, next) => {
   const ip = resolveIp(req);
 
-  if (strikeRegistry.has(ip)) {
-    logSecurityEvent('PERIMETER_BLACKLIST_BLOCK', {
-      ip,
-      path: req.path,
+  if (isStruck(ip)) {
+    recordFrontGateBlock(ip, {
+      path: redactAdminMtdToken(req.path),
       method: req.method,
-      strikeAgeMs: Date.now() - strikeRegistry.get(ip),
     });
 
     // Raw socket destruction — no HTTP response is formed, no Express
@@ -93,10 +96,6 @@ const checkDynamicRoute = (req, res, next) => {
     path: req.path,
   });
 
-  if (!strikeRegistry.has(ip)) {
-    strikeRegistry.set(ip, Date.now());
-  }
-
   return tarpitTrap(req, res, next);
 };
 
@@ -129,73 +128,155 @@ const checkDynamicRoute = (req, res, next) => {
 //
 const tarpitTrap = (req, res, _next) => {
   const ip = resolveIp(req);
+  const admission = admitTrap(ip);
 
-  // Commit to blacklist immediately — idempotent, existing entry is preserved
-  if (!strikeRegistry.has(ip)) {
-    strikeRegistry.set(ip, Date.now());
-    logSecurityEvent('PERIMETER_TARPIT_ENTRY', {
-      ip,
-      path: req.path,
-      method: req.method,
-      userAgent: req.headers['user-agent'] ?? 'unknown',
-    });
+  if (admission.status !== 'reserved') {
+    return res.sendStatus(404);
   }
 
-  // Begin the drip: chunked transfer keeps the connection alive.
-  // Writing anything here implicitly starts the HTTP response — the client
-  // cannot distinguish this from a slow legitimate server response.
-  res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-  res.setHeader('Transfer-Encoding', 'chunked');
-  res.setHeader('X-Robots-Tag', 'noindex, nofollow');
-
-  const MAX_HOLD_MS = 55_000; // 55 seconds — safe under 60-second proxy timeouts
+  const entry = admission.entry;
   const startTime = Date.now();
   let dripsCount = 0;
+  let timer = null;
+  let finalized = false;
+  const listeners = [];
 
-  /**
-   * Schedule the next drip with a uniformly random delay in [2_000, 5_000] ms.
-   *
-   * Each tick:
-   *   1. Bail early if the client already closed the connection.
-   *   2. Close cleanly if MAX_HOLD_MS has been reached.
-   *   3. Otherwise drip a single space and recurse.
-   */
-  const scheduleDrip = () => {
-    const delay = 2_000 + Math.floor(Math.random() * 3_000);
-
-    setTimeout(() => {
-      const elapsed = Date.now() - startTime;
-
-      // Client disconnected (scanner timeout or user abort) — nothing to drip
-      if (res.destroyed || req.socket.destroyed) {
-        logSecurityEvent('PERIMETER_TARPIT_CLIENT_DROPPED', {
-          ip,
-          dripsCount,
-          elapsedMs: elapsed,
-        });
-        return;
-      }
-
-      if (elapsed >= MAX_HOLD_MS) {
-        // Max hold reached — end the response without revealing a status code
-        logSecurityEvent('PERIMETER_TARPIT_EXIT', {
-          ip,
-          dripsCount,
-          elapsedMs: elapsed,
-          reason: 'max_hold_reached',
-        });
-        res.end();
-        return;
-      }
-
-      res.write(' '); // single space to maintain TCP activity
-      dripsCount++;
-      scheduleDrip();
-    }, delay);
+  const removeListeners = () => {
+    for (const [emitter, event, listener] of listeners) {
+      emitter.removeListener?.(event, listener);
+    }
+    listeners.length = 0;
   };
 
-  // Kick off the drip loop — deliberately NOT calling next()
-  scheduleDrip();
+  const finalize = () => {
+    if (finalized) return;
+    finalized = true;
+
+    if (timer !== null) {
+      clearTimeout(timer);
+      timer = null;
+    }
+
+    removeListeners();
+    finalizeTrapReservation(ip, entry);
+  };
+
+  const listenOnce = (emitter, event, listener) => {
+    if (typeof emitter?.once !== 'function') return;
+    emitter.once(event, listener);
+    listeners.push([emitter, event, listener]);
+  };
+
+  const onClientDrop = () => {
+    if (finalized) return;
+    try {
+      logSecurityEvent('PERIMETER_TARPIT_CLIENT_DROPPED', {
+        ip,
+        dripsCount,
+        elapsedMs: Date.now() - startTime,
+      });
+    } finally {
+      finalize();
+    }
+  };
+
+  const onResponseError = (error) => {
+    try {
+      logSecurityEvent('PERIMETER_TARPIT_RESPONSE_ERROR', {
+        ip,
+        error: error?.code ?? error?.name ?? 'unknown',
+      });
+    } finally {
+      finalize();
+    }
+  };
+
+  const onSocketError = (error) => {
+    try {
+      logSecurityEvent('PERIMETER_TARPIT_SOCKET_ERROR', {
+        ip,
+        error: error?.code ?? error?.name ?? 'unknown',
+      });
+    } finally {
+      finalize();
+    }
+  };
+
+  listenOnce(req, 'aborted', onClientDrop);
+  listenOnce(req.socket, 'close', onClientDrop);
+  listenOnce(req.socket, 'error', onSocketError);
+  listenOnce(res, 'close', onClientDrop);
+  listenOnce(res, 'finish', finalize);
+  listenOnce(res, 'error', onResponseError);
+
+  const endAtMaximumHold = () => {
+    try {
+      logSecurityEvent('PERIMETER_TARPIT_EXIT', {
+        ip,
+        dripsCount,
+        elapsedMs: Date.now() - startTime,
+        reason: 'max_hold_reached',
+      });
+      res.end();
+    } finally {
+      finalize();
+    }
+  };
+
+  const scheduleDrip = () => {
+    if (finalized) return;
+
+    const elapsed = Date.now() - startTime;
+    const remaining = MAX_TRAP_HOLD_MS - elapsed;
+    if (remaining <= 0) {
+      endAtMaximumHold();
+      return;
+    }
+
+    const randomDelay = 2_000 + Math.floor(Math.random() * 3_000);
+    timer = setTimeout(() => {
+      timer = null;
+      if (finalized) return;
+
+      const currentElapsed = Date.now() - startTime;
+      if (res.destroyed || req.socket.destroyed) {
+        onClientDrop();
+        return;
+      }
+
+      if (currentElapsed >= MAX_TRAP_HOLD_MS) {
+        endAtMaximumHold();
+        return;
+      }
+
+      try {
+        res.write(' ');
+      } catch (error) {
+        finalize();
+        throw error;
+      }
+      dripsCount++;
+      scheduleDrip();
+    }, Math.min(randomDelay, remaining));
+  };
+
+  try {
+    if (admission.created) {
+      logSecurityEvent('PERIMETER_TARPIT_ENTRY', {
+        ip,
+        path: req.path,
+        method: req.method,
+        userAgent: req.headers['user-agent'] ?? 'unknown',
+      });
+    }
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+    res.setHeader('Transfer-Encoding', 'chunked');
+    res.setHeader('X-Robots-Tag', 'noindex, nofollow');
+    scheduleDrip();
+  } catch (error) {
+    finalize();
+    throw error;
+  }
 };
 
 // ─── EXPORTS ─────────────────────────────────────────────────────────────────

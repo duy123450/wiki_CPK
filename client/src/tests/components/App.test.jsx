@@ -7,6 +7,7 @@ import App from '@/App'
 
 // Mock all API calls used by the app and its children
 vi.mock('@/services/api', () => ({
+  API_BASE_URL: '/api/v1/wiki',
   getCurrentUser: vi.fn(),
   getMovieInfo: vi.fn(),
   getSidebar: vi.fn(),
@@ -49,12 +50,14 @@ beforeEach(() => {
 
 // We need to wrap App with Provider since App uses useAuth → useAppDispatch
 // but App has its own <Router>, so Provider goes around it
-const renderApp = () =>
-  render(
+const renderApp = (path = '/') => {
+  window.history.replaceState({}, '', path)
+  return render(
     <Provider store={makeStore()}>
       <App />
     </Provider>
   )
+}
 
 describe('App', () => {
   it('renders without crashing', async () => {
@@ -102,5 +105,39 @@ describe('App', () => {
     await waitFor(() => {
       expect(getCurrentUser).toHaveBeenCalled()
     })
+  })
+
+  it('allows admins to access the Admin route', async () => {
+    getCurrentUser.mockResolvedValueOnce({
+      username: 'admin',
+      role: 'admin',
+    })
+
+    renderApp('/admin')
+
+    expect(await screen.findByRole('heading', { name: 'Admin' })).toBeInTheDocument()
+  })
+
+  it.each(['sub_admin', 'user'])('denies the %s role access to the Admin route', async (role) => {
+    getCurrentUser.mockResolvedValueOnce({
+      username: role,
+      role,
+    })
+
+    renderApp('/admin')
+
+    await waitFor(() => {
+      expect(window.location.pathname).toBe('/')
+    })
+    expect(screen.queryByRole('heading', { name: 'Admin' })).not.toBeInTheDocument()
+  })
+
+  it('redirects unauthenticated visitors from the Admin route to login', async () => {
+    renderApp('/admin')
+
+    await waitFor(() => {
+      expect(window.location.pathname).toBe('/auth')
+    })
+    expect(screen.queryByRole('heading', { name: 'Admin' })).not.toBeInTheDocument()
   })
 })

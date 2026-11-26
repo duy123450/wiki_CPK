@@ -5,6 +5,10 @@
       "destination": "https://wiki-cpk-be.onrender.com/api/v1/wiki/:path*"
     },
     {
+      "source": "/api/v1/admin/:path*",
+      "destination": "https://wiki-cpk-be.onrender.com/api/v1/admin/:path*"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

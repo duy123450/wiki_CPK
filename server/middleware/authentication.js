@@ -1,4 +1,3 @@
-const jwt = require('jsonwebtoken')
 const { timingSafeVerify } = require('../utils/security')
 const { UnauthenticatedError } = require('../errors')
 const envConfig = require('../config/env.config')
@@ -15,11 +14,18 @@ const authenticateUser = async (req, res, next) => {
   try {
     const payload = timingSafeVerify(token, envConfig.JWT_ACCESS_SECRET)
 
-    if (payload.jti) {
-      const isBlacklisted = await redisClient.get(`blacklist:${payload.jti}`)
-      if (isBlacklisted) {
-        return next(new UnauthenticatedError('Token revoked or expired'))
-      }
+    if (
+      typeof payload.jti !== 'string' ||
+      !payload.jti ||
+      payload.jti.length > 128 ||
+      /\s|[\x00-\x1F\x7F]/.test(payload.jti)
+    ) {
+      return next(new UnauthenticatedError('Authentication invalid'))
+    }
+
+    const isBlacklisted = await redisClient.get(`blacklist:${payload.jti}`)
+    if (isBlacklisted) {
+      return next(new UnauthenticatedError('Token revoked or expired'))
     }
 
     req.user = { userId: payload.userId, name: payload.name, role: payload.role, jti: payload.jti }

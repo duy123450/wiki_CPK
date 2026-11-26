@@ -357,8 +357,7 @@ export default function Sidebar({
                       <Bookmark size={14} strokeWidth={1.8} />
                       <span>Bookmarks</span>
                     </button>
-                    {(currentUser.role === ROLES.ADMIN ||
-                      currentUser.role === ROLES.SUB_ADMIN) && (
+                    {currentUser.role === ROLES.ADMIN && (
                       <button
                         className="flyout-item"
                         onClick={() => handleAvatarMenuNavigate('/admin')}

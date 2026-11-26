@@ -9,6 +9,7 @@
  */
 const { ROLES } = require('../constants/roles')
 const { logSecurityEvent } = require('../utils/logger')
+const redactAdminMtdToken = require('../utils/redactAdminMtdToken')
 
 /**
  * Returns Express middleware that restricts a route to the given roles.
@@ -26,7 +27,7 @@ function authorizeRoles(...allowedRoles) {
         userId: req.user.userId,
         role: req.user.role,
         requiredRoles: allowedRoles,
-        path: req.originalUrl,
+        path: redactAdminMtdToken(req.originalUrl),
       })
       return res.status(403).json({ msg: 'Insufficient permissions' })
     }

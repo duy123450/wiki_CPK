@@ -29,6 +29,7 @@ import NotFoundPage       from './pages/NotFoundPage'
 import AuthPage           from './pages/AuthPage'
 import WelcomePage        from './pages/WelcomePage'
 import ProfilePage        from './pages/ProfilePage'
+import AdminPage          from './pages/AdminPage'
 import LegalPage          from './pages/LegalPage'
 import AccessRestrictedPage from './pages/AccessRestrictedPage'
 import Footer             from './components/Footer'
@@ -37,6 +38,7 @@ import CookieConsent      from './components/CookieConsent'
 import useAuth            from './hooks/useAuth'
 import { Analytics }      from '@vercel/analytics/react'
 import { SpeedInsights }   from '@vercel/speed-insights/react'
+import { ROLES }          from './constants'
 
 export default function App() {
   const [sidebarCollapsed,    setSidebarCollapsed]    = useState(false)
@@ -158,6 +160,15 @@ export default function App() {
                       onAvatarUpdate={authState.handleAvatarUpdate}
                       onLogout={authState.handleLogout}
                     />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/admin"
+                element={
+                  <ProtectedRoute requiredRole={ROLES.ADMIN}>
+                    <AdminPage sidebarCollapsed={sidebarCollapsed} />
                   </ProtectedRoute>
                 }
               />

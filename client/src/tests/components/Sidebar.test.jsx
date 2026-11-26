@@ -225,6 +225,25 @@ describe('Sidebar — Auth State', () => {
       expect(screen.queryByText('Admin')).not.toBeInTheDocument()
     })
   })
+
+  it('does NOT show Admin option for sub-admin users', async () => {
+    const user = userEvent.setup()
+    vi.mocked(useAuthContext).mockReturnValue({
+      authUser: {
+        username: 'subadmin',
+        avatar: { url: 'http://img.com/a.png' },
+        role: 'sub_admin',
+      },
+      handleLogout: vi.fn(),
+    })
+    renderSidebar()
+
+    await user.click(screen.getByTitle('subadmin'))
+
+    await waitFor(() => {
+      expect(screen.queryByText('Admin')).not.toBeInTheDocument()
+    })
+  })
 })
 
 describe('Sidebar — Dragon Cursor Toggle', () => {

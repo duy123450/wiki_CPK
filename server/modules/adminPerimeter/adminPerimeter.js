@@ -20,17 +20,18 @@
 const crypto = require('crypto');
 const { logSecurityEvent } = require('../../utils/logger');
 
-// ─── 0. Fail-fast on missing entropy source ──────────────────────────────────
+// ─── 0. Optional MTD entropy source ──────────────────────────────────────────
 //
 // ADMIN_SECRET_PEPPER is the root secret from which every rolling route token
-// is derived. Without it the entire MTD engine is meaningless — crash early
-// rather than silently degrading to a predictable route.
+// is derived. Its absence disables only MTD; authentication and RBAC remain
+// mandatory. A configured but weak pepper is a startup error.
 //
 const PEPPER = process.env.ADMIN_SECRET_PEPPER;
-if (!PEPPER || PEPPER.length < 32) {
+const MTD_ENABLED = Boolean(PEPPER);
+if (MTD_ENABLED && PEPPER.length < 32) {
   throw new Error(
-    '[AdminPerimeter] ADMIN_SECRET_PEPPER is missing or too short (min 32 chars). ' +
-    'Set it in your .env file before starting the server.'
+    '[AdminPerimeter] ADMIN_SECRET_PEPPER is too short (min 32 chars). ' +
+    'Use a longer value or remove it to disable MTD.'
   );
 }
 
@@ -44,8 +45,8 @@ if (!PEPPER || PEPPER.length < 32) {
 // The URL segment the legitimate admin must visit is therefore:
 //   /api/v1/admin/<token>
 //
-// This segment silently rotates every 60 seconds. An attacker who captures one
-// URL from logs or network sniffing has at most 60 seconds before it expires.
+// This segment rotates every 60 seconds. Validation accepts adjacent buckets,
+// so the current token remains valid through the following 60-second bucket.
 //
 // ── Race-condition mitigation: three-step validation window ─────────────────
 //
@@ -94,7 +95,14 @@ function computeWindowToken(windowIndex) {
  * @returns {number|null}
  */
 function validateWindowToken(candidate) {
-  if (!candidate || typeof candidate !== 'string') return null;
+  if (
+    !MTD_ENABLED ||
+    typeof candidate !== 'string' ||
+    candidate.length !== 64 ||
+    !/^[0-9a-f]{64}$/.test(candidate)
+  ) {
+    return null;
+  }
 
   const now = Math.floor(Date.now() / 60_000);
 
@@ -103,10 +111,7 @@ function validateWindowToken(candidate) {
 
     // Constant-time comparison prevents timing-oracle attacks where an attacker
     // probes character-by-character to infer partial token values.
-    if (
-      candidate.length === expected.length &&
-      crypto.timingSafeEqual(Buffer.from(candidate), Buffer.from(expected))
-    ) {
+    if (crypto.timingSafeEqual(Buffer.from(candidate), Buffer.from(expected))) {
       return offset; // matched — offset tells us which window
     }
   }
@@ -121,42 +126,213 @@ function validateWindowToken(candidate) {
  * @returns {{ path: string, expiresInMs: number }}
  */
 function getCurrentAdminPath() {
+  if (!MTD_ENABLED) {
+    throw new Error('[AdminPerimeter] MTD is disabled because ADMIN_SECRET_PEPPER is unset.');
+  }
+
   const now = Date.now();
   const windowIndex = Math.floor(now / 60_000);
   const token = computeWindowToken(windowIndex);
   const msUntilNextWindow = 60_000 - (now % 60_000);
+  const msUntilTokenExpires = msUntilNextWindow + 60_000;
   return {
     path: `/api/v1/admin/${token}`,
-    expiresInMs: msUntilNextWindow,
+    expiresInMs: msUntilTokenExpires,
   };
 }
 
 // ─── 2. ONE-STRIKE BLACKLIST — Private Registry Scope ───────────────────────
-//
-// This Map lives entirely inside module scope. The middleware file closes over
-// it via the shared module reference — nothing outside this domain can read or
-// mutate it directly.
-//
-// Memory-safety guarantee:
-//   A setInterval sweeps the entire registry every 24 hours. A blacklisted IP
-//   could retry after the flush — but the tarpit will immediately re-register
-//   it on next contact. Reduce SWEEP_INTERVAL_MS for a more aggressive posture.
-//
 
-/** @type {Map<string, number>} IP -> UNIX timestamp (ms) of first offense */
+const MAX_ACTIVE_TRAPS = 100;
+const MAX_STRIKE_ENTRIES = 10_000;
+const STRIKE_TTL_MS = 24 * 60 * 60 * 1000;
+const CLEANUP_INTERVAL_MS = 1_000;
+const CLEANUP_BATCH_SIZE = 256;
+const LOG_SUPPRESSION_INTERVAL_MS = 60_000;
+const MAX_TRAP_HOLD_MS = 55_000;
+
+/** @type {Map<string, StrikeEntry>} IP -> strike and trap state */
 const strikeRegistry = new Map();
+let activeTrapCount = 0;
 
-const SWEEP_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24 hours
+/**
+ * @typedef {object} StrikeEntry
+ * @property {number} firstStrikeAt
+ * @property {number} expiresAt
+ * @property {boolean} activeTrap
+ * @property {boolean} frontGateLogged
+ * @property {number} suppressedCount
+ * @property {number} lastSummaryAt
+ */
 
-// Non-blocking — unref() lets the event loop exit cleanly during shutdown/tests.
-setInterval(() => {
-  const count = strikeRegistry.size;
-  strikeRegistry.clear();
-  logSecurityEvent('PERIMETER_BLACKLIST_SWEEP', {
-    flushedEntries: count,
-    nextSweepIn: `${SWEEP_INTERVAL_MS / 3_600_000}h`,
-  });
-}, SWEEP_INTERVAL_MS).unref();
+const createStrikeEntry = (now) => ({
+  firstStrikeAt: now,
+  expiresAt: now + STRIKE_TTL_MS,
+  activeTrap: false,
+  frontGateLogged: false,
+  suppressedCount: 0,
+  lastSummaryAt: now,
+});
+
+const emitPendingSummary = (ip, entry, now, reason) => {
+  if (entry.suppressedCount > 0) {
+    logSecurityEvent('PERIMETER_BLACKLIST_BLOCK_SUMMARY', {
+      ip,
+      suppressedCount: entry.suppressedCount,
+      intervalMs: LOG_SUPPRESSION_INTERVAL_MS,
+      strikeAgeMs: now - entry.firstStrikeAt,
+      reason,
+    });
+    entry.suppressedCount = 0;
+  }
+
+  entry.lastSummaryAt = now;
+};
+
+const emitDueSummaryIfAny = (ip, entry, now) => {
+  if (now - entry.lastSummaryAt >= LOG_SUPPRESSION_INTERVAL_MS) {
+    emitPendingSummary(ip, entry, now, 'interval');
+  }
+};
+
+const removeExpiredEntry = (ip, entry, now) => {
+  emitPendingSummary(ip, entry, now, 'expiry');
+  if (strikeRegistry.get(ip) === entry) {
+    strikeRegistry.delete(ip);
+  }
+};
+
+/**
+ * Process a bounded number of entries. Retained entries rotate to the Map tail,
+ * so a fresh iterator always starts at the next unexamined entry.
+ *
+ * @param {number} [now]
+ * @returns {number} Number of entries examined.
+ */
+function cleanupStrikeRegistry(now = Date.now()) {
+  const budget = Math.min(CLEANUP_BATCH_SIZE, strikeRegistry.size);
+  let examined = 0;
+
+  for (; examined < budget; examined++) {
+    const first = strikeRegistry.keys().next();
+    if (first.done) break;
+
+    const ip = first.value;
+    const entry = strikeRegistry.get(ip);
+
+    if (entry.expiresAt <= now && !entry.activeTrap) {
+      removeExpiredEntry(ip, entry, now);
+      continue;
+    }
+
+    emitDueSummaryIfAny(ip, entry, now);
+    strikeRegistry.delete(ip);
+    strikeRegistry.set(ip, entry);
+  }
+
+  return examined;
+}
+
+// Keep cleanup bounded and independent of request traffic.
+setInterval(() => cleanupStrikeRegistry(), CLEANUP_INTERVAL_MS).unref();
+
+/**
+ * Check whether an IP is still struck, lazily reclaiming its expired entry.
+ *
+ * @param {string} ip
+ * @param {number} [now]
+ * @returns {boolean}
+ */
+function isStruck(ip, now = Date.now()) {
+  const entry = strikeRegistry.get(ip);
+  if (!entry) return false;
+
+  if (entry.activeTrap || entry.expiresAt > now) {
+    return true;
+  }
+
+  removeExpiredEntry(ip, entry, now);
+  return false;
+}
+
+/**
+ * Record a front-gate block, logging the first event and suppressing repeats.
+ *
+ * @param {string} ip
+ * @param {{ path: string, method: string }} details
+ * @param {number} [now]
+ */
+function recordFrontGateBlock(ip, details, now = Date.now()) {
+  const entry = strikeRegistry.get(ip);
+  if (!entry) return;
+
+  if (!entry.frontGateLogged) {
+    entry.frontGateLogged = true;
+    entry.lastSummaryAt = now;
+    logSecurityEvent('PERIMETER_BLACKLIST_BLOCK', {
+      ip,
+      ...details,
+      strikeAgeMs: now - entry.firstStrikeAt,
+    });
+    return;
+  }
+
+  emitDueSummaryIfAny(ip, entry, now);
+  entry.suppressedCount++;
+}
+
+/**
+ * Record a strike and reserve a trap slot without yielding.
+ *
+ * @param {string} ip
+ * @param {number} [now]
+ * @returns {{ status: 'reserved'|'already_struck'|'active_capacity'|'registry_capacity', entry?: StrikeEntry, created?: boolean }}
+ */
+function admitTrap(ip, now = Date.now()) {
+  if (isStruck(ip, now)) {
+    return { status: 'already_struck', entry: strikeRegistry.get(ip) };
+  }
+
+  if (strikeRegistry.size >= MAX_STRIKE_ENTRIES) {
+    return { status: 'registry_capacity' };
+  }
+
+  const entry = createStrikeEntry(now);
+  strikeRegistry.set(ip, entry);
+
+  if (activeTrapCount >= MAX_ACTIVE_TRAPS) {
+    return { status: 'active_capacity', entry, created: true };
+  }
+
+  entry.activeTrap = true;
+  activeTrapCount++;
+  return { status: 'reserved', entry, created: true };
+}
+
+/**
+ * Release an active trap exactly once and reclaim its expired entry if it is
+ * still the registry value for this IP.
+ *
+ * @param {string} ip
+ * @param {StrikeEntry} entry
+ * @param {number} [now]
+ * @returns {boolean} Whether this call finalized an active trap.
+ */
+function finalizeTrap(ip, entry, now = Date.now()) {
+  if (!entry.activeTrap) return false;
+  if (activeTrapCount <= 0) {
+    throw new Error('[AdminPerimeter] Active trap count invariant violated.');
+  }
+
+  entry.activeTrap = false;
+  activeTrapCount--;
+
+  if (entry.expiresAt <= now && strikeRegistry.get(ip) === entry) {
+    removeExpiredEntry(ip, entry, now);
+  }
+
+  return true;
+}
 
 // ─── 3. HELPERS ──────────────────────────────────────────────────────────────
 
@@ -231,18 +407,36 @@ const HONEYPOT_PATHS = new Set([
 // ─── 5. EXPORTS ──────────────────────────────────────────────────────────────
 
 module.exports = {
+  /** Whether a valid ADMIN_SECRET_PEPPER enables the optional MTD gate. */
+  MTD_ENABLED,
+
   /** Tests a candidate token against the t-1 / t / t+1 windows. */
   validateWindowToken,
 
   /** Returns the live admin URL and milliseconds until it next rotates. */
   getCurrentAdminPath,
 
-  /**
-   * The strike registry Map — shared reference consumed by the middleware file.
-   * Exposed deliberately so both files share one authoritative state store.
-   * Do not re-export or leak this reference further up the call stack.
-   */
+  /** Process-local strike registry, shared with the perimeter middleware. */
   strikeRegistry,
+
+  /** Registry admission and lifecycle helpers. */
+  admitTrap,
+  cleanupStrikeRegistry,
+  finalizeTrap,
+  isStruck,
+  recordFrontGateBlock,
+
+  /** Internal resource limits, exported for focused integration coverage. */
+  MAX_ACTIVE_TRAPS,
+  MAX_STRIKE_ENTRIES,
+  STRIKE_TTL_MS,
+  CLEANUP_INTERVAL_MS,
+  CLEANUP_BATCH_SIZE,
+  LOG_SUPPRESSION_INTERVAL_MS,
+  MAX_TRAP_HOLD_MS,
+
+  /** Read-only view of process-local active trap reservations. */
+  getActiveTrapCount: () => activeTrapCount,
 
   /** Real-IP resolver — proxy-aware, test-safe. */
   resolveIp,

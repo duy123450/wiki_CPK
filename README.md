@@ -33,6 +33,7 @@ No deadline. No team. Just code, ship, iterate. 🚀
   - OAuth: Google, X (Twitter), Discord, GitHub (all optional)
   - JWT tokens (15m access, 30d refresh)
   - Role-based access control (RBAC) for admin routes
+- **Admin API:** Cache clearing requires a valid access token and the `admin` role. `ADMIN_SECRET_PEPPER` optionally enables MTD: when omitted, only MTD is disabled and the route is `POST /api/v1/admin/soundtrack/cache/clear`; when set to at least 32 characters, use `POST /api/v1/admin/<token>/soundtrack/cache/clear`. MTD is an additional route gate, not authentication or authorization. The client cache helper requires its caller to pass the active MTD token, or `null` when MTD is disabled. See the [Security Defense guide](docs/security_defense.md).
 - **Real-time Updates:** Live user counter + socket.io
 - **Music Player:** YouTube iframe, shuffle/loop, timeline control
 - **Synchronized Lyrics:** Millisecond-precise lyrics highlight + auto-scroll (Japanese, Romaji, Vietnamese)
@@ -200,7 +201,7 @@ VITE_OPEN_CATEGORY_COOKIE=cpkSidebarOpenCategory
 
 ## 📡 API Overview
 
-All endpoints are prefixed with `/api/v1/wiki`. See [server/modules/](server/modules/) for full route definitions.
+Wiki endpoints are prefixed with `/api/v1/wiki`; the Admin API is separate. See [server/modules/](server/modules/) for full route definitions and the [Security Defense guide](docs/security_defense.md) for Admin API details.
 
 | Module                | Endpoint                      | Methods | Description                                 |
 | --------------------- | ----------------------------- | ------- | ------------------------------------------- |
@@ -211,9 +212,6 @@ All endpoints are prefixed with `/api/v1/wiki`. See [server/modules/](server/mod
 |                       | `/auth/{provider}/callback` | GET     | OAuth callback handler                      |
 | **Characters**  | `/characters`               | GET     | List all characters (paginated, filterable) |
 |                       | `/characters/{id}`          | GET     | Get character by ID                         |
-|                       | `/characters`               | POST    | Create character (admin only)               |
-|                       | `/characters/{id}`          | PATCH   | Update character (admin only)               |
-|                       | `/characters/{id}`          | DELETE  | Delete character (admin only)               |
 | **Wiki/Movies** | `/movies`                   | GET     | List all movies                             |
 |                       | `/movies/{id}`              | GET     | Get movie details                           |
 |                       | `/categories`               | GET     | List wiki categories                        |

@@ -25,15 +25,9 @@ const connectDB = require('./config/db')
 const notFoundMiddleware = require('./middleware/not-found')
 const errorHandlerMiddleware = require('./middleware/error-handler')
 
-// Import Admin Perimeter (Moving Target Defense engine)
-// NOTE: adminPerimeter.js throws on startup if ADMIN_SECRET_PEPPER is missing/short.
-//       This is intentional — fail fast rather than boot with a broken perimeter.
-const { getCurrentAdminPath, HONEYPOT_PATHS } = require('./modules/adminPerimeter/adminPerimeter')
-const {
-  frontGateFilter,
-  checkDynamicRoute,
-  tarpitTrap,
-} = require('./modules/adminPerimeter/adminPerimeter.middleware')
+// Import Admin Perimeter
+const { MTD_ENABLED, HONEYPOT_PATHS } = require('./modules/adminPerimeter/adminPerimeter')
+const { frontGateFilter, tarpitTrap } = require('./modules/adminPerimeter/adminPerimeter.middleware')
 
 // Import Routers
 const wikiRouter = require('./modules/wiki/wiki.route')
@@ -41,6 +35,7 @@ const nextTrackRouter = require('./modules/soundtrack/soundtrack.route')
 const characterRouter = require('./modules/characters/character.route')
 const authRouter = require('./modules/auth/auth.route')
 const legalRouter = require('./modules/legal/legal.route')
+const adminRouter = require('./modules/admin/admin.route')
 
 // Allowed Origins & Options
 const isProd = envConfig.NODE_ENV === 'production'
@@ -159,27 +154,18 @@ app.get('/api/v1/wiki/csrf-token', (_req, res) => res.sendStatus(204))
 app.use(passport.initialize())
 
 // ─── PERIMETER LAYER 2: Honeypot Tarpit ─────────────────────────────────────
-// Mount BEFORE application routes. Any request to a known scanner bait path
-// is immediately absorbed by the tarpit — legitimate routes are never reached.
-// The tarpit also blacklists the offending IP so all future requests are
-// killed at Layer 1 (frontGateFilter) with zero overhead.
-app.use(HONEYPOT_PATHS, tarpitTrap)
+// Exact decoy paths only. Descendant API paths must continue to their routers.
+app.all(HONEYPOT_PATHS, tarpitTrap)
 
 // 2. Routes
+// Admin router applies authentication and admin-only RBAC centrally. Its MTD
+// check, when enabled, runs after both checks inside the router.
+app.use('/api/v1/admin', adminRouter)
 app.use('/api/v1/wiki', wikiRouter)
 app.use('/api/v1/wiki/soundtrack', nextTrackRouter)
 app.use('/api/v1/wiki/characters', characterRouter)
 app.use('/api/v1/wiki/auth', authRouter)
 app.use('/api/v1/legal', legalRouter)
-
-// ─── PERIMETER LAYER 3: Rolling Admin Route ──────────────────────────────────
-// The admin path rotates every 60 seconds via HMAC-SHA256(PEPPER, window).
-// An invalid/expired token triggers tarpitTrap and blacklists the IP.
-// Mount AFTER application routes to avoid interfering with public API paths.
-app.use('/api/v1/admin/:token', checkDynamicRoute, (_req, res) => {
-  // Placeholder: replace this handler with your real admin router
-  res.json({ ok: true, message: 'Admin perimeter validated' })
-})
 
 // 3. Error Handling
 app.use(notFoundMiddleware)
@@ -194,14 +180,7 @@ const start = async () => {
     server.listen(port, () => {
       console.log(`Server is listening on port ${port}...`)
 
-      // Log the current rolling admin path so the admin knows where to go.
-      // In production, pipe this to a secure internal channel (not stdout).
-      const { path: adminPath, expiresInMs } = getCurrentAdminPath()
-      logSecurityEvent('PERIMETER_ADMIN_PATH', {
-        adminPath,
-        expiresInMs,
-        note: 'This path rotates every 60 seconds. Do not share it.',
-      })
+      logSecurityEvent('PERIMETER_MTD_STATUS', { enabled: MTD_ENABLED })
     })
   } catch (error) {
     console.log('Connection failed: ', error.message)
