@@ -64,13 +64,13 @@ function SkeletonCard() {
 // ─── Search bar ───────────────────────────────────────────────────────────────
 function SearchBar({ value, onChange }) {
   return (
-    <div className="st-search-wrap">
-      <svg className="st-search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <div className="relative w-full max-w-[420px]">
+      <svg className="pointer-events-none absolute left-[14px] top-1/2 -translate-y-1/2 text-[var(--st-muted)]" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="11" cy="11" r="8" />
         <line x1="21" y1="21" x2="16.65" y2="16.65" />
       </svg>
       <input
-        className="st-search"
+        className="box-border w-full rounded-[99px] border border-solid border-[var(--st-border)] bg-[var(--st-surface)] py-[0.65rem] pl-[2.4rem] pr-[2.6rem] text-[0.875rem] text-[var(--st-text)] outline-none transition-[border-color,box-shadow] duration-200 focus:border-[var(--st-purple)] focus:shadow-[0_0_0_3px_hsl(272,78%,62%,0.18)]"
         type="text"
         placeholder="Search tracks…"
         value={value}
@@ -78,7 +78,13 @@ function SearchBar({ value, onChange }) {
         aria-label="Search tracks"
       />
       {value && (
-        <button className="st-search-clear" onClick={() => onChange('')} aria-label="Clear search">✕</button>
+        <button
+          className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer rounded border-0 bg-transparent px-1 py-[2px] text-[0.8rem] leading-none text-[var(--st-muted)] transition-colors duration-150 hover:text-[var(--st-text)]"
+          onClick={() => onChange('')}
+          aria-label="Clear search"
+        >
+          ✕
+        </button>
       )}
     </div>
   )

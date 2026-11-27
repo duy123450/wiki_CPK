@@ -320,104 +320,12 @@
     }
 }
 
-.chrs-card:hover {
-    border-color: var(--chrs-border-bright);
-    transform: translateY(-4px);
-    box-shadow:
-        0 12px 40px rgba(0, 0, 0, 0.4),
-        0 0 0 1px rgba(192, 132, 252, 0.12);
-}
-
 /* Card image */
 .chrs-card-img-wrap {
     position: relative;
     aspect-ratio: 3 / 4;
     overflow: hidden;
     background: rgba(10, 8, 28, 0.8);
-}
-
-.chrs-card-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: top center;
-    display: block;
-    transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.chrs-card:hover .chrs-card-img {
-    transform: scale(1.05);
-}
-
-.chrs-card-img-placeholder {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, #1a1030, #0d0820);
-}
-
-.chrs-card-glyph {
-    font-size: 40px;
-    color: var(--chrs-subtle);
-}
-
-/* Bottom scrim */
-.chrs-card-img-scrim {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 40%;
-    background: linear-gradient(to top, rgba(5, 4, 15, 0.85), transparent);
-    pointer-events: none;
-    z-index: 2;
-}
-
-/* Decorative corners */
-.chrs-card-corner {
-    position: absolute;
-    width: 14px;
-    height: 14px;
-    z-index: 3;
-    pointer-events: none;
-    transition: border-color 0.25s;
-}
-
-.chrs-card-corner--tl {
-    top: 7px;
-    left: 7px;
-    border-top: 1.5px solid rgba(232, 201, 122, 0.4);
-    border-left: 1.5px solid rgba(232, 201, 122, 0.4);
-}
-
-.chrs-card-corner--tr {
-    top: 7px;
-    right: 7px;
-    border-top: 1.5px solid rgba(232, 201, 122, 0.4);
-    border-right: 1.5px solid rgba(232, 201, 122, 0.4);
-}
-
-.chrs-card-corner--bl {
-    bottom: 7px;
-    left: 7px;
-    border-bottom: 1.5px solid rgba(232, 201, 122, 0.4);
-    border-left: 1.5px solid rgba(232, 201, 122, 0.4);
-}
-
-.chrs-card-corner--br {
-    bottom: 7px;
-    right: 7px;
-    border-bottom: 1.5px solid rgba(232, 201, 122, 0.4);
-    border-right: 1.5px solid rgba(232, 201, 122, 0.4);
-}
-
-.chrs-card:hover .chrs-card-corner--tl,
-.chrs-card:hover .chrs-card-corner--tr,
-.chrs-card:hover .chrs-card-corner--bl,
-.chrs-card:hover .chrs-card-corner--br {
-    border-color: var(--chrs-gold);
 }
 
 /* Card body */
@@ -444,72 +352,6 @@
     width: fit-content;
 }
 
-.chrs-card-name {
-    font-family: 'Inter', sans-serif;
-    font-size: clamp(14px, 2vw, 17px);
-    font-weight: 600;
-    color: var(--chrs-text);
-    margin: 0;
-    line-height: 1.25;
-    letter-spacing: 0.03em;
-}
-
-.chrs-card-voice {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin: 0;
-    font-size: 11.5px;
-    color: rgba(240, 232, 255, 0.55);
-}
-
-.chrs-card-voice-label {
-    font-family: 'Inter', sans-serif;
-    font-size: 8px;
-    letter-spacing: 0.2em;
-    color: var(--chrs-teal);
-    opacity: 0.8;
-}
-
-.chrs-card-summary {
-    font-size: 12.5px;
-    line-height: 1.7;
-    color: rgba(240, 232, 255, 0.55);
-    margin: 0;
-    font-weight: 300;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    flex: 1;
-}
-
-.chrs-card-cta {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    font-family: 'Inter', sans-serif;
-    font-size: 9.5px;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--chrs-purple);
-    opacity: 0.75;
-    margin-top: 4px;
-    transition: opacity 0.2s, gap 0.2s;
-}
-
-.chrs-card:hover .chrs-card-cta {
-    opacity: 1;
-    gap: 8px;
-}
-
-.chrs-card-arrow {
-    transition: transform 0.2s;
-}
-
-.chrs-card:hover .chrs-card-arrow {
-    transform: translateX(3px);
-}
 
 /* ── Skeleton ────────────────────────────────────────────────────────────────── */
 .chrs-card--skeleton {

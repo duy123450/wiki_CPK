@@ -1,3 +1,5 @@
+@tailwind utilities;
+
 :root {
   background-color: #0f0e1a;
   --sidebar-current-width: 260px;

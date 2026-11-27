@@ -4,33 +4,12 @@ export default function LiveUserCount() {
   const userCount = useLiveUserCount()
 
   return (
-    <div
-      className="live-user-count"
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '8px',
-        justifyContent: 'center',
-      }}
-    >
+    <div className="live-user-count flex items-center justify-center gap-2">
       <span
-        style={{
-          width: '10px',
-          height: '10px',
-          backgroundColor: '#4ade80',
-          borderRadius: '50%',
-          display: 'inline-block',
-          animation: 'pulse 1.5s infinite',
-        }}
+        className="inline-block h-[10px] w-[10px] animate-[pulse_1.5s_infinite] rounded-full bg-[#4ade80]"
       />
       <span
-        style={{
-          fontSize: '11px',
-          color: 'var(--text-secondary, #8b7da8)',
-          fontFamily: "'Inter', sans-serif",
-          fontWeight: 500,
-          letterSpacing: '0.02em',
-        }}
+        className="font-['Inter',sans-serif] text-[11px] font-medium tracking-[0.02em] text-[var(--text-secondary,#8b7da8)]"
       >
         Có {userCount} con dân CPK đang online
       </span>

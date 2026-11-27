@@ -27,10 +27,13 @@ describe('GoogleLoginButton', () => {
   it('renders the Google login button', () => {
     render(<GoogleLoginButton />)
 
-    expect(
-      screen.getByRole('button', { name: 'Sign in with Google' })
-    ).toBeInTheDocument()
-    expect(document.querySelector('.auth-google-icon')).toBeInTheDocument()
+    const button = screen.getByRole('button', { name: 'Sign in with Google' })
+    const icon = button.querySelector('svg[aria-hidden="true"]')
+
+    expect(button).toBeInTheDocument()
+    expect(icon).toBeInTheDocument()
+    expect(icon).toHaveAttribute('viewBox', '0 0 24 24')
+    expect(icon.querySelectorAll('path')).toHaveLength(4)
   })
 
   it('redirects to the backend Google OAuth route', async () => {

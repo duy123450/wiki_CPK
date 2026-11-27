@@ -18,7 +18,7 @@ export default defineConfig({
   },
 
   css: {
-    transformer: 'lightningcss',
+    transformer: 'postcss',
     lightningcss: {
       targets: {
         safari: 14,
@@ -28,6 +28,7 @@ export default defineConfig({
 
   build: {
     cssMinify: 'lightningcss',
+    cssTarget: 'safari14',
     sourcemap: false,
     reportCompressedSize: false,
     target: 'esnext',

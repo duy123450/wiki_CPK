@@ -8,12 +8,12 @@ export default function GoogleLoginButton() {
   return (
     <button
       type="button"
-      className="auth-google-button"
+      className="inline-flex h-[52px] w-[52px] cursor-pointer items-center justify-center rounded-[14px] border border-solid border-[rgba(255,255,255,0.15)] bg-[rgba(255,255,255,0.04)] text-white [transition:all_0.25s_cubic-bezier(0.4,0,0.2,1)] hover:border-[var(--auth-purple)] hover:bg-[rgba(192,132,252,0.12)] hover:shadow-[0_8px_24px_rgba(192,132,252,0.15)] hover:[transform:translateY(-2px)]"
       onClick={handleClick}
       aria-label="Sign in with Google"
     >
       <svg
-        className="auth-google-icon"
+        className="block h-6 w-6 flex-none overflow-visible"
         viewBox="0 0 24 24"
         aria-hidden="true"
         focusable="false"
