@@ -75,27 +75,33 @@ describe('CharacterPage', () => {
     )
   })
 
-  it('keeps ImageSwitcher styling hooks and its 260 ms fade behavior', async () => {
+  it('preserves image switching and its 260 ms fade behavior', async () => {
     vi.useFakeTimers()
     renderPage()
 
-    expect(document.querySelectorAll('.chr-img-corner')).toHaveLength(4)
+    expect(screen.getByAltText('character view 1')).toHaveAttribute(
+      'src',
+      '/kaguya-real.png'
+    )
     expect(screen.getByAltText('character view 1')).toHaveClass(
-      'chr-img-main',
-      'chr-img-fade-in'
+      'animate-[imgFadeIn_0.28s_ease_forwards]'
     )
 
     fireEvent.click(screen.getByRole('button', { name: 'Tsukuyomi' }))
     expect(screen.getByAltText('character view 1')).toHaveClass(
-      'chr-img-fade-out'
+      'animate-[imgFadeOut_0.26s_ease_forwards]'
     )
 
     await act(async () => {
       vi.advanceTimersByTime(260)
     })
 
+    expect(screen.getByAltText('character view 2')).toHaveAttribute(
+      'src',
+      '/kaguya-tsukuyomi.png'
+    )
     expect(screen.getByAltText('character view 2')).toHaveClass(
-      'chr-img-fade-in'
+      'animate-[imgFadeIn_0.28s_ease_forwards]'
     )
   })
 })
