@@ -7,6 +7,21 @@ import '../styles/CharactersPage.css'
 
 import { generateParticles } from '../utils/uiUtils'
 
+const ROLE_BADGE_BACKGROUNDS = {
+  Protagonist: 'rgba(232, 201, 122, 0.1)',
+  Supporting: 'rgba(103, 232, 249, 0.1)',
+  Antagonist: 'rgba(249, 168, 212, 0.1)',
+  Cameo: 'rgba(240, 232, 255, 0.035)',
+}
+
+const ACTIVE_ROLE_BACKGROUNDS = {
+  All: 'rgba(192, 132, 252, 0.12)',
+  Protagonist: 'rgba(232, 201, 122, 0.12)',
+  Supporting: 'rgba(103, 232, 249, 0.12)',
+  Antagonist: 'rgba(249, 168, 212, 0.12)',
+  Cameo: 'rgba(240, 232, 255, 0.042)',
+}
+
 // ─── Floating particles ───────────────────────────────────────────────────────
 function Particles() {
   const [pts] = useState(() => generateParticles(35))
@@ -15,7 +30,7 @@ function Particles() {
       {pts.map((p) => (
         <span
           key={p.id}
-          className="chrs-particle absolute rounded-full bg-[rgba(192,132,252,0.7)]"
+          className="absolute rounded-full bg-[rgba(192,132,252,0.7)] animate-[chrsParticleDrift_6s_ease-in-out_infinite]"
           style={{
             left: p.left,
             top: p.top,
@@ -33,10 +48,15 @@ function Particles() {
 // ─── Role badge ───────────────────────────────────────────────────────────────
 
 function RoleBadge({ role }) {
+  const badgeColor = ROLE_COLORS[role] ?? 'var(--wiki-purple)'
   return (
     <span
-      className="chrs-role-badge"
-      style={{ '--badge-color': ROLE_COLORS[role] ?? 'var(--wiki-purple)' }}
+      className="inline-flex w-fit items-center rounded-full border border-solid border-[var(--badge-color,var(--chrs-purple))] px-[10px] py-[3px] font-['Inter',sans-serif] text-[8.5px] uppercase tracking-[0.2em] text-[var(--badge-color,var(--chrs-purple))]"
+      style={{
+        '--badge-color': badgeColor,
+        backgroundColor:
+          ROLE_BADGE_BACKGROUNDS[role] ?? 'rgba(192, 132, 252, 0.1)',
+      }}
     >
       {role}
     </span>
@@ -49,14 +69,14 @@ function RoleBadge({ role }) {
 // ─── Skeleton card ────────────────────────────────────────────────────────────
 function SkeletonCard() {
   return (
-    <div className="chrs-card chrs-card--skeleton">
-      <div className="chrs-card-img-wrap chrs-skeleton-img" />
-      <div className="chrs-card-body">
-        <div className="chrs-skeleton-bar w-24" />
-        <div className="chrs-skeleton-bar w-48" />
-        <div className="chrs-skeleton-bar w-36" />
-        <div className="chrs-skeleton-bar w-full" />
-        <div className="chrs-skeleton-bar w-3/4" />
+    <div className="pointer-events-none flex flex-col overflow-hidden rounded-xl border border-solid border-[var(--chrs-border)] bg-[var(--chrs-surface)] [animation:none]">
+      <div className="aspect-[3/4] bg-[linear-gradient(90deg,rgba(255,255,255,0.03)_0%,rgba(255,255,255,0.08)_50%,rgba(255,255,255,0.03)_100%)] bg-[length:200%_100%] animate-[skeletonSlide_1.6s_infinite]" />
+      <div className="flex flex-1 flex-col gap-[7px] px-[18px] pb-[18px] pt-4">
+        <div className="mb-[2px] h-[14px] w-[24%] rounded-[4px] bg-[linear-gradient(90deg,rgba(255,255,255,0.03)_0%,rgba(255,255,255,0.08)_50%,rgba(255,255,255,0.03)_100%)] bg-[length:200%_100%] animate-[skeletonSlide_1.6s_infinite]" />
+        <div className="mb-[2px] h-[14px] w-[48%] rounded-[4px] bg-[linear-gradient(90deg,rgba(255,255,255,0.03)_0%,rgba(255,255,255,0.08)_50%,rgba(255,255,255,0.03)_100%)] bg-[length:200%_100%] animate-[skeletonSlide_1.6s_infinite]" />
+        <div className="mb-[2px] h-[14px] w-[36%] rounded-[4px] bg-[linear-gradient(90deg,rgba(255,255,255,0.03)_0%,rgba(255,255,255,0.08)_50%,rgba(255,255,255,0.03)_100%)] bg-[length:200%_100%] animate-[skeletonSlide_1.6s_infinite]" />
+        <div className="mb-[2px] h-[14px] w-full rounded-[4px] bg-[linear-gradient(90deg,rgba(255,255,255,0.03)_0%,rgba(255,255,255,0.08)_50%,rgba(255,255,255,0.03)_100%)] bg-[length:200%_100%] animate-[skeletonSlide_1.6s_infinite]" />
+        <div className="mb-[2px] h-[14px] w-3/4 rounded-[4px] bg-[linear-gradient(90deg,rgba(255,255,255,0.03)_0%,rgba(255,255,255,0.08)_50%,rgba(255,255,255,0.03)_100%)] bg-[length:200%_100%] animate-[skeletonSlide_1.6s_infinite]" />
       </div>
     </div>
   )
@@ -108,12 +128,17 @@ function FilterBar({ search, onSearch, role, onRole, roles, total, showing }) {
         {roles.map((r) => (
           <button
             key={r}
-            className={`cursor-pointer whitespace-nowrap rounded-[999px] border border-solid border-[var(--chrs-border)] bg-[var(--chrs-surface)] px-[14px] py-[6px] font-['Inter',sans-serif] text-[9.5px] uppercase tracking-[0.16em] text-[var(--chrs-muted)] transition-all duration-200 hover:border-[rgba(192,132,252,0.3)] hover:bg-[var(--chrs-surface-hover)] hover:text-[var(--chrs-text)] ${role === r ? 'chrs-role-pill--active' : ''}`}
+            className={`cursor-pointer whitespace-nowrap rounded-[999px] border border-solid border-[var(--chrs-border)] bg-[var(--chrs-surface)] px-[14px] py-[6px] font-['Inter',sans-serif] text-[9.5px] uppercase tracking-[0.16em] text-[var(--chrs-muted)] transition-all duration-200 hover:border-[rgba(192,132,252,0.3)] hover:bg-[var(--chrs-surface-hover)] hover:text-[var(--chrs-text)] ${role === r ? 'border-[var(--pill-color,var(--chrs-purple))] text-[var(--pill-color,var(--chrs-purple))]' : ''}`}
             onClick={() => onRole(r)}
             style={
-              role === r && r !== 'All'
-                ? { '--pill-color': ROLE_COLORS[r] ?? 'var(--chrs-purple)' }
-                : {}
+              role === r
+                ? {
+                    '--pill-color': ROLE_COLORS[r] ?? 'var(--chrs-purple)',
+                    backgroundColor:
+                      ACTIVE_ROLE_BACKGROUNDS[r] ??
+                      'rgba(192, 132, 252, 0.12)',
+                  }
+                : undefined
             }
           >
             {r}
@@ -166,7 +191,7 @@ function Pagination({ current, total, onChange }) {
         ) : (
           <button
             key={item}
-            className={`min-w-[36px] cursor-pointer rounded-[6px] border border-solid border-[var(--chrs-border)] bg-[var(--chrs-surface)] px-[12px] py-[7px] font-['Inter',sans-serif] text-[11px] leading-none tracking-[0.1em] text-[var(--chrs-muted)] transition-all duration-200 hover:border-[rgba(192,132,252,0.35)] hover:bg-[var(--chrs-surface-hover)] hover:text-[var(--chrs-text)] ${item === current ? 'chrs-page-btn--active' : ''}`}
+            className={`min-w-[36px] cursor-pointer rounded-[6px] border border-solid border-[var(--chrs-border)] bg-[var(--chrs-surface)] px-[12px] py-[7px] font-['Inter',sans-serif] text-[11px] leading-none tracking-[0.1em] text-[var(--chrs-muted)] transition-all duration-200 hover:border-[rgba(192,132,252,0.35)] hover:bg-[var(--chrs-surface-hover)] hover:text-[var(--chrs-text)] ${item === current ? 'border-[#c084fc] bg-[rgba(192,132,252,0.1)] text-[#c084fc]' : ''}`}
             onClick={() => onChange(item)}
             aria-current={item === current ? 'page' : undefined}
           >
