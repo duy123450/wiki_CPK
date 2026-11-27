@@ -9,11 +9,11 @@ import TrackCard from '../components/Track/TrackCard';
 function Particles() {
   const [pts] = useState(() => generateParticles(30))
   return (
-    <div className="st-particles" aria-hidden="true">
+    <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden" aria-hidden="true">
       {pts.map((p) => (
         <span
           key={p.id}
-          className="st-particle"
+          className="absolute rounded-full bg-[rgba(192,132,252,0.7)] animate-[st-float_6s_ease-in-out_infinite]"
           style={{
             left: p.left,
             top: p.top,
@@ -35,10 +35,32 @@ const TYPE_COLORS = {
   'Insert Song': 'hsl(330, 70%, 62%)',
 }
 
+const TYPE_BADGE_STYLES = {
+  Opening: {
+    backgroundColor: 'hsla(280, 80%, 65%, 0.15)',
+    borderColor: 'hsla(280, 80%, 65%, 0.4)',
+  },
+  Ending: {
+    backgroundColor: 'hsla(220, 75%, 65%, 0.15)',
+    borderColor: 'hsla(220, 75%, 65%, 0.4)',
+  },
+  'Insert Song': {
+    backgroundColor: 'hsla(330, 70%, 62%, 0.15)',
+    borderColor: 'hsla(330, 70%, 62%, 0.4)',
+  },
+}
+
 function TrackTypeBadge({ type }) {
   const color = TYPE_COLORS[type] ?? 'var(--st-purple)'
+  const badgeStyle = TYPE_BADGE_STYLES[type] ?? {
+    backgroundColor: 'rgba(192, 132, 252, 0.15)',
+    borderColor: 'rgba(192, 132, 252, 0.4)',
+  }
   return (
-    <span className="st-type-badge" style={{ '--badge-color': color }}>
+    <span
+      className="inline-block w-fit rounded-[99px] border border-solid px-[0.6rem] py-[0.2rem] text-[0.65rem] font-bold uppercase tracking-[0.08em]"
+      style={{ color, ...badgeStyle }}
+    >
       {type ?? 'Track'}
     </span>
   )
@@ -49,13 +71,13 @@ function TrackTypeBadge({ type }) {
 // ─── Skeleton card ────────────────────────────────────────────────────────────
 function SkeletonCard() {
   return (
-    <div className="st-card st-card--skeleton">
-      <div className="st-card-disc st-skeleton-disc" />
-      <div className="st-card-cover st-skeleton-cover" />
-      <div className="st-card-body">
-        <div className="st-skeleton-bar" style={{ width: '5rem' }} />
-        <div className="st-skeleton-bar" style={{ width: '11rem' }} />
-        <div className="st-skeleton-bar" style={{ width: '8rem' }} />
+    <div className="st-card--skeleton pointer-events-none relative flex flex-col overflow-hidden rounded-[var(--st-radius)] border border-solid border-[var(--st-border)] bg-[var(--st-surface)] opacity-100 [animation:none]">
+      <div className="absolute right-[10px] top-[10px] z-[2] flex h-[38px] w-[38px] items-center justify-center overflow-hidden rounded-full border-2 border-solid border-[var(--st-border)] bg-[var(--st-border)] animate-[st-shimmer_1.6s_ease-in-out_infinite]" />
+      <div className="relative h-[160px] shrink-0 bg-[linear-gradient(90deg,var(--st-border)_25%,hsl(228,18%,16%)_50%,var(--st-border)_75%)] bg-[length:200%_100%] animate-[st-shimmer_1.6s_ease-in-out_infinite]" />
+      <div className="flex flex-1 flex-col gap-[0.35rem] px-4 pt-[0.9rem] pb-4">
+        <div className="my-1 h-3 rounded bg-[linear-gradient(90deg,var(--st-border)_25%,hsl(228,18%,16%)_50%,var(--st-border)_75%)] bg-[length:200%_100%] animate-[st-shimmer_1.6s_ease-in-out_infinite]" style={{ width: '5rem' }} />
+        <div className="my-1 h-3 rounded bg-[linear-gradient(90deg,var(--st-border)_25%,hsl(228,18%,16%)_50%,var(--st-border)_75%)] bg-[length:200%_100%] animate-[st-shimmer_1.6s_ease-in-out_infinite]" style={{ width: '11rem' }} />
+        <div className="my-1 h-3 rounded bg-[linear-gradient(90deg,var(--st-border)_25%,hsl(228,18%,16%)_50%,var(--st-border)_75%)] bg-[length:200%_100%] animate-[st-shimmer_1.6s_ease-in-out_infinite]" style={{ width: '8rem' }} />
       </div>
     </div>
   )
@@ -93,15 +115,42 @@ function SearchBar({ value, onChange }) {
 // ─── Type filter pills ────────────────────────────────────────────────────────
 const TYPES = ['All', ...Object.keys(TYPE_COLORS)]
 
+const ACTIVE_TYPE_STYLES = {
+  All: {
+    backgroundColor: 'rgba(192, 132, 252, 0.18)',
+    borderColor: 'var(--st-purple)',
+    color: 'var(--st-purple)',
+    boxShadow: '0 0 12px rgba(192, 132, 252, 0.3)',
+  },
+  Opening: {
+    backgroundColor: 'hsla(280, 80%, 65%, 0.18)',
+    borderColor: TYPE_COLORS.Opening,
+    color: TYPE_COLORS.Opening,
+    boxShadow: '0 0 12px hsla(280, 80%, 65%, 0.3)',
+  },
+  Ending: {
+    backgroundColor: 'hsla(220, 75%, 65%, 0.18)',
+    borderColor: TYPE_COLORS.Ending,
+    color: TYPE_COLORS.Ending,
+    boxShadow: '0 0 12px hsla(220, 75%, 65%, 0.3)',
+  },
+  'Insert Song': {
+    backgroundColor: 'hsla(330, 70%, 62%, 0.18)',
+    borderColor: TYPE_COLORS['Insert Song'],
+    color: TYPE_COLORS['Insert Song'],
+    boxShadow: '0 0 12px hsla(330, 70%, 62%, 0.3)',
+  },
+}
+
 function TypePills({ active, onSelect }) {
   return (
     <div className="flex flex-wrap justify-center gap-[0.4rem]">
       {TYPES.map((t) => (
         <button
           key={t}
-          className={`cursor-pointer rounded-[99px] border border-solid border-[var(--st-border)] bg-[var(--st-surface)] px-[0.9rem] py-[0.3rem] text-[0.78rem] font-semibold text-[var(--st-muted)] transition-all duration-200 hover:border-[var(--st-purple)] hover:text-[var(--st-text)] ${active === t ? 'st-type-pill--active' : ''}`}
+          className="cursor-pointer rounded-[99px] border border-solid border-[var(--st-border)] bg-[var(--st-surface)] px-[0.9rem] py-[0.3rem] text-[0.78rem] font-semibold text-[var(--st-muted)] transition-all duration-200 hover:border-[var(--st-purple)] hover:text-[var(--st-text)]"
           onClick={() => onSelect(t)}
-          style={active === t && t !== 'All' ? { '--pill-color': TYPE_COLORS[t] } : {}}
+          style={active === t ? ACTIVE_TYPE_STYLES[t] : undefined}
         >
           {t}
         </button>
