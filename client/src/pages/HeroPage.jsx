@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/purity */
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import useMovieInfo from '../hooks/useMovieInfo'
@@ -11,11 +10,11 @@ function Stars() {
   const [stars] = useState(() => generateStars(60))
 
   return (
-    <div className="hero-stars" aria-hidden="true">
+    <div className="hero-stars absolute inset-0 z-[2] pointer-events-none" aria-hidden="true">
       {stars.map((s) => (
         <span
           key={s.id}
-          className="hero-star"
+          className="hero-star absolute rounded-full bg-white animate-[starPulse_4s_ease-in-out_infinite]"
           style={{
             left: s.left,
             top: s.top,
@@ -33,10 +32,10 @@ function Stars() {
 // ─── shimmer ──────────────────────────────────────────────────────────────────
 function Shimmer() {
   return (
-    <div className="hero-shimmer">
-      <div className="shimmer-bar w-60" />
-      <div className="shimmer-bar w-40" />
-      <div className="shimmer-bar w-52" />
+    <div className="hero-shimmer flex flex-col items-center gap-4">
+      <div className="shimmer-bar h-4 w-[240px] rounded-lg bg-[linear-gradient(90deg,rgba(255,255,255,0.04)_0%,rgba(255,255,255,0.12)_50%,rgba(255,255,255,0.04)_100%)] bg-[length:200%_100%] animate-[shimmerSlide_1.5s_infinite]" />
+      <div className="shimmer-bar h-4 w-[160px] rounded-lg bg-[linear-gradient(90deg,rgba(255,255,255,0.04)_0%,rgba(255,255,255,0.12)_50%,rgba(255,255,255,0.04)_100%)] bg-[length:200%_100%] animate-[shimmerSlide_1.5s_infinite]" />
+      <div className="shimmer-bar h-4 w-[200px] rounded-lg bg-[linear-gradient(90deg,rgba(255,255,255,0.04)_0%,rgba(255,255,255,0.12)_50%,rgba(255,255,255,0.04)_100%)] bg-[length:200%_100%] animate-[shimmerSlide_1.5s_infinite]" />
     </div>
   )
 }
@@ -66,13 +65,13 @@ export default function HeroPage() {
   }, [videoSrc])
 
   return (
-    <section className="hero-root">
+    <section className="hero-root relative box-border flex min-h-[100dvh] w-[calc(100%-var(--sidebar-current-width))] max-w-[100vw] items-center justify-center overflow-hidden bg-[#05040f] font-['Source_Sans_3',sans-serif] [margin-left:var(--sidebar-current-width)] [transition:width_0.35s_cubic-bezier(0.4,0,0.2,1),margin-left_0.35s_cubic-bezier(0.4,0,0.2,1)] max-[768px]:ml-0 max-[768px]:w-full">
       {/* ── video ── */}
       {videoSrc ? (
-        <div className="hero-video-wrap">
+        <div className="hero-video-wrap absolute inset-0 z-0 bg-black">
           <video
             ref={videoRef}
-            className={`hero-video${videoReady ? ' ready' : ''}`}
+            className={`hero-video block h-full w-full object-cover transition-opacity duration-[1400ms] ease-out ${videoReady ? 'opacity-100' : 'opacity-0'}`}
             src={videoSrc}
             autoPlay
             loop
@@ -85,47 +84,50 @@ export default function HeroPage() {
           />
         </div>
       ) : (
-        <div className="hero-fallback-bg" />
+        <div className="hero-fallback-bg absolute inset-0 z-0 bg-[radial-gradient(ellipse_at_30%_20%,rgba(192,132,252,0.18)_0%,transparent_55%),radial-gradient(ellipse_at_75%_80%,rgba(103,232,249,0.12)_0%,transparent_55%),#05040f]" />
       )}
 
-      <div className="hero-overlay" />
-      <div className="hero-vignette" />
+      <div className="hero-overlay pointer-events-none absolute inset-0 z-[1] bg-[linear-gradient(to_bottom,rgba(5,4,15,0.55)_0%,rgba(5,4,15,0.1)_35%,rgba(5,4,15,0.1)_65%,rgba(5,4,15,0.8)_100%),linear-gradient(to_right,rgba(5,4,15,0.5)_0%,transparent_30%,transparent_70%,rgba(5,4,15,0.5)_100%)]" />
+      <div className="hero-vignette pointer-events-none absolute inset-0 z-[1] bg-[radial-gradient(ellipse_at_center,transparent_40%,rgba(5,4,15,0.65)_100%)]" />
       <Stars />
 
       {/* ── content ── */}
-      <div className="hero-content">
+      <div className="hero-content relative z-10 flex max-w-[min(760px,92vw)] flex-col items-center gap-[clamp(12px,3vw,24px)] px-[clamp(20px,8vw,80px)] py-[clamp(24px,6vw,60px)] text-center animate-[heroReveal_1.6s_cubic-bezier(0.16,1,0.3,1)_both]">
         {loading ? (
           <Shimmer />
         ) : error ? (
-          <p className="hero-error">Failed to load movie data.</p>
+          <p className="hero-error font-['Inter',sans-serif] text-xs tracking-[0.1em] text-[rgba(255,100,100,0.8)]">Failed to load movie data.</p>
         ) : (
           <>
-            <div className="hero-eyebrow">
-              <span className="hero-eyebrow-dot" />
+            <div className="hero-eyebrow inline-flex items-center gap-2 rounded-full border border-solid border-[rgba(232,201,122,0.35)] bg-[rgba(232,201,122,0.07)] px-[14px] py-[5px] font-['Inter',sans-serif] text-[clamp(9px,2vw,11px)] uppercase tracking-[0.25em] text-[#e8c97a] [backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)] animate-[heroReveal_1.6s_0.15s_cubic-bezier(0.16,1,0.3,1)_both]">
+              <span className="hero-eyebrow-dot h-[5px] w-[5px] rounded-full bg-[#e8c97a] shadow-[0_0_8px_#e8c97a] animate-[dotPulse_2s_ease-in-out_infinite]" />
               Fan Wiki · Now Showing
             </div>
 
-            <h1 className="hero-title">{title}</h1>
+            <h1 className="hero-title m-0 font-['Inter',sans-serif] text-[clamp(28px,7vw,72px)] font-bold leading-[1.08] text-white [text-shadow:0_0_40px_rgba(192,132,252,0.45),0_0_80px_rgba(192,132,252,0.2),0_2px_4px_rgba(0,0,0,0.6)] max-[480px]:break-words animate-[heroReveal_1.6s_0.25s_cubic-bezier(0.16,1,0.3,1)_both]">{title}</h1>
 
-            {tagline && <p className="hero-tagline">"{tagline}"</p>}
+            {tagline && <p className="hero-tagline m-0 font-['Source_Sans_3',sans-serif] text-[clamp(13px,3.2vw,18px)] font-light italic leading-normal tracking-[0.04em] text-[rgba(240,232,255,0.5)] animate-[heroReveal_1.6s_0.4s_cubic-bezier(0.16,1,0.3,1)_both]">"{tagline}"</p>}
 
             {(releaseDate || studio) && (
-              <div className="hero-meta">
+              <div className="hero-meta flex flex-wrap items-center justify-center gap-[10px] animate-[heroReveal_1.6s_0.5s_cubic-bezier(0.16,1,0.3,1)_both]">
                 {releaseDate && (
-                  <span className="hero-meta-chip">{releaseDate}</span>
+                  <span className="hero-meta-chip font-['Inter',sans-serif] text-[clamp(9px,2vw,11px)] uppercase tracking-[0.15em] text-[#67e8f9] opacity-80">{releaseDate}</span>
                 )}
-                {releaseDate && studio && <span className="hero-meta-sep" />}
-                {studio && <span className="hero-meta-chip">{studio}</span>}
+                {releaseDate && studio && <span className="hero-meta-sep h-[3px] w-[3px] rounded-full bg-[#e8c97a] opacity-50" />}
+                {studio && <span className="hero-meta-chip font-['Inter',sans-serif] text-[clamp(9px,2vw,11px)] uppercase tracking-[0.15em] text-[#67e8f9] opacity-80">{studio}</span>}
               </div>
             )}
 
-            <div className="hero-actions">
-              <Link to="/wiki/characters" className="hero-btn hero-btn-primary">
+            <div className="hero-actions flex flex-wrap justify-center gap-[clamp(10px,3vw,16px)] animate-[heroReveal_1.6s_0.6s_cubic-bezier(0.16,1,0.3,1)_both]">
+              <Link
+                to="/wiki/characters"
+                className="hero-btn hero-btn-primary inline-flex items-center gap-2 rounded-md border-0 border-solid px-[clamp(20px,5vw,32px)] py-[clamp(10px,2vw,13px)] bg-[linear-gradient(135deg,#c084fc_0%,#818cf8_100%)] font-['Inter',sans-serif] text-[clamp(10px,2.5vw,12px)] uppercase tracking-[0.15em] text-white no-underline shadow-[0_4px_24px_rgba(192,132,252,0.4)] [transition:all_0.25s_ease] hover:-translate-y-0.5 hover:shadow-[0_8px_32px_rgba(192,132,252,0.6)] active:translate-y-0 focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-[#67e8f9]"
+              >
                 Explore Wiki
               </Link>
               <Link
                 to="/wiki/chou-kaguya-hime-overview"
-                className="hero-btn hero-btn-secondary"
+                className="hero-btn hero-btn-secondary inline-flex items-center gap-2 rounded-md border border-solid border-[rgba(232,201,122,0.4)] px-[clamp(20px,5vw,32px)] py-[clamp(10px,2vw,13px)] bg-transparent font-['Inter',sans-serif] text-[clamp(10px,2.5vw,12px)] uppercase tracking-[0.15em] text-[#e8c97a] no-underline [backdrop-filter:blur(8px)] [-webkit-backdrop-filter:blur(8px)] [transition:all_0.25s_ease] hover:-translate-y-0.5 hover:border-[#e8c97a] hover:bg-[rgba(232,201,122,0.1)] active:translate-y-0 focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-[#67e8f9]"
               >
                 Movie Info
               </Link>
@@ -135,9 +137,9 @@ export default function HeroPage() {
       </div>
 
       {/* ── scroll cue ── */}
-      <div className="hero-scroll-cue" aria-hidden="true">
-        <div className="hero-scroll-line" />
-        <span className="hero-scroll-text">Scroll</span>
+      <div className="hero-scroll-cue absolute bottom-[clamp(20px,5vw,36px)] left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-[6px] animate-[heroReveal_1.6s_0.9s_both]" aria-hidden="true">
+        <div className="hero-scroll-line h-[clamp(30px,5vw,48px)] w-px bg-[linear-gradient(to_bottom,#e8c97a,transparent)] animate-[scrollDrop_2s_ease-in-out_infinite]" />
+        <span className="hero-scroll-text font-['Inter',sans-serif] text-[8px] uppercase tracking-[0.3em] text-[#e8c97a] opacity-50">Scroll</span>
       </div>
     </section>
   )

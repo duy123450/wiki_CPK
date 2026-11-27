@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import NotFoundPage from '@/pages/NotFoundPage'
+import AccessRestrictedPage from '@/pages/AccessRestrictedPage'
 
 const renderPage = (props = {}) =>
   render(
@@ -48,5 +49,40 @@ describe('NotFoundPage', () => {
     const { container } = renderPage()
     const orbField = container.querySelector('.nf-orb-field')
     expect(orbField).toHaveAttribute('aria-hidden', 'true')
+  })
+})
+
+describe('AccessRestrictedPage', () => {
+  it('renders 403 code and restricted content', () => {
+    const { container } = render(
+      <MemoryRouter>
+        <AccessRestrictedPage sidebarCollapsed={false} />
+      </MemoryRouter>
+    )
+    expect(screen.getAllByText('403').length).toBeGreaterThanOrEqual(1)
+    expect(screen.getByText('Access Restricted')).toBeInTheDocument()
+    expect(container.querySelectorAll('.nf-orb')).toHaveLength(18)
+  })
+
+  it('renders login and reload links', () => {
+    render(
+      <MemoryRouter>
+        <AccessRestrictedPage sidebarCollapsed={false} />
+      </MemoryRouter>
+    )
+    expect(screen.getByText('Đăng Nhập').closest('a')).toHaveAttribute('href', '/auth')
+    expect(screen.getByText('Thử Lại (Tải Lại)').closest('a')).toHaveAttribute('href', '/')
+  })
+
+  it('preserves restricted-page text and orb styles', () => {
+    const { container } = render(
+      <MemoryRouter>
+        <AccessRestrictedPage sidebarCollapsed={true} />
+      </MemoryRouter>
+    )
+    expect(container.querySelector('.nf-root')).toHaveClass('sidebar-collapsed')
+    expect(container.querySelector('.nf-code-shadow')).toHaveStyle({
+      color: 'rgba(221, 143, 176, 0.14)',
+    })
   })
 })

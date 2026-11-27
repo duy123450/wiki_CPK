@@ -1,13 +1,9 @@
-/* eslint-disable react-hooks/purity */
 import { useEffect, useRef, useState, useCallback } from 'react'
-import { Link } from 'react-router-dom'
 import { getCharacters, getCharacterRoles } from '../services/api';
 import CharacterCard from '../components/Character/CharacterCard';
 import useMovieInfo from '../hooks/useMovieInfo'
 import { ROLE_COLORS } from '../constants/ui.constants'
 import '../styles/CharactersPage.css'
-
-import { nameToSlug } from '../utils/characterUtils'
 
 import { generateParticles } from '../utils/uiUtils'
 
@@ -15,11 +11,11 @@ import { generateParticles } from '../utils/uiUtils'
 function Particles() {
   const [pts] = useState(() => generateParticles(35))
   return (
-    <div className="chrs-particles" aria-hidden="true">
+    <div className="pointer-events-none fixed inset-0 z-0" aria-hidden="true">
       {pts.map((p) => (
         <span
           key={p.id}
-          className="chrs-particle"
+          className="chrs-particle absolute rounded-full bg-[rgba(192,132,252,0.7)]"
           style={{
             left: p.left,
             top: p.top,
@@ -71,11 +67,11 @@ function SkeletonCard() {
 
 function FilterBar({ search, onSearch, role, onRole, roles, total, showing }) {
   return (
-    <div className="chrs-filter-bar">
+    <div className="relative z-[1] mx-auto mb-8 flex max-w-[1200px] flex-wrap items-center gap-[14px] max-[640px]:flex-col max-[640px]:items-stretch motion-safe:animate-[chrsReveal_0.8s_0.1s_cubic-bezier(0.16,1,0.3,1)_both]">
       {/* Search */}
-      <div className="chrs-search-wrap">
+      <div className="relative min-w-[200px] max-w-[320px] flex-1 max-[640px]:max-w-full">
         <svg
-          className="chrs-search-icon"
+          className="pointer-events-none absolute left-[12px] top-1/2 -translate-y-1/2 text-[var(--chrs-subtle)]"
           width="14"
           height="14"
           viewBox="0 0 24 24"
@@ -89,7 +85,7 @@ function FilterBar({ search, onSearch, role, onRole, roles, total, showing }) {
           <line x1="21" y1="21" x2="16.65" y2="16.65" />
         </svg>
         <input
-          className="chrs-search"
+          className="box-border w-full rounded-[8px] border border-solid border-[var(--chrs-border)] bg-[var(--chrs-surface)] py-[9px] pl-[36px] pr-[36px] font-['Source_Sans_3',sans-serif] text-[13px] text-[var(--chrs-text)] outline-none transition-[border-color,background] duration-[220ms] placeholder:text-[var(--chrs-subtle)] focus:border-[rgba(192,132,252,0.4)] focus:bg-[rgba(255,255,255,0.05)]"
           type="text"
           placeholder="Search characters…"
           value={search}
@@ -98,7 +94,7 @@ function FilterBar({ search, onSearch, role, onRole, roles, total, showing }) {
         />
         {search && (
           <button
-            className="chrs-search-clear"
+            className="absolute right-[10px] top-1/2 -translate-y-1/2 cursor-pointer border-0 bg-transparent px-[4px] py-[2px] font-['Source_Sans_3',sans-serif] text-[11px] text-[var(--chrs-subtle)] transition-colors duration-[180ms] hover:text-[var(--chrs-text)]"
             onClick={() => onSearch('')}
             aria-label="Clear search"
           >
@@ -108,11 +104,11 @@ function FilterBar({ search, onSearch, role, onRole, roles, total, showing }) {
       </div>
 
       {/* Role pills */}
-      <div className="chrs-role-pills">
+      <div className="flex flex-wrap gap-[6px]">
         {roles.map((r) => (
           <button
             key={r}
-            className={`chrs-role-pill ${role === r ? 'chrs-role-pill--active' : ''}`}
+            className={`cursor-pointer whitespace-nowrap rounded-[999px] border border-solid border-[var(--chrs-border)] bg-[var(--chrs-surface)] px-[14px] py-[6px] font-['Inter',sans-serif] text-[9.5px] uppercase tracking-[0.16em] text-[var(--chrs-muted)] transition-all duration-200 hover:border-[rgba(192,132,252,0.3)] hover:bg-[var(--chrs-surface-hover)] hover:text-[var(--chrs-text)] ${role === r ? 'chrs-role-pill--active' : ''}`}
             onClick={() => onRole(r)}
             style={
               role === r && r !== 'All'
@@ -126,8 +122,8 @@ function FilterBar({ search, onSearch, role, onRole, roles, total, showing }) {
       </div>
 
       {/* Count */}
-      <p className="chrs-count">
-        Showing <strong>{showing}</strong> of <strong>{total}</strong>{' '}
+      <p className="ml-auto whitespace-nowrap text-[12px] italic text-[var(--chrs-subtle)] max-[640px]:ml-0">
+        Showing <strong className="font-semibold text-[var(--chrs-muted)]">{showing}</strong> of <strong className="font-semibold text-[var(--chrs-muted)]">{total}</strong>{' '}
         characters
       </p>
     </div>
@@ -152,9 +148,9 @@ function Pagination({ current, total, onChange }) {
   }
 
   return (
-    <nav className="chrs-pagination" aria-label="Character pages">
+    <nav className="relative z-[1] mt-10 flex flex-wrap items-center justify-center gap-[6px]" aria-label="Character pages">
       <button
-        className="chrs-page-btn"
+        className="min-w-[36px] cursor-pointer rounded-[6px] border border-solid border-[var(--chrs-border)] bg-[var(--chrs-surface)] px-[12px] py-[7px] font-['Inter',sans-serif] text-[11px] leading-none tracking-[0.1em] text-[var(--chrs-muted)] transition-all duration-200 enabled:hover:border-[rgba(192,132,252,0.35)] enabled:hover:bg-[var(--chrs-surface-hover)] enabled:hover:text-[var(--chrs-text)] disabled:cursor-not-allowed disabled:opacity-30"
         onClick={() => onChange(current - 1)}
         disabled={current === 1}
         aria-label="Previous page"
@@ -164,13 +160,13 @@ function Pagination({ current, total, onChange }) {
 
       {rendered.map((item, i) =>
         item === '…' ? (
-          <span key={`ellipsis-${i}`} className="chrs-page-ellipsis">
+          <span key={`ellipsis-${i}`} className="select-none px-1 text-[13px] text-[var(--chrs-subtle)]">
             …
           </span>
         ) : (
           <button
             key={item}
-            className={`chrs-page-btn ${item === current ? 'chrs-page-btn--active' : ''}`}
+            className={`min-w-[36px] cursor-pointer rounded-[6px] border border-solid border-[var(--chrs-border)] bg-[var(--chrs-surface)] px-[12px] py-[7px] font-['Inter',sans-serif] text-[11px] leading-none tracking-[0.1em] text-[var(--chrs-muted)] transition-all duration-200 hover:border-[rgba(192,132,252,0.35)] hover:bg-[var(--chrs-surface-hover)] hover:text-[var(--chrs-text)] ${item === current ? 'chrs-page-btn--active' : ''}`}
             onClick={() => onChange(item)}
             aria-current={item === current ? 'page' : undefined}
           >
@@ -180,7 +176,7 @@ function Pagination({ current, total, onChange }) {
       )}
 
       <button
-        className="chrs-page-btn"
+        className="min-w-[36px] cursor-pointer rounded-[6px] border border-solid border-[var(--chrs-border)] bg-[var(--chrs-surface)] px-[12px] py-[7px] font-['Inter',sans-serif] text-[11px] leading-none tracking-[0.1em] text-[var(--chrs-muted)] transition-all duration-200 enabled:hover:border-[rgba(192,132,252,0.35)] enabled:hover:bg-[var(--chrs-surface-hover)] enabled:hover:text-[var(--chrs-text)] disabled:cursor-not-allowed disabled:opacity-30"
         onClick={() => onChange(current + 1)}
         disabled={current === total}
         aria-label="Next page"
@@ -281,19 +277,29 @@ export default function CharactersPage({ sidebarCollapsed }) {
 
   return (
     <main
-      className={`chrs-root ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}
+      className={`chrs-root relative box-border max-w-[100vw] overflow-x-hidden bg-[var(--chrs-bg)] p-[clamp(32px,5vw,60px)_clamp(16px,5vw,56px)_80px] font-['Source_Sans_3',sans-serif] text-[var(--chrs-text)] transition-[width,margin-left] duration-[350ms] ease-[cubic-bezier(0.4,0,0.2,1)] ${
+        sidebarCollapsed
+          ? 'ml-0 w-full'
+          : 'ml-[var(--sidebar-current-width,260px)] w-[calc(100%-var(--sidebar-current-width,260px))]'
+      } max-[768px]:ml-0 max-[768px]:w-full`}
     >
       <Particles />
 
       {/* ── Page header ── */}
-      <header className="chrs-header">
-        <div className="chrs-header-eyebrow">
-          <span className="chrs-eyebrow-dot" />
+      <header className="relative z-[1] mx-auto mb-10 flex max-w-[680px] flex-col items-center gap-[10px] text-center motion-safe:animate-[chrsReveal_0.8s_cubic-bezier(0.16,1,0.3,1)_both]">
+        <div className="inline-flex items-center gap-[7px] font-['Inter',sans-serif] text-[10px] uppercase tracking-[0.28em] text-[var(--chrs-gold)] opacity-[0.85]">
+          <span className="h-[5px] w-[5px] shrink-0 rounded-full bg-[var(--chrs-gold)] shadow-[0_0_8px_var(--chrs-gold)] motion-safe:animate-[dotPulse_2.4s_ease-in-out_infinite]" />
           Fan Wiki · Characters
         </div>
-        <h1 className="chrs-header-title">{headerTitle}</h1>
-        {headerSub && <p className="chrs-header-sub">{headerSub}</p>}
-        <div className="chrs-header-rule" />
+        <h1 className="m-0 font-['Inter',sans-serif] text-[clamp(30px,5vw,56px)] font-bold leading-[1.1] text-white [text-shadow:0_0_50px_rgba(192,132,252,0.35),0_2px_4px_rgba(0,0,0,0.5)]">
+          {headerTitle}
+        </h1>
+        {headerSub && (
+          <p className="m-0 text-[clamp(12px,2vw,15px)] font-light italic tracking-[0.04em] text-[var(--chrs-muted)]">
+            {headerSub}
+          </p>
+        )}
+        <div className="mt-1 h-px w-[clamp(40px,10vw,80px)] border-0 bg-[linear-gradient(to_right,transparent,var(--chrs-gold),transparent)]" />
       </header>
 
       {/* ── Filter bar ── */}
@@ -309,11 +315,11 @@ export default function CharactersPage({ sidebarCollapsed }) {
 
       {/* ── Content ── */}
       {error ? (
-        <div className="chrs-error">
-          <span className="chrs-error-glyph">✦</span>
+        <div className="relative z-[1] col-span-full flex flex-col items-center gap-[14px] px-5 py-20 text-center text-[14px] text-[var(--chrs-muted)]">
+          <span className="block text-[36px] text-[var(--chrs-subtle)]">✦</span>
           <p>{error}</p>
           <button
-            className="chrs-retry-btn"
+            className="mt-1 cursor-pointer rounded-[6px] border border-solid border-[rgba(192,132,252,0.3)] bg-[rgba(192,132,252,0.1)] px-5 py-2 font-['Inter',sans-serif] text-[10px] uppercase tracking-[0.18em] text-[var(--chrs-purple)] transition-[background-color,border-color] duration-200 hover:border-[var(--chrs-purple)] hover:bg-[rgba(192,132,252,0.18)]"
             onClick={() => load(page, search, role)}
           >
             Retry
@@ -321,16 +327,20 @@ export default function CharactersPage({ sidebarCollapsed }) {
         </div>
       ) : (
         <>
-          <div className={`chrs-grid ${loading ? 'chrs-grid--loading' : ''}`}>
+          <div
+            className={`relative z-[1] mx-auto grid max-w-[1200px] grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-5 transition-opacity duration-[250ms] ${
+              loading ? 'pointer-events-none opacity-50' : ''
+            } max-[640px]:grid-cols-[repeat(auto-fill,minmax(160px,1fr))] max-[640px]:gap-[14px] max-[400px]:grid-cols-2`}
+          >
             {loading ? (
               Array.from({ length: LIMIT }, (_, i) => <SkeletonCard key={i} />)
             ) : characters.length === 0 ? (
-              <div className="chrs-empty">
-                <span className="chrs-empty-glyph">◈</span>
+              <div className="relative z-[1] col-span-full flex flex-col items-center gap-[14px] px-5 py-20 text-center text-[14px] text-[var(--chrs-muted)]">
+                <span className="block text-[36px] text-[var(--chrs-subtle)]">◈</span>
                 <p>No characters found.</p>
                 {(search || role !== 'All') && (
                   <button
-                    className="chrs-retry-btn"
+                    className="mt-1 cursor-pointer rounded-[6px] border border-solid border-[rgba(192,132,252,0.3)] bg-[rgba(192,132,252,0.1)] px-5 py-2 font-['Inter',sans-serif] text-[10px] uppercase tracking-[0.18em] text-[var(--chrs-purple)] transition-[background-color,border-color] duration-200 hover:border-[var(--chrs-purple)] hover:bg-[rgba(192,132,252,0.18)]"
                     onClick={() => {
                       setSearch('')
                       setRole('All')

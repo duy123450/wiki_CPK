@@ -95,11 +95,11 @@ const TYPES = ['All', ...Object.keys(TYPE_COLORS)]
 
 function TypePills({ active, onSelect }) {
   return (
-    <div className="st-type-pills">
+    <div className="flex flex-wrap justify-center gap-[0.4rem]">
       {TYPES.map((t) => (
         <button
           key={t}
-          className={`st-type-pill ${active === t ? 'st-type-pill--active' : ''}`}
+          className={`cursor-pointer rounded-[99px] border border-solid border-[var(--st-border)] bg-[var(--st-surface)] px-[0.9rem] py-[0.3rem] text-[0.78rem] font-semibold text-[var(--st-muted)] transition-all duration-200 hover:border-[var(--st-purple)] hover:text-[var(--st-text)] ${active === t ? 'st-type-pill--active' : ''}`}
           onClick={() => onSelect(t)}
           style={active === t && t !== 'All' ? { '--pill-color': TYPE_COLORS[t] } : {}}
         >
@@ -151,39 +151,56 @@ export default function SoundtracksPage({ sidebarCollapsed }) {
   const loading = status === 'idle' || status === 'loading'
 
   return (
-    <main className={`st-root ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
+    <main
+      className={`st-root relative box-border max-w-[100vw] overflow-x-hidden bg-[var(--st-bg)] p-[clamp(32px,5vw,60px)_clamp(16px,5vw,56px)_80px] font-['Source_Sans_3','Inter',sans-serif] text-[var(--st-text)] transition-[width,margin-left] duration-[350ms] ease-[cubic-bezier(0.4,0,0.2,1)] ${
+        sidebarCollapsed
+          ? 'ml-0 w-full'
+          : 'ml-[var(--sidebar-current-width,260px)] w-[calc(100%-var(--sidebar-current-width,260px))]'
+      } max-[768px]:ml-0 max-[768px]:w-full max-[640px]:p-[1.25rem_1rem_3rem]`}
+    >
       <Particles />
 
       {/* ── Header ── */}
-      <header className="st-header">
-        <div className="st-header-eyebrow">
-          <span className="st-eyebrow-dot" />
+      <header className="relative z-[1] mb-10 text-center">
+        <div className="mb-3 inline-flex items-center gap-2 text-[0.7rem] font-bold uppercase tracking-[0.14em] text-[var(--st-muted)]">
+          <span className="inline-block h-[6px] w-[6px] rounded-full bg-[var(--st-purple)] shadow-[0_0_8px_var(--st-purple)]" />
           Fan Wiki · Soundtrack
         </div>
-        <h1 className="st-header-title">{movie?.title ?? '超かぐや姫'}</h1>
-        <p className="st-header-sub">Original Soundtrack</p>
-        <div className="st-header-rule" />
+        <h1 className="m-[0_0_0.4rem] bg-[linear-gradient(135deg,#fff_30%,var(--st-purple)_100%)] bg-clip-text text-[clamp(2rem,5vw,3.4rem)] font-extrabold tracking-[-0.02em] text-transparent [-webkit-background-clip:text] [-webkit-text-fill-color:transparent]">
+          {movie?.title ?? '超かぐや姫'}
+        </h1>
+        <p className="m-[0_0_1.25rem] text-[0.9rem] tracking-[0.04em] text-[var(--st-muted)]">
+          Original Soundtrack
+        </p>
+        <div className="mx-auto h-0.5 w-20 rounded-[2px] bg-[linear-gradient(90deg,transparent,var(--st-purple),transparent)]" />
       </header>
 
       {/* ── Filter bar ── */}
-      <div className="st-filter-bar">
+      <div className="relative z-[1] mb-10 flex flex-col items-center gap-4">
         <SearchBar value={search} onChange={handleSearch} />
         <TypePills active={typeFilter} onSelect={setTypeFilter} />
-        <p className="st-count">
+        <p className="m-0 text-[0.78rem] text-[var(--st-muted)]">
           Showing <strong>{filtered.length}</strong> of <strong>{publicTracks.length}</strong> tracks
         </p>
       </div>
 
       {/* ── Grid ── */}
-      <div className={`st-grid ${loading ? 'st-grid--loading' : ''}`}>
+      <div
+        className={`relative z-[1] mx-auto grid max-w-[1200px] grid-cols-[repeat(auto-fill,minmax(var(--st-card-w),1fr))] gap-5 transition-opacity duration-[250ms] ${
+          loading ? 'pointer-events-none opacity-50' : ''
+        } max-[640px]:grid-cols-1`}
+      >
         {loading ? (
           Array.from({ length: 8 }, (_, i) => <SkeletonCard key={i} />)
         ) : filtered.length === 0 ? (
-          <div className="st-empty">
-            <span className="st-empty-glyph">♩</span>
+          <div className="col-span-full flex flex-col items-center gap-3 px-4 py-16 text-center text-[var(--st-muted)]">
+            <span className="text-5xl opacity-40">♩</span>
             <p>No tracks found.</p>
             {(search || typeFilter !== 'All') && (
-              <button className="st-retry-btn" onClick={() => { setSearch(''); setTypeFilter('All') }}>
+              <button
+                className="cursor-pointer rounded-[99px] border border-solid border-[var(--st-purple)] bg-transparent px-[1.2rem] py-2 text-[0.82rem] font-semibold text-[var(--st-purple)] transition-[background-color,color] duration-200 hover:bg-[var(--st-purple)] hover:text-white"
+                onClick={() => { setSearch(''); setTypeFilter('All') }}
+              >
                 Clear filters
               </button>
             )}

@@ -132,7 +132,7 @@ describe('CharactersPage', () => {
     await waitFor(() => {
       // "Showing 2 of 2 characters" — look for the container text
       expect(screen.getByText(/Showing/)).toBeInTheDocument()
-      const countEl = screen.getByText(/Showing/).closest('.chrs-count')
+      const countEl = screen.getByText(/Showing/).closest('p')
       expect(countEl).toHaveTextContent('Showing 2 of 2 characters')
     })
   })

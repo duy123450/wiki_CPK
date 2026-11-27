@@ -182,7 +182,7 @@ describe('SoundtracksPage', () => {
       expect(screen.getByText(/Showing/)).toBeInTheDocument()
     })
 
-    const countEl = screen.getByText(/Showing/).closest('.st-count')
+    const countEl = screen.getByText(/Showing/).closest('p')
     expect(countEl).toHaveTextContent('Showing 2 of 2 tracks')
 
     // Filter to 1 track

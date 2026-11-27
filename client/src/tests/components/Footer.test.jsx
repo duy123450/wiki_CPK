@@ -33,6 +33,20 @@ describe('Footer', () => {
     renderFooter()
     const emailLinks = screen.getAllByText('168daisuki8000@gmail.com')
     expect(emailLinks.length).toBeGreaterThanOrEqual(1)
+    expect(emailLinks[0].closest('a')).toHaveAttribute(
+      'href',
+      'mailto:168daisuki8000@gmail.com'
+    )
+  })
+
+  it('renders legal page links', () => {
+    renderFooter()
+    expect(
+      screen.getByRole('link', { name: 'Terms of Use / Điều khoản sử dụng' })
+    ).toHaveAttribute('href', '/terms')
+    expect(
+      screen.getByRole('link', { name: 'Privacy Policy / Chính sách bảo mật' })
+    ).toHaveAttribute('href', '/privacy')
   })
 
   it('renders GitHub link with target _blank', () => {

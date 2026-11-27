@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
+import { useEffect, useRef, useState, useMemo } from 'react'
 import '../styles/Playlist.css'
 import useYouTubePlayer from '../hooks/useYouTubePlayer'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
@@ -12,7 +12,7 @@ const fmtTime = (s) => {
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`
 }
 
-function TipBtn({ label, onClick, className = 'pl-icon-btn', children }) {
+function TipBtn({ label, onClick, className = 'pl-icon-btn flex shrink-0 items-center justify-center rounded-full border-0 border-solid bg-transparent p-[7px] text-[#b3b3b3] [transition:color_0.15s,transform_0.1s] hover:text-white active:scale-90', children }) {
   const [show, setShow] = useState(false)
   const timer = useRef(null)
   const startHold = () => {
@@ -24,7 +24,7 @@ function TipBtn({ label, onClick, className = 'pl-icon-btn', children }) {
   }
   return (
     <button
-      className={`${className} pl-tip-wrap`}
+      className={`${className} pl-tip-wrap relative`}
       onClick={onClick}
       onMouseDown={startHold}
       onMouseUp={endHold}
@@ -33,7 +33,7 @@ function TipBtn({ label, onClick, className = 'pl-icon-btn', children }) {
       onTouchEnd={endHold}
     >
       {children}
-      {show && <span className="pl-tooltip">{label}</span>}
+      {show && <span className="pl-tooltip pointer-events-none absolute bottom-[calc(100%+7px)] left-1/2 z-10 whitespace-nowrap rounded-md bg-[rgba(30,30,30,0.95)] px-[9px] py-1 text-[10px] font-semibold tracking-[0.04em] text-white shadow-[0_2px_10px_rgba(0,0,0,0.4)] -translate-x-1/2 animate-[plFadeIn_0.15s_ease-out]">{label}</span>}
     </button>
   )
 }
@@ -307,17 +307,15 @@ export default function Playlist() {
   // On error: show a small persistent error bar so the player doesn't silently vanish
   if ((allStatus === 'failed' || allError) && !currentTrack) {
     return (
-      <div className="pl-container">
-        <div className="pl-sticky-bar pl-sticky-bar--error">
+      <div className="pl-container fixed bottom-[20px] right-[20px] z-[999] font-['Source_Sans_3','Segoe_UI',sans-serif] max-[480px]:bottom-[14px] max-[480px]:right-[14px]">
+        <div className="pl-sticky-bar pl-sticky-bar--error flex max-w-[280px] items-center gap-2 rounded-[10px] bg-[linear-gradient(135deg,#1DB954,#1ed760)] px-[10px] py-[6px] shadow-[0_6px_20px_rgba(0,0,0,0.4)] animate-[plSlideIn_0.35s_ease-out] [transition:transform_0.2s,box-shadow_0.2s] hover:-translate-y-0.5 hover:shadow-[0_10px_28px_rgba(0,0,0,0.5)] max-[480px]:max-w-[260px]">
           <span
-            className="pl-sticky-info"
-            style={{ color: '#ff6b6b', fontSize: '0.75rem' }}
+            className="pl-sticky-info min-w-0 flex-1 text-[0.75rem] text-[#ff6b6b]"
           >
             ♩ Could not load tracks
           </span>
           <button
-            className="pl-sticky-play"
-            style={{ fontSize: '0.65rem', padding: '0.25rem 0.5rem' }}
+            className="pl-sticky-play flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-0 border-solid bg-[rgba(18,18,18,0.18)] text-[0.65rem] text-[#121212] [padding:0.25rem_0.5rem] active:scale-[0.93] active:bg-[rgba(18,18,18,0.32)]"
             onClick={() => {
               dispatch(fetchSoundtrackMovie())
             }}
@@ -335,28 +333,23 @@ export default function Playlist() {
     <>
       <div
         id="yt-hidden-mount"
-        style={{
-          position: 'absolute',
-          width: 1,
-          height: 1,
-          opacity: 0,
-          top: -9999,
-        }}
+        className="absolute top-[-9999px] h-px w-px opacity-0"
       />
 
       {isExpanded && (
         <div
-          className="pl-backdrop-overlay"
+          className="pl-backdrop-overlay fixed inset-0 z-[998] bg-[rgba(0,0,0,0.5)] animate-[plFadeIn_0.25s_ease-out]"
           onClick={() => setIsExpanded(false)}
         />
       )}
 
-      <div className="pl-container">
+      <div className="pl-container fixed bottom-[20px] right-[20px] z-[999] font-['Source_Sans_3','Segoe_UI',sans-serif] max-[480px]:bottom-[14px] max-[480px]:right-[14px]">
         {/* ── Collapsed bar ── */}
         {!isExpanded && (
-          <div className="pl-sticky-bar" onClick={() => setIsExpanded(true)}>
-            <div className="pl-sticky-cover">
+          <div className="pl-sticky-bar flex max-w-[280px] cursor-pointer items-center gap-2 rounded-[10px] bg-[linear-gradient(135deg,#1DB954,#1ed760)] px-[10px] py-[6px] shadow-[0_6px_20px_rgba(0,0,0,0.4)] animate-[plSlideIn_0.35s_ease-out] [transition:transform_0.2s,box-shadow_0.2s] hover:-translate-y-0.5 hover:shadow-[0_10px_28px_rgba(0,0,0,0.5)] max-[480px]:max-w-[260px]" onClick={() => setIsExpanded(true)}>
+            <div className="pl-sticky-cover h-[34px] w-[34px] shrink-0 overflow-hidden rounded-[5px] bg-[#282828]">
               <img
+                className="h-full w-full object-cover"
                 src={currentTrack.coverImage || null}
                 alt={currentTrack.title}
                 onError={(e) => {
@@ -364,12 +357,12 @@ export default function Playlist() {
                 }}
               />
             </div>
-            <div className="pl-sticky-info">
-              <div className="pl-sticky-title">{currentTrack.title}</div>
-              <div className="pl-sticky-artist">{currentTrack.vocal}</div>
+            <div className="pl-sticky-info min-w-0 flex-1">
+              <div className="pl-sticky-title overflow-hidden text-ellipsis whitespace-nowrap text-[11px] font-bold text-[#121212]">{currentTrack.title}</div>
+              <div className="pl-sticky-artist overflow-hidden text-ellipsis whitespace-nowrap text-[10px] text-[rgba(18,18,18,0.65)]">{currentTrack.vocal}</div>
             </div>
             <button
-              className="pl-sticky-play"
+              className="pl-sticky-play flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-0 border-solid bg-[rgba(18,18,18,0.18)] text-[#121212] [transition:background_0.15s,transform_0.1s] active:scale-[0.93] active:bg-[rgba(18,18,18,0.32)]"
               onClick={(e) => {
                 e.stopPropagation()
                 handlePlayPause()
@@ -378,7 +371,7 @@ export default function Playlist() {
               {isPlaying ? <IconPause size={16} /> : <IconPlay size={16} />}
             </button>
             <button
-              className="pl-sticky-expand"
+              className="pl-sticky-expand flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-0 border-solid bg-[rgba(18,18,18,0.18)] text-[#121212] [transition:background_0.15s,transform_0.1s] active:scale-[0.93] active:bg-[rgba(18,18,18,0.32)]"
               onClick={(e) => {
                 e.stopPropagation()
                 setIsExpanded(true)
@@ -391,57 +384,56 @@ export default function Playlist() {
 
         {/* ── Expanded panel ── */}
         {isExpanded && (
-          <div className="pl-panel">
+          <div className="pl-panel pointer-events-auto fixed bottom-0 right-0 z-[2] flex w-full flex-col overflow-hidden rounded-t-[18px] bg-[#121212] shadow-[0_-6px_28px_rgba(0,0,0,0.75)] animate-[plSlideUp_0.35s_cubic-bezier(0.4,0,0.2,1)] min-[769px]:bottom-5 min-[769px]:right-5 min-[769px]:max-h-[calc(100vh-40px)] min-[769px]:w-[700px] min-[769px]:flex-row min-[769px]:rounded-[14px]">
             {/* ─── PLAYER ─── */}
-            <div className="pl-panel-player">
-              <div className="pl-panel-header">
-                <div className="pl-player-tabs">
+            <div className="pl-panel-player flex min-h-0 flex-col max-[768px]:flex-[0_1_60%] max-[768px]:overflow-hidden max-[768px]:border-b max-[768px]:border-solid max-[768px]:border-b-[#282828] min-[769px]:flex-1 min-[769px]:overflow-y-auto">
+              <div className="pl-panel-header relative flex shrink-0 items-center justify-center px-3 pb-1 pt-2">
+                <div className="pl-player-tabs ml-3 mr-auto flex gap-4">
                   <button
-                    className={`pl-tab-btn ${activeTab === 'cover' ? 'pl-tab-btn--active' : ''}`}
+                    className={`pl-tab-btn relative cursor-pointer border-0 border-solid bg-transparent px-2 py-1 text-[13px] font-semibold transition-colors duration-200 ${activeTab === 'cover' ? 'pl-tab-btn--active text-[#1DB954]' : 'text-[#888] hover:text-[#ccc]'}`}
                     onClick={() => setActiveTab('cover')}
                   >
                     Player
                   </button>
                   <button
-                    className={`pl-tab-btn ${activeTab === 'lyrics' ? 'pl-tab-btn--active' : ''}`}
+                    className={`pl-tab-btn relative cursor-pointer border-0 border-solid bg-transparent px-2 py-1 text-[13px] font-semibold transition-colors duration-200 ${activeTab === 'lyrics' ? 'pl-tab-btn--active text-[#1DB954]' : 'text-[#888] hover:text-[#ccc]'}`}
                     onClick={() => setActiveTab('lyrics')}
                   >
                     Lyrics
                   </button>
                 </div>
                 <button
-                  className="pl-panel-close"
+                  className="pl-panel-close absolute right-3 flex items-center border-0 border-solid bg-transparent p-1 text-[#888] [transition:color_0.2s] hover:text-white"
                   onClick={() => setIsExpanded(false)}
-                  style={{ position: 'absolute', right: 12 }}
                 >
                   <IconChevronDown />
                 </button>
               </div>
 
-              <div className="pl-panel-cover-wrap">
+              <div className="pl-panel-cover-wrap relative flex min-h-0 flex-1 flex-col items-center justify-center overflow-hidden px-3 py-1 [transform:translate3d(0,0,0)] min-[769px]:flex-none min-[769px]:px-3 min-[769px]:pb-3 min-[769px]:pt-[14px]">
                 {activeTab === 'lyrics' ? (
-                  <div className="pl-panel-lyrics-wrap">
+                  <div className="pl-panel-lyrics-wrap flex h-full min-h-0 w-full flex-col justify-center gap-0 overflow-hidden px-[10px] [transform:translate3d(0,0,0)] max-[768px]:absolute max-[768px]:inset-[4px_12px] max-[768px]:h-auto max-[768px]:w-auto max-[480px]:px-2">
                     {visibleLines.length > 0 ? (
                       visibleLines.map((l) => (
                         <div
                           key={l.originalIdx}
-                          className={`pl-synced-line ${l.originalIdx === activeLineIdx ? 'pl-synced-line--active' : ''}`}
+                          className={`pl-synced-line flex min-h-0 cursor-pointer flex-col overflow-hidden rounded px-2 py-[3px] opacity-35 [transition:all_0.25s_ease] hover:opacity-60 max-[480px]:px-2 max-[480px]:py-[2px] ${l.originalIdx === activeLineIdx ? 'pl-synced-line--active bg-[rgba(29,185,84,0.08)] opacity-100' : ''}`}
                         >
-                          <span className="pl-synced-text">{l.line}</span>
+                          <span className={`pl-synced-text overflow-hidden text-[18px] font-bold leading-[1.4] [display:-webkit-box] [overflow-wrap:anywhere] [-webkit-box-orient:vertical] [-webkit-line-clamp:2] [line-clamp:2] [transition:color_0.25s] max-[480px]:text-[clamp(14px,4.4vw,18px)] max-[480px]:leading-[1.25] ${l.originalIdx === activeLineIdx ? 'text-[#1DB954]' : 'text-white'}`}>{l.line}</span>
                           {typeof l.lineJapanese === 'string' && l.lineJapanese.trim() && (
-                            <span className="pl-synced-translation">
+                            <span className="pl-synced-translation mt-px overflow-hidden text-ellipsis whitespace-nowrap text-[11px] leading-[1.3] text-[#888]">
                               {l.lineJapanese}
                             </span>
                           )}
                           {l.lineTranslation && (
-                            <span className="pl-synced-translation">
+                            <span className="pl-synced-translation mt-px overflow-hidden text-ellipsis whitespace-nowrap text-[11px] leading-[1.3] text-[#888]">
                               {l.lineTranslation}
                             </span>
                           )}
                         </div>
                       ))
                     ) : (
-                      <div className="pl-no-lyrics">
+                      <div className="pl-no-lyrics mt-10 text-center text-[13px] text-[#888]">
                         No lyrics available for this track.
                       </div>
                     )}
@@ -449,7 +441,7 @@ export default function Playlist() {
                 ) : (
                   <>
                     <img
-                      className="pl-panel-cover"
+                      className="pl-panel-cover h-full w-full object-contain [filter:drop-shadow(0_6px_24px_rgba(0,0,0,0.55))] min-[769px]:h-[200px]"
                       src={currentTrack.coverImage || null}
                       alt={currentTrack.title}
                       onError={(e) => {
@@ -457,16 +449,16 @@ export default function Playlist() {
                       }}
                     />
                     {activeLine && (
-                      <div className="pl-karaoke-sub">
-                        <div className="pl-karaoke-line">{activeLine.line}</div>
+                      <div className="pl-karaoke-sub mt-3 max-w-[90%] rounded-lg bg-[rgba(0,0,0,0.6)] px-3 py-2 text-center animate-[plFadeIn_0.2s_ease-out]">
+                        <div className="pl-karaoke-line text-[14px] font-semibold text-white">{activeLine.line}</div>
                         {typeof activeLine.lineJapanese === 'string' &&
                           activeLine.lineJapanese.trim() && (
-                            <div className="pl-karaoke-japanese">
+                            <div className="pl-karaoke-japanese mt-0.5 text-xs text-[#1DB954]">
                               {activeLine.lineJapanese}
                             </div>
                           )}
                         {activeLine.lineTranslation && (
-                          <div className="pl-karaoke-romaji">
+                          <div className="pl-karaoke-romaji mt-0.5 text-xs text-[#1DB954]">
                             {activeLine.lineTranslation}
                           </div>
                         )}
@@ -476,18 +468,18 @@ export default function Playlist() {
                 )}
               </div>
 
-              <div className="pl-panel-meta">
-                <div className="pl-panel-title">{currentTrack.title}</div>
-                <div className="pl-panel-vocal">{currentTrack.vocal}</div>
-                <div className="pl-panel-producer">
+              <div className="pl-panel-meta shrink-0 px-3 py-1 text-center max-[480px]:px-[10px] max-[480px]:py-[2px] min-[769px]:px-3 min-[769px]:pb-2 min-[769px]:pt-0">
+                <div className="pl-panel-title mb-px overflow-hidden text-ellipsis whitespace-nowrap text-[13px] font-bold text-white min-[769px]:mb-0.5 min-[769px]:text-[14px]">{currentTrack.title}</div>
+                <div className="pl-panel-vocal mb-px overflow-hidden text-ellipsis whitespace-nowrap text-[11px] text-[#1DB954]">{currentTrack.vocal}</div>
+                <div className="pl-panel-producer overflow-hidden text-ellipsis whitespace-nowrap text-[10px] italic text-[#626262]">
                   by {currentTrack.producer}
                 </div>
               </div>
 
-              <div className="pl-panel-progress">
+              <div className="pl-panel-progress shrink-0 px-3 pb-[6px] max-[480px]:px-[10px] max-[480px]:pb-1">
                 <input
                   type="range"
-                  className="pl-slider"
+                  className="pl-slider mb-1 h-1 w-full cursor-pointer rounded-[2px] outline-none [-webkit-appearance:none] [appearance:none]"
                   min="0"
                   max="100"
                   value={progress}
@@ -505,23 +497,23 @@ export default function Playlist() {
                   onMouseUp={handleSeekCommit}
                   onTouchEnd={handleSeekCommit}
                 />
-                <div className="pl-time-row">
-                  <span className="pl-time">{fmtTime(currentTime)}</span>
-                  <span className="pl-time">{fmtTime(duration)}</span>
+                <div className="pl-time-row flex justify-between text-[10px] text-[#888]">
+                  <span className="pl-time tabular-nums">{fmtTime(currentTime)}</span>
+                  <span className="pl-time tabular-nums">{fmtTime(duration)}</span>
                 </div>
               </div>
 
-              <div className="pl-controls-row">
+              <div className="pl-controls-row flex shrink-0 items-center justify-center gap-2 px-3 pb-[6px] pt-0.5 max-[480px]:gap-1 max-[480px]:px-[10px] max-[480px]:pb-1">
                 <TipBtn label="Shuffle" onClick={handleShuffleToggle}>
                   <IconShuffle active={isShuffle} />
                 </TipBtn>
-                <button className="pl-icon-btn" onClick={handlePrev}>
+                <button className="pl-icon-btn flex shrink-0 items-center justify-center rounded-full border-0 border-solid bg-transparent p-[7px] text-[#b3b3b3] [transition:color_0.15s,transform_0.1s] hover:text-white active:scale-90" onClick={handlePrev}>
                   <IconPrev />
                 </button>
-                <button className="pl-play-btn" onClick={handlePlayPause}>
+                <button className="pl-play-btn flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-full border-0 border-solid bg-[#1DB954] [transition:background_0.2s,transform_0.15s] hover:scale-[1.06] hover:bg-[#1ed760] active:scale-[0.96] max-[480px]:h-9 max-[480px]:w-9" onClick={handlePlayPause}>
                   {isPlaying ? <IconPause /> : <IconPlay />}
                 </button>
-                <button className="pl-icon-btn" onClick={handleNext}>
+                <button className="pl-icon-btn flex shrink-0 items-center justify-center rounded-full border-0 border-solid bg-transparent p-[7px] text-[#b3b3b3] [transition:color_0.15s,transform_0.1s] hover:text-white active:scale-90" onClick={handleNext}>
                   <IconNext />
                 </button>
                 <TipBtn label="Loop" onClick={handleLoopToggle}>
@@ -529,13 +521,13 @@ export default function Playlist() {
                 </TipBtn>
               </div>
 
-              <div className="pl-volume-row">
-                <span className="pl-volume-icon" aria-hidden="true">
+              <div className="pl-volume-row flex shrink-0 items-center gap-[10px] px-3 pb-[10px] max-[480px]:gap-2 max-[480px]:px-[10px] max-[480px]:pb-2">
+                <span className="pl-volume-icon flex shrink-0 items-center justify-center text-[#b3b3b3]" aria-hidden="true">
                   <IconVolume />
                 </span>
                 <input
                   type="range"
-                  className="pl-slider pl-volume-slider"
+                  className="pl-slider pl-volume-slider mb-0 h-1 flex-1 cursor-pointer rounded-[2px] outline-none [-webkit-appearance:none] [appearance:none]"
                   min="0"
                   max="100"
                   value={volume}
@@ -546,38 +538,38 @@ export default function Playlist() {
                   }}
                   onChange={handleVolumeChange}
                 />
-                <span className="pl-volume-value">{volume}</span>
+                <span className="pl-volume-value min-w-[30px] shrink-0 text-right text-[10px] tabular-nums text-[#888]">{volume}</span>
               </div>
             </div>
 
             {/* ─── TRACK LIST ─── */}
-            <div className="pl-panel-tracks">
-              <div className="pl-tracks-header">
+            <div className="pl-panel-tracks flex min-h-0 flex-col overflow-hidden max-[768px]:min-h-0 max-[768px]:flex-[1_1_40%] min-[769px]:flex-[0_0_35%] min-[769px]:border-r min-[769px]:border-solid min-[769px]:border-r-[#282828]">
+              <div className="pl-tracks-header flex shrink-0 items-center justify-between border-b border-solid border-b-[#282828] px-4 py-3 text-xs font-bold uppercase tracking-[0.5px] text-[#b3b3b3]">
                 <span>Tracks ({accessibleTracks.length})</span>
               </div>
-              <div className="pl-track-list">
+              <div className="pl-track-list min-h-0 flex-1 overflow-x-hidden overflow-y-auto pb-[max(16px,env(safe-area-inset-bottom,0px))]">
                 {accessibleTracks.map((t, i) => (
                   <div
                     key={t._id}
-                    className={`pl-track-row ${i === currentIdx ? 'pl-track-row--active' : ''}`}
+                    className={`pl-track-row flex cursor-pointer items-center gap-[10px] px-4 py-[7px] [transition:background_0.12s] hover:bg-[rgba(255,255,255,0.05)] ${i === currentIdx ? 'pl-track-row--active bg-[rgba(29,185,84,0.12)]' : ''}`}
                     onClick={() => playTrackAtIndex(i)}
                   >
                     <span
-                      className={`pl-track-num ${i === currentIdx ? 'pl-track-num--playing' : ''}`}
+                      className={`pl-track-num w-[22px] shrink-0 text-center text-[11px] font-semibold ${i === currentIdx ? 'pl-track-num--playing text-[#1DB954]' : 'text-[#555]'}`}
                     >
                       {i === currentIdx
                         ? '▶'
                         : String(t.trackNumber).padStart(2, '0')}
                     </span>
-                    <div className="pl-track-info">
+                    <div className="pl-track-info min-w-0 flex-1">
                       <div
-                        className={`pl-track-title ${i === currentIdx ? 'pl-track-title--active' : ''}`}
+                        className={`pl-track-title overflow-hidden text-ellipsis whitespace-nowrap text-[12px] ${i === currentIdx ? 'pl-track-title--active font-semibold text-[#1DB954]' : 'font-medium text-[#ddd]'}`}
                       >
                         {t.title}
                       </div>
-                      <div className="pl-track-producer">{t.producer}</div>
+                      <div className="pl-track-producer mt-px overflow-hidden text-ellipsis whitespace-nowrap text-[10px] text-[#555]">{t.producer}</div>
                     </div>
-                    <span className="pl-track-duration">
+                    <span className="pl-track-duration shrink-0 tabular-nums text-[10px] text-[#555]">
                       {fmtTime(t.endTime - t.startTime)}
                     </span>
                   </div>
