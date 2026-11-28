@@ -131,6 +131,34 @@ export default {
             transform: 'translateY(-40px) scale(1.2)',
           },
         },
+        movieParticleDrift: {
+          '0%, 100%': {
+            opacity: '0.25',
+            transform: 'translateY(0) scale(1)',
+          },
+          '50%': {
+            opacity: '0.7',
+            transform: 'translateY(-32px) scale(1.4)',
+          },
+        },
+        movieHeroFade: {
+          from: {
+            opacity: '0',
+            transform: 'translateY(32px)',
+          },
+          to: {
+            opacity: '1',
+            transform: 'translateY(0)',
+          },
+        },
+        movieDotPulse: {
+          '0%, 100%': { opacity: '1' },
+          '50%': { opacity: '0.3' },
+        },
+        movieShimmerSlide: {
+          '0%': { backgroundPosition: '200% 0' },
+          '100%': { backgroundPosition: '-200% 0' },
+        },
       },
       animation: {
         'profile-avatar-pulse': 'profileAvatarPulse 1.2s ease-in-out infinite',
@@ -151,6 +179,10 @@ export default {
         'hero-scroll-drop': 'heroScrollDrop 2s ease-in-out infinite',
         'hero-shimmer-slide': 'heroShimmerSlide 1.5s infinite',
         'legal-particle-drift': 'legalParticleDrift 8s ease-in-out infinite',
+        'movie-particle-drift': 'movieParticleDrift 6s ease-in-out infinite',
+        'movie-hero-fade': 'movieHeroFade 1.2s cubic-bezier(0.16,1,0.3,1) both',
+        'movie-dot-pulse': 'movieDotPulse 2.5s ease-in-out infinite',
+        'movie-shimmer-slide': 'movieShimmerSlide 1.6s infinite',
       },
     },
   },

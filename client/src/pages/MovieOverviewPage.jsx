@@ -4,7 +4,6 @@ import { Link } from 'react-router-dom'
 import useMovieInfo from '../hooks/useMovieInfo'
 import useReveal from '../hooks/useReveal'
 import { getYoutubeId } from '../utils/youtubeUtils'
-import '../styles/MovieOverviewPage.css'
 
 // ─── Floating particles ───────────────────────────────────────────────────────
 function Particles() {
@@ -21,7 +20,7 @@ function Particles() {
       {particles.map((p) => (
         <span
           key={p.id}
-          className="absolute rounded-full bg-[rgba(192,132,252,0.7)] animate-[particleDrift_var(--dur,6s)_ease-in-out_infinite]"
+          className="absolute rounded-full bg-[rgba(192,132,252,0.7)] motion-safe:animate-movie-particle-drift motion-reduce:animate-none"
           style={{
             left: p.left,
             top: p.top,
@@ -68,7 +67,7 @@ function Reveal({ children, delay = 0, className = '' }) {
 function Shimmer({ w, h }) {
   return (
     <div
-      className="rounded-md bg-[linear-gradient(90deg,rgba(255,255,255,0.03)_0%,rgba(255,255,255,0.09)_50%,rgba(255,255,255,0.03)_100%)] bg-[length:200%_100%] animate-[shimmerSlide_1.6s_infinite]"
+      className="rounded-md bg-[linear-gradient(90deg,rgba(255,255,255,0.03)_0%,rgba(255,255,255,0.09)_50%,rgba(255,255,255,0.03)_100%)] bg-[length:200%_100%] motion-safe:animate-movie-shimmer-slide motion-reduce:animate-none"
       style={{ width: w, height: h }}
     />
   )
@@ -150,7 +149,7 @@ export default function MovieOverviewPage({ sidebarCollapsed }) {
     : null
 
   return (
-    <main className={`mov-viewport relative box-border max-w-[100vw] overflow-x-hidden bg-[#05040f] font-['Source_Sans_3',sans-serif] text-[#f0e8ff] w-[calc(100%_-_var(--sidebar-current-width,260px))] ml-[var(--sidebar-current-width,260px)] [transition:width_0.35s_cubic-bezier(0.4,0,0.2,1),margin-left_0.35s_cubic-bezier(0.4,0,0.2,1)] max-[768px]:ml-0 max-[768px]:w-full ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
+    <main className={`mov-viewport relative box-border min-h-[100vh] min-h-[100dvh] max-w-[100vw] overflow-x-hidden bg-[#05040f] font-['Source_Sans_3',sans-serif] text-[#f0e8ff] w-[calc(100%_-_var(--sidebar-current-width,260px))] ml-[var(--sidebar-current-width,260px)] [transition:width_0.35s_cubic-bezier(0.4,0,0.2,1),margin-left_0.35s_cubic-bezier(0.4,0,0.2,1)] max-[768px]:ml-0 max-[768px]:w-full ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
       <Particles />
 
       {/* ── Hero banner ─────────────────────────────────────────────────── */}
@@ -168,7 +167,7 @@ export default function MovieOverviewPage({ sidebarCollapsed }) {
           <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(5,4,15,0.3)_0%,rgba(5,4,15,0.5)_50%,rgba(5,4,15,0.97)_100%),linear-gradient(to_right,rgba(5,4,15,0.6)_0%,transparent_40%)]" />
         </div>
 
-        <div className="relative z-[2] mx-auto flex w-full max-w-[1200px] items-end gap-[clamp(24px,5vw,56px)] px-[clamp(20px,6vw,72px)] pb-[clamp(36px,6vw,60px)] pt-[clamp(80px,14vw,160px)] animate-[heroFade_1.2s_cubic-bezier(0.16,1,0.3,1)_both] max-[600px]:flex-col max-[600px]:items-start max-[600px]:gap-5">
+        <div className="relative z-[2] mx-auto flex w-full max-w-[1200px] items-end gap-[clamp(24px,5vw,56px)] px-[clamp(20px,6vw,72px)] pb-[clamp(36px,6vw,60px)] pt-[clamp(80px,14vw,160px)] motion-safe:animate-movie-hero-fade motion-reduce:animate-none motion-reduce:opacity-100 motion-reduce:translate-y-0 max-[600px]:flex-col max-[600px]:items-start max-[600px]:gap-5">
           {/* Poster */}
           <div className="relative shrink-0">
             {loading ? (
@@ -190,7 +189,7 @@ export default function MovieOverviewPage({ sidebarCollapsed }) {
           {/* Title block */}
           <div className="flex min-w-0 flex-1 flex-col gap-3">
             <p className="m-0 inline-flex items-center gap-[7px] font-['Inter',sans-serif] text-[clamp(9px,1.8vw,11px)] uppercase tracking-[0.25em] text-[#e8c97a] opacity-[0.85]">
-              <span className="h-[5px] w-[5px] shrink-0 rounded-full bg-[#e8c97a] shadow-[0_0_8px_#e8c97a] animate-[dotPulse_2.5s_ease-in-out_infinite]" />
+              <span className="h-[5px] w-[5px] shrink-0 rounded-full bg-[#e8c97a] shadow-[0_0_8px_#e8c97a] motion-safe:animate-movie-dot-pulse motion-reduce:animate-none" />
               Fan Wiki · Movie Overview
             </p>
 
