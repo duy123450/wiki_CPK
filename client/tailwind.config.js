@@ -6,6 +6,10 @@ export default {
   ],
   theme: {
     extend: {
+      backgroundImage: {
+        'sidebar-stars':
+          'radial-gradient(1px 1px at 20% 15%, rgba(255, 255, 255, 0.4) 0%, transparent 100%), radial-gradient(1px 1px at 75% 30%, rgba(255, 255, 255, 0.3) 0%, transparent 100%), radial-gradient(1px 1px at 40% 60%, rgba(255, 255, 255, 0.35) 0%, transparent 100%), radial-gradient(1px 1px at 85% 80%, rgba(255, 255, 255, 0.25) 0%, transparent 100%), radial-gradient(1px 1px at 10% 85%, rgba(255, 255, 255, 0.3) 0%, transparent 100%), radial-gradient(1.5px 1.5px at 55% 45%, rgba(192, 132, 252, 0.5) 0%, transparent 100%), radial-gradient(1px 1px at 30% 90%, rgba(103, 232, 249, 0.4) 0%, transparent 100%)',
+      },
       colors: {
         soundtracks: {
           bg: '#05040f',
@@ -33,6 +37,16 @@ export default {
         },
       },
       keyframes: {
+        sidebarPulseOrb: {
+          '0%, 100%': {
+            opacity: '1',
+            transform: 'scale(1)',
+          },
+          '50%': {
+            opacity: '0.5',
+            transform: 'scale(0.8)',
+          },
+        },
         soundtracksFloat: {
           '0%, 100%': {
             transform: 'translateY(0) scale(1)',
@@ -337,6 +351,7 @@ export default {
         },
       },
       animation: {
+        'sidebar-pulse-orb': 'sidebarPulseOrb 2.5s ease-in-out infinite',
         'soundtracks-float': 'soundtracksFloat 6s ease-in-out infinite',
         'soundtracks-card-in': 'soundtracksCardIn 0.45s ease forwards',
         'soundtracks-spin': 'soundtracksSpin 2s linear infinite',

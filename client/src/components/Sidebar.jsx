@@ -21,7 +21,6 @@ import { ROLES } from '../constants'
 import { useAuthContext } from '../context/AuthContext'
 import { getSidebar } from '../services/api'
 import LiveUserCount from './LiveUserCount'
-import '../styles/Sidebar.css'
 
 import { envConfig } from '../config/env.config'
 
@@ -257,13 +256,13 @@ export default function Sidebar({
         </div>
       </button>
 
-      <aside className={`cpk-sidebar fixed bottom-0 left-0 top-0 z-[100] flex flex-col overflow-hidden border-r border-solid border-r-[rgba(180,140,255,0.15)] font-['Source_Sans_3',sans-serif] [background-color:#0a0b14] [background-image:radial-gradient(ellipse_at_20%_0%,rgba(192,132,252,0.06)_0%,transparent_60%),radial-gradient(ellipse_at_80%_100%,rgba(103,232,249,0.04)_0%,transparent_60%)] [transition:width_0.35s_cubic-bezier(0.4,0,0.2,1)] ${isCollapsed ? 'collapsed w-0' : 'w-[260px]'}`}>
+      <aside className={`cpk-sidebar fixed bottom-0 left-0 top-0 z-[100] flex flex-col overflow-hidden border-r border-solid border-r-[rgba(180,140,255,0.15)] font-['Source_Sans_3',sans-serif] [background-color:#0a0b14] [background-image:radial-gradient(ellipse_at_20%_0%,rgba(192,132,252,0.06)_0%,transparent_60%),radial-gradient(ellipse_at_80%_100%,rgba(103,232,249,0.04)_0%,transparent_60%)] [transition:width_0.35s_cubic-bezier(0.4,0,0.2,1)] before:pointer-events-none before:absolute before:inset-0 before:z-0 before:bg-sidebar-stars before:content-[''] ${isCollapsed ? 'collapsed w-0' : 'w-[260px]'}`}>
         <button
           className="sidebar-logo relative z-[1] flex shrink-0 flex-col items-center gap-[10px] border-0 border-b border-solid border-b-[rgba(180,140,255,0.15)] bg-none px-4 pb-4 pt-5 font-inherit text-inherit [transition:opacity_0.2s_ease] hover:opacity-85"
           onClick={() => navigate('/')}
           title="Go to home"
         >
-          <div className="logo-image-wrap relative w-full max-w-[200px]">
+          <div className="logo-image-wrap relative w-full max-w-[200px] after:absolute after:-inset-1 after:-z-[1] after:rounded-[6px] after:bg-[linear-gradient(135deg,rgba(192,132,252,0.2),rgba(103,232,249,0.15))] after:blur-[8px] after:content-['']">
             <img
               src={LOGO_URL}
               alt="Cosmic Princess Kaguya"
@@ -286,7 +285,7 @@ export default function Sidebar({
           </div>
         )}
 
-        <nav className="sidebar-nav relative z-[1] flex-1 overflow-x-hidden overflow-y-auto px-[10px] pb-4 [scrollbar-color:rgba(192,132,252,0.2)_transparent] [scrollbar-width:thin]">
+        <nav className="sidebar-nav relative z-[1] flex-1 overflow-x-hidden overflow-y-auto px-[10px] pb-4 [scrollbar-color:rgba(192,132,252,0.2)_transparent] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-[3px] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[rgba(192,132,252,0.25)]">
           {loading ? (
             <div className="p-4 text-[14px] text-[#999]">
               Loading...
@@ -416,7 +415,7 @@ export default function Sidebar({
             >
               <Wand2 size={16} strokeWidth={2} />
             </button>
-            <div className="footer-orb h-2 w-2 shrink-0 rounded-full bg-[#fbbf24] shadow-[0_0_8px_#fbbf24] animate-[pulse-orb_2.5s_ease-in-out_infinite]" />
+            <div className="footer-orb h-2 w-2 shrink-0 rounded-full bg-[#fbbf24] shadow-[0_0_8px_#fbbf24] animate-sidebar-pulse-orb" />
             <span className="footer-text font-['Source_Sans_3',sans-serif] text-[10px] tracking-[0.05em] text-[#4a4060]">CPK Wiki</span>
           </div>
         </div>
