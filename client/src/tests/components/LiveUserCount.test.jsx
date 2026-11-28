@@ -39,7 +39,7 @@ describe('LiveUserCount', () => {
     const { container } = render(<LiveUserCount />)
 
     const indicator = container.querySelector('span.inline-block')
-    expect(indicator).toBeInTheDocument()
-    expect(container.querySelector('style')).toHaveTextContent('@keyframes pulse')
+    expect(indicator).toHaveClass('animate-live-user-pulse')
+    expect(container.querySelector('style')).not.toBeInTheDocument()
   })
 })

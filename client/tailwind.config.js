@@ -37,6 +37,11 @@ export default {
         },
       },
       keyframes: {
+        liveUserPulse: {
+          '0%': { boxShadow: '0 0 0 0 rgba(74, 222, 128, 0.7)' },
+          '70%': { boxShadow: '0 0 0 6px rgba(74, 222, 128, 0)' },
+          '100%': { boxShadow: '0 0 0 0 rgba(74, 222, 128, 0)' },
+        },
         dragonSparkle: {
           '0%': {
             opacity: '1',
@@ -361,6 +366,7 @@ export default {
         },
       },
       animation: {
+        'live-user-pulse': 'liveUserPulse 1.5s ease infinite',
         'dragon-sparkle': 'dragonSparkle 0.8s ease-out forwards',
         'sidebar-pulse-orb': 'sidebarPulseOrb 2.5s ease-in-out infinite',
         'soundtracks-float': 'soundtracksFloat 6s ease-in-out infinite',
