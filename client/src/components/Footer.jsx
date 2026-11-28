@@ -8,7 +8,7 @@ export default function Footer({ sidebarCollapsed }) {
 
   return (
     <footer
-      className={`cpk-footer relative box-border w-[calc(100%-var(--sidebar-current-width))] max-w-[100vw] overflow-hidden border-t border-solid border-t-[rgba(148,163,184,0.1)] bg-[#070b14] pt-[60px] font-['Source_Sans_3','Segoe_UI',sans-serif] text-[#94a3b8] before:absolute before:left-1/2 before:top-0 before:h-px before:w-[60%] before:-translate-x-1/2 before:content-[''] before:bg-[linear-gradient(to_right,transparent,rgba(192,132,252,0.4),rgba(103,232,249,0.3),transparent)] [margin-left:var(--sidebar-current-width)] [transition:width_0.35s_cubic-bezier(0.4,0,0.2,1),margin-left_0.35s_cubic-bezier(0.4,0,0.2,1)] max-[768px]:ml-0 max-[768px]:w-full max-[600px]:pt-10 ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}
+      className={`cpk-footer relative box-border w-[calc(100%-var(--sidebar-current-width))] max-w-[100vw] overflow-hidden border-t [border-top-style:solid] border-t-[rgba(148,163,184,0.1)] bg-[#070b14] pt-[60px] font-['Source_Sans_3','Segoe_UI',sans-serif] text-[#94a3b8] before:absolute before:left-1/2 before:top-0 before:h-px before:w-[60%] before:-translate-x-1/2 before:content-[''] before:bg-[linear-gradient(to_right,transparent,rgba(192,132,252,0.4),rgba(103,232,249,0.3),transparent)] [margin-left:var(--sidebar-current-width)] [transition:width_0.35s_cubic-bezier(0.4,0,0.2,1),margin-left_0.35s_cubic-bezier(0.4,0,0.2,1)] max-[768px]:ml-0 max-[768px]:w-full max-[600px]:pt-10 ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}
     >
       <div className="footer-main mx-auto grid max-w-[1100px] grid-cols-[1.6fr_1fr_1.2fr] gap-12 px-8 pb-12 max-[900px]:grid-cols-2 max-[900px]:gap-9 max-[600px]:grid-cols-1 max-[600px]:gap-8 max-[600px]:px-5 max-[600px]:pb-9">
         {/* ── Col 1: Brand ── */}
@@ -19,7 +19,7 @@ export default function Footer({ sidebarCollapsed }) {
             A fan-made wiki dedicated to the world of Chou Kaguya Hime —
             exploring characters, lore, music, and the story of the moon.
           </p>
-          <p className="footer-desc footer-desc--vn mb-0 mt-0 border-l-2 border-solid border-l-[rgba(192,132,252,0.2)] pl-[10px] text-xs leading-[1.75] text-[#4a5568]">
+          <p className="footer-desc footer-desc--vn mb-0 mt-0 border-l-2 [border-left-style:solid] border-l-[rgba(192,132,252,0.2)] pl-[10px] text-xs leading-[1.75] text-[#4a5568]">
             Một wiki được tạo bởi người hâm mộ, dành riêng cho thế giới của Chou
             Kaguya Hime — khám phá nhân vật, cốt truyện, âm nhạc và hành trình
             của mặt trăng.
@@ -48,7 +48,7 @@ export default function Footer({ sidebarCollapsed }) {
           <p className="footer-contact-desc m-0 text-[13px] leading-[1.6] text-[#64748b]">
             Found an error or want to contribute? Reach out!
           </p>
-          <p className="footer-contact-desc footer-contact-desc--vn m-0 border-l-2 border-solid border-l-[rgba(192,132,252,0.2)] pl-[10px] text-xs leading-[1.6] text-[#4a5568]">
+          <p className="footer-contact-desc footer-contact-desc--vn m-0 border-l-2 [border-left-style:solid] border-l-[rgba(192,132,252,0.2)] pl-[10px] text-xs leading-[1.6] text-[#4a5568]">
             Phát hiện lỗi hoặc muốn đóng góp? Hãy liên hệ với mình nhé!
           </p>
           <a
