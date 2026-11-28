@@ -60,7 +60,7 @@ function CategoryItem({
   return (
     <div className={`category-item mb-0.5 ${hasActivePage ? 'has-active' : ''}`}>
       <button
-        className={`category-header flex w-full items-center gap-2 whitespace-nowrap rounded-lg px-[10px] py-2 text-left font-['Inter',sans-serif] text-[10.5px] font-semibold tracking-[0.08em] text-[#8b7da8] [transition:background_0.2s,color_0.2s] hover:bg-[rgba(192,132,252,0.08)] hover:text-[#c084fc] max-[768px]:min-h-[42px] ${isOpen ? 'open bg-[rgba(192,132,252,0.08)] text-[#c084fc]' : ''}`}
+        className={`category-header flex w-full appearance-none items-center gap-2 whitespace-nowrap rounded-lg border-0 bg-transparent px-[10px] py-2 text-left font-['Inter',sans-serif] text-[10.5px] font-semibold tracking-[0.08em] text-[#8b7da8] [transition:background_0.2s,color_0.2s] hover:bg-[rgba(192,132,252,0.08)] hover:text-[#c084fc] max-[768px]:min-h-[42px] ${isOpen ? 'open bg-[rgba(192,132,252,0.08)] text-[#c084fc]' : ''}`}
         onClick={() => onToggle(category.slug)}
         aria-expanded={isOpen}
       >
@@ -79,7 +79,7 @@ function CategoryItem({
           {/* Index / listing page link for collection categories */}
           {indexPath && (
             <button
-              className="page-link page-link--index flex w-full items-center gap-2 overflow-hidden whitespace-nowrap rounded-md px-[10px] py-[6px] text-left font-['Source_Sans_3',sans-serif] text-[11px] font-medium italic tracking-[0.04em] text-[#c084fc] opacity-75 no-underline [-webkit-tap-highlight-color:transparent] [transition:all_0.2s] hover:bg-[rgba(192,132,252,0.1)] hover:opacity-100 max-[768px]:min-h-[44px] max-[768px]:py-2"
+              className="page-link page-link--index flex w-full appearance-none items-center gap-2 overflow-hidden whitespace-nowrap rounded-md border-0 bg-transparent px-[10px] py-[6px] text-left font-['Source_Sans_3',sans-serif] text-[11px] font-medium italic tracking-[0.04em] text-[#c084fc] opacity-75 no-underline [-webkit-tap-highlight-color:transparent] [transition:all_0.2s] hover:bg-[rgba(192,132,252,0.1)] hover:opacity-100 max-[768px]:min-h-[44px] max-[768px]:py-2"
               onClick={() => onNavigate(indexPath)}
             >
               <span className="page-dot h-1 w-1 shrink-0 rounded-full bg-[#c084fc] opacity-60 [transition:opacity_0.2s]" />
@@ -89,7 +89,7 @@ function CategoryItem({
           {category.pages?.map((page) => (
             <button
               key={page.slug}
-              className={`page-link flex w-full items-center gap-2 overflow-hidden whitespace-nowrap rounded-md px-[10px] py-[6px] text-left font-['Source_Sans_3',sans-serif] text-xs font-light tracking-[0.02em] no-underline [-webkit-tap-highlight-color:transparent] [transition:all_0.2s] hover:bg-[rgba(255,255,255,0.04)] hover:text-[#e2d9f3] max-[768px]:min-h-[44px] max-[768px]:py-2 ${activePage === page.slug ? 'active border-l-2 border-solid border-l-[#67e8f9] bg-[rgba(103,232,249,0.1)] pl-2 font-normal text-[#67e8f9]' : 'border-l-0 text-[#4a4060]'}`}
+              className={`page-link flex w-full appearance-none items-center gap-2 overflow-hidden whitespace-nowrap rounded-md border-0 bg-transparent px-[10px] py-[6px] text-left font-['Source_Sans_3',sans-serif] text-xs font-light tracking-[0.02em] no-underline [-webkit-tap-highlight-color:transparent] [transition:all_0.2s] hover:bg-[rgba(255,255,255,0.04)] hover:text-[#e2d9f3] max-[768px]:min-h-[44px] max-[768px]:py-2 ${activePage === page.slug ? 'active border-l-2 border-solid border-l-[#67e8f9] bg-[rgba(103,232,249,0.1)] pl-2 font-normal text-[#67e8f9]' : 'border-l-0 text-[#4a4060]'}`}
               onClick={() => onPageSelect(page.slug, category.slug)}
             >
               <span className={`page-dot h-1 w-1 shrink-0 rounded-full bg-current [transition:opacity_0.2s] ${activePage === page.slug ? 'opacity-100 shadow-[0_0_6px_currentColor]' : 'opacity-50'}`} />
@@ -258,7 +258,7 @@ export default function Sidebar({
 
       <aside className={`cpk-sidebar fixed bottom-0 left-0 top-0 z-[100] flex flex-col overflow-hidden border-r border-solid border-r-[rgba(180,140,255,0.15)] font-['Source_Sans_3',sans-serif] [background-color:#0a0b14] [background-image:radial-gradient(ellipse_at_20%_0%,rgba(192,132,252,0.06)_0%,transparent_60%),radial-gradient(ellipse_at_80%_100%,rgba(103,232,249,0.04)_0%,transparent_60%)] [transition:width_0.35s_cubic-bezier(0.4,0,0.2,1)] before:pointer-events-none before:absolute before:inset-0 before:z-0 before:bg-sidebar-stars before:content-[''] ${isCollapsed ? 'collapsed w-0' : 'w-[260px]'}`}>
         <button
-          className="sidebar-logo relative z-[1] flex shrink-0 flex-col items-center gap-[10px] border-0 border-b border-solid border-b-[rgba(180,140,255,0.15)] bg-none px-4 pb-4 pt-5 font-inherit text-inherit [transition:opacity_0.2s_ease] hover:opacity-85"
+          className="sidebar-logo relative z-[1] flex shrink-0 appearance-none flex-col items-center gap-[10px] border-0 border-b border-solid border-b-[rgba(180,140,255,0.15)] bg-transparent px-4 pb-4 pt-5 [font:inherit] text-inherit [transition:opacity_0.2s_ease] hover:opacity-85"
           onClick={() => navigate('/')}
           title="Go to home"
         >
