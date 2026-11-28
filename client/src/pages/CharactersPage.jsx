@@ -3,7 +3,6 @@ import { getCharacters, getCharacterRoles } from '../services/api';
 import CharacterCard from '../components/Character/CharacterCard';
 import useMovieInfo from '../hooks/useMovieInfo'
 import { ROLE_COLORS } from '../constants/ui.constants'
-import '../styles/CharactersPage.css'
 
 import { generateParticles } from '../utils/uiUtils'
 
@@ -30,7 +29,7 @@ function Particles() {
       {pts.map((p) => (
         <span
           key={p.id}
-          className="absolute rounded-full bg-[rgba(192,132,252,0.7)] animate-[chrsParticleDrift_6s_ease-in-out_infinite]"
+          className="absolute animate-characters-particle-drift rounded-full bg-[rgba(192,132,252,0.7)]"
           style={{
             left: p.left,
             top: p.top,
@@ -51,7 +50,7 @@ function RoleBadge({ role }) {
   const badgeColor = ROLE_COLORS[role] ?? 'var(--wiki-purple)'
   return (
     <span
-      className="inline-flex w-fit items-center rounded-full border border-solid border-[var(--badge-color,var(--chrs-purple))] px-[10px] py-[3px] font-['Inter',sans-serif] text-[8.5px] uppercase tracking-[0.2em] text-[var(--badge-color,var(--chrs-purple))]"
+      className="inline-flex w-fit items-center rounded-full border border-solid border-[var(--badge-color,#c084fc)] px-[10px] py-[3px] font-['Inter',sans-serif] text-[8.5px] uppercase tracking-[0.2em] text-[var(--badge-color,#c084fc)]"
       style={{
         '--badge-color': badgeColor,
         backgroundColor:
@@ -69,14 +68,14 @@ function RoleBadge({ role }) {
 // ─── Skeleton card ────────────────────────────────────────────────────────────
 function SkeletonCard() {
   return (
-    <div className="pointer-events-none flex flex-col overflow-hidden rounded-xl border border-solid border-[var(--chrs-border)] bg-[var(--chrs-surface)] [animation:none]">
-      <div className="aspect-[3/4] bg-[linear-gradient(90deg,rgba(255,255,255,0.03)_0%,rgba(255,255,255,0.08)_50%,rgba(255,255,255,0.03)_100%)] bg-[length:200%_100%] animate-[skeletonSlide_1.6s_infinite]" />
+    <div className="pointer-events-none flex flex-col overflow-hidden rounded-xl border border-solid border-characters-border bg-characters-surface [animation:none]">
+      <div className="aspect-[3/4] animate-characters-skeleton-slide bg-[linear-gradient(90deg,rgba(255,255,255,0.03)_0%,rgba(255,255,255,0.08)_50%,rgba(255,255,255,0.03)_100%)] bg-[length:200%_100%]" />
       <div className="flex flex-1 flex-col gap-[7px] px-[18px] pb-[18px] pt-4">
-        <div className="mb-[2px] h-[14px] w-[24%] rounded-[4px] bg-[linear-gradient(90deg,rgba(255,255,255,0.03)_0%,rgba(255,255,255,0.08)_50%,rgba(255,255,255,0.03)_100%)] bg-[length:200%_100%] animate-[skeletonSlide_1.6s_infinite]" />
-        <div className="mb-[2px] h-[14px] w-[48%] rounded-[4px] bg-[linear-gradient(90deg,rgba(255,255,255,0.03)_0%,rgba(255,255,255,0.08)_50%,rgba(255,255,255,0.03)_100%)] bg-[length:200%_100%] animate-[skeletonSlide_1.6s_infinite]" />
-        <div className="mb-[2px] h-[14px] w-[36%] rounded-[4px] bg-[linear-gradient(90deg,rgba(255,255,255,0.03)_0%,rgba(255,255,255,0.08)_50%,rgba(255,255,255,0.03)_100%)] bg-[length:200%_100%] animate-[skeletonSlide_1.6s_infinite]" />
-        <div className="mb-[2px] h-[14px] w-full rounded-[4px] bg-[linear-gradient(90deg,rgba(255,255,255,0.03)_0%,rgba(255,255,255,0.08)_50%,rgba(255,255,255,0.03)_100%)] bg-[length:200%_100%] animate-[skeletonSlide_1.6s_infinite]" />
-        <div className="mb-[2px] h-[14px] w-3/4 rounded-[4px] bg-[linear-gradient(90deg,rgba(255,255,255,0.03)_0%,rgba(255,255,255,0.08)_50%,rgba(255,255,255,0.03)_100%)] bg-[length:200%_100%] animate-[skeletonSlide_1.6s_infinite]" />
+        <div className="mb-[2px] h-[14px] w-[24%] animate-characters-skeleton-slide rounded-[4px] bg-[linear-gradient(90deg,rgba(255,255,255,0.03)_0%,rgba(255,255,255,0.08)_50%,rgba(255,255,255,0.03)_100%)] bg-[length:200%_100%]" />
+        <div className="mb-[2px] h-[14px] w-[48%] animate-characters-skeleton-slide rounded-[4px] bg-[linear-gradient(90deg,rgba(255,255,255,0.03)_0%,rgba(255,255,255,0.08)_50%,rgba(255,255,255,0.03)_100%)] bg-[length:200%_100%]" />
+        <div className="mb-[2px] h-[14px] w-[36%] animate-characters-skeleton-slide rounded-[4px] bg-[linear-gradient(90deg,rgba(255,255,255,0.03)_0%,rgba(255,255,255,0.08)_50%,rgba(255,255,255,0.03)_100%)] bg-[length:200%_100%]" />
+        <div className="mb-[2px] h-[14px] w-full animate-characters-skeleton-slide rounded-[4px] bg-[linear-gradient(90deg,rgba(255,255,255,0.03)_0%,rgba(255,255,255,0.08)_50%,rgba(255,255,255,0.03)_100%)] bg-[length:200%_100%]" />
+        <div className="mb-[2px] h-[14px] w-3/4 animate-characters-skeleton-slide rounded-[4px] bg-[linear-gradient(90deg,rgba(255,255,255,0.03)_0%,rgba(255,255,255,0.08)_50%,rgba(255,255,255,0.03)_100%)] bg-[length:200%_100%]" />
       </div>
     </div>
   )
@@ -87,11 +86,11 @@ function SkeletonCard() {
 
 function FilterBar({ search, onSearch, role, onRole, roles, total, showing }) {
   return (
-    <div className="relative z-[1] mx-auto mb-8 flex max-w-[1200px] flex-wrap items-center gap-[14px] max-[640px]:flex-col max-[640px]:items-stretch motion-safe:animate-[chrsReveal_0.8s_0.1s_cubic-bezier(0.16,1,0.3,1)_both]">
+    <div className="relative z-[1] mx-auto mb-8 flex max-w-[1200px] flex-wrap items-center gap-[14px] max-[640px]:flex-col max-[640px]:items-stretch motion-safe:animate-characters-filter-reveal">
       {/* Search */}
       <div className="relative min-w-[200px] max-w-[320px] flex-1 max-[640px]:max-w-full">
         <svg
-          className="pointer-events-none absolute left-[12px] top-1/2 -translate-y-1/2 text-[var(--chrs-subtle)]"
+          className="pointer-events-none absolute left-[12px] top-1/2 -translate-y-1/2 text-characters-subtle"
           width="14"
           height="14"
           viewBox="0 0 24 24"
@@ -105,7 +104,7 @@ function FilterBar({ search, onSearch, role, onRole, roles, total, showing }) {
           <line x1="21" y1="21" x2="16.65" y2="16.65" />
         </svg>
         <input
-          className="box-border w-full rounded-[8px] border border-solid border-[var(--chrs-border)] bg-[var(--chrs-surface)] py-[9px] pl-[36px] pr-[36px] font-['Source_Sans_3',sans-serif] text-[13px] text-[var(--chrs-text)] outline-none transition-[border-color,background] duration-[220ms] placeholder:text-[var(--chrs-subtle)] focus:border-[rgba(192,132,252,0.4)] focus:bg-[rgba(255,255,255,0.05)]"
+          className="box-border w-full rounded-[8px] border border-solid border-characters-border bg-characters-surface py-[9px] pl-[36px] pr-[36px] font-['Source_Sans_3',sans-serif] text-[13px] text-characters-text outline-none transition-[border-color,background] duration-[220ms] placeholder:text-characters-subtle focus:border-[rgba(192,132,252,0.4)] focus:bg-[rgba(255,255,255,0.05)]"
           type="text"
           placeholder="Search characters…"
           value={search}
@@ -114,7 +113,7 @@ function FilterBar({ search, onSearch, role, onRole, roles, total, showing }) {
         />
         {search && (
           <button
-            className="absolute right-[10px] top-1/2 -translate-y-1/2 cursor-pointer border-0 bg-transparent px-[4px] py-[2px] font-['Source_Sans_3',sans-serif] text-[11px] text-[var(--chrs-subtle)] transition-colors duration-[180ms] hover:text-[var(--chrs-text)]"
+            className="absolute right-[10px] top-1/2 -translate-y-1/2 cursor-pointer border-0 bg-transparent px-[4px] py-[2px] font-['Source_Sans_3',sans-serif] text-[11px] text-characters-subtle transition-colors duration-[180ms] hover:text-characters-text"
             onClick={() => onSearch('')}
             aria-label="Clear search"
           >
@@ -128,12 +127,12 @@ function FilterBar({ search, onSearch, role, onRole, roles, total, showing }) {
         {roles.map((r) => (
           <button
             key={r}
-            className={`cursor-pointer whitespace-nowrap rounded-[999px] border border-solid border-[var(--chrs-border)] bg-[var(--chrs-surface)] px-[14px] py-[6px] font-['Inter',sans-serif] text-[9.5px] uppercase tracking-[0.16em] text-[var(--chrs-muted)] transition-all duration-200 hover:border-[rgba(192,132,252,0.3)] hover:bg-[var(--chrs-surface-hover)] hover:text-[var(--chrs-text)] ${role === r ? 'border-[var(--pill-color,var(--chrs-purple))] text-[var(--pill-color,var(--chrs-purple))]' : ''}`}
+            className={`cursor-pointer whitespace-nowrap rounded-[999px] border border-solid border-characters-border bg-characters-surface px-[14px] py-[6px] font-['Inter',sans-serif] text-[9.5px] uppercase tracking-[0.16em] text-characters-muted transition-all duration-200 hover:border-characters-border-bright hover:bg-characters-surface-hover hover:text-characters-text ${role === r ? 'border-[var(--pill-color,#c084fc)] text-[var(--pill-color,#c084fc)]' : ''}`}
             onClick={() => onRole(r)}
             style={
               role === r
                 ? {
-                    '--pill-color': ROLE_COLORS[r] ?? 'var(--chrs-purple)',
+                    '--pill-color': ROLE_COLORS[r] ?? '#c084fc',
                     backgroundColor:
                       ACTIVE_ROLE_BACKGROUNDS[r] ??
                       'rgba(192, 132, 252, 0.12)',
@@ -147,8 +146,8 @@ function FilterBar({ search, onSearch, role, onRole, roles, total, showing }) {
       </div>
 
       {/* Count */}
-      <p className="ml-auto whitespace-nowrap text-[12px] italic text-[var(--chrs-subtle)] max-[640px]:ml-0">
-        Showing <strong className="font-semibold text-[var(--chrs-muted)]">{showing}</strong> of <strong className="font-semibold text-[var(--chrs-muted)]">{total}</strong>{' '}
+      <p className="ml-auto whitespace-nowrap text-[12px] italic text-characters-subtle max-[640px]:ml-0">
+        Showing <strong className="font-semibold text-characters-muted">{showing}</strong> of <strong className="font-semibold text-characters-muted">{total}</strong>{' '}
         characters
       </p>
     </div>
@@ -175,7 +174,7 @@ function Pagination({ current, total, onChange }) {
   return (
     <nav className="relative z-[1] mt-10 flex flex-wrap items-center justify-center gap-[6px]" aria-label="Character pages">
       <button
-        className="min-w-[36px] cursor-pointer rounded-[6px] border border-solid border-[var(--chrs-border)] bg-[var(--chrs-surface)] px-[12px] py-[7px] font-['Inter',sans-serif] text-[11px] leading-none tracking-[0.1em] text-[var(--chrs-muted)] transition-all duration-200 enabled:hover:border-[rgba(192,132,252,0.35)] enabled:hover:bg-[var(--chrs-surface-hover)] enabled:hover:text-[var(--chrs-text)] disabled:cursor-not-allowed disabled:opacity-30"
+        className="min-w-[36px] cursor-pointer rounded-[6px] border border-solid border-characters-border bg-characters-surface px-[12px] py-[7px] font-['Inter',sans-serif] text-[11px] leading-none tracking-[0.1em] text-characters-muted transition-all duration-200 enabled:hover:border-characters-border-bright enabled:hover:bg-characters-surface-hover enabled:hover:text-characters-text disabled:cursor-not-allowed disabled:opacity-30"
         onClick={() => onChange(current - 1)}
         disabled={current === 1}
         aria-label="Previous page"
@@ -185,13 +184,13 @@ function Pagination({ current, total, onChange }) {
 
       {rendered.map((item, i) =>
         item === '…' ? (
-          <span key={`ellipsis-${i}`} className="select-none px-1 text-[13px] text-[var(--chrs-subtle)]">
+          <span key={`ellipsis-${i}`} className="select-none px-1 text-[13px] text-characters-subtle">
             …
           </span>
         ) : (
           <button
             key={item}
-            className={`min-w-[36px] cursor-pointer rounded-[6px] border border-solid border-[var(--chrs-border)] bg-[var(--chrs-surface)] px-[12px] py-[7px] font-['Inter',sans-serif] text-[11px] leading-none tracking-[0.1em] text-[var(--chrs-muted)] transition-all duration-200 hover:border-[rgba(192,132,252,0.35)] hover:bg-[var(--chrs-surface-hover)] hover:text-[var(--chrs-text)] ${item === current ? 'border-[#c084fc] bg-[rgba(192,132,252,0.1)] text-[#c084fc]' : ''}`}
+            className={`min-w-[36px] cursor-pointer rounded-[6px] border border-solid border-characters-border bg-characters-surface px-[12px] py-[7px] font-['Inter',sans-serif] text-[11px] leading-none tracking-[0.1em] text-characters-muted transition-all duration-200 hover:border-characters-border-bright hover:bg-characters-surface-hover hover:text-characters-text ${item === current ? 'border-characters-purple bg-[rgba(192,132,252,0.1)] text-characters-purple' : ''}`}
             onClick={() => onChange(item)}
             aria-current={item === current ? 'page' : undefined}
           >
@@ -201,7 +200,7 @@ function Pagination({ current, total, onChange }) {
       )}
 
       <button
-        className="min-w-[36px] cursor-pointer rounded-[6px] border border-solid border-[var(--chrs-border)] bg-[var(--chrs-surface)] px-[12px] py-[7px] font-['Inter',sans-serif] text-[11px] leading-none tracking-[0.1em] text-[var(--chrs-muted)] transition-all duration-200 enabled:hover:border-[rgba(192,132,252,0.35)] enabled:hover:bg-[var(--chrs-surface-hover)] enabled:hover:text-[var(--chrs-text)] disabled:cursor-not-allowed disabled:opacity-30"
+        className="min-w-[36px] cursor-pointer rounded-[6px] border border-solid border-characters-border bg-characters-surface px-[12px] py-[7px] font-['Inter',sans-serif] text-[11px] leading-none tracking-[0.1em] text-characters-muted transition-all duration-200 enabled:hover:border-characters-border-bright enabled:hover:bg-characters-surface-hover enabled:hover:text-characters-text disabled:cursor-not-allowed disabled:opacity-30"
         onClick={() => onChange(current + 1)}
         disabled={current === total}
         aria-label="Next page"
@@ -302,7 +301,7 @@ export default function CharactersPage({ sidebarCollapsed }) {
 
   return (
     <main
-      className={`chrs-root relative box-border max-w-[100vw] overflow-x-hidden bg-[var(--chrs-bg)] p-[clamp(32px,5vw,60px)_clamp(16px,5vw,56px)_80px] font-['Source_Sans_3',sans-serif] text-[var(--chrs-text)] transition-[width,margin-left] duration-[350ms] ease-[cubic-bezier(0.4,0,0.2,1)] ${
+      className={`relative box-border min-h-screen max-w-[100vw] overflow-x-hidden bg-characters-bg p-[clamp(32px,5vw,60px)_clamp(16px,5vw,56px)_80px] font-['Source_Sans_3',sans-serif] text-characters-text transition-[width,margin-left] duration-[350ms] ease-[cubic-bezier(0.4,0,0.2,1)] supports-[height:100dvh]:min-h-[100dvh] ${
         sidebarCollapsed
           ? 'ml-0 w-full'
           : 'ml-[var(--sidebar-current-width,260px)] w-[calc(100%-var(--sidebar-current-width,260px))]'
@@ -311,20 +310,20 @@ export default function CharactersPage({ sidebarCollapsed }) {
       <Particles />
 
       {/* ── Page header ── */}
-      <header className="relative z-[1] mx-auto mb-10 flex max-w-[680px] flex-col items-center gap-[10px] text-center motion-safe:animate-[chrsReveal_0.8s_cubic-bezier(0.16,1,0.3,1)_both]">
-        <div className="inline-flex items-center gap-[7px] font-['Inter',sans-serif] text-[10px] uppercase tracking-[0.28em] text-[var(--chrs-gold)] opacity-[0.85]">
-          <span className="h-[5px] w-[5px] shrink-0 rounded-full bg-[var(--chrs-gold)] shadow-[0_0_8px_var(--chrs-gold)] motion-safe:animate-[dotPulse_2.4s_ease-in-out_infinite]" />
+      <header className="relative z-[1] mx-auto mb-10 flex max-w-[680px] flex-col items-center gap-[10px] text-center motion-safe:animate-characters-reveal">
+        <div className="inline-flex items-center gap-[7px] font-['Inter',sans-serif] text-[10px] uppercase tracking-[0.28em] text-characters-gold opacity-[0.85]">
+          <span className="h-[5px] w-[5px] shrink-0 rounded-full bg-characters-gold shadow-[0_0_8px_#e8c97a] motion-safe:animate-characters-dot-pulse" />
           Fan Wiki · Characters
         </div>
         <h1 className="m-0 font-['Inter',sans-serif] text-[clamp(30px,5vw,56px)] font-bold leading-[1.1] text-white [text-shadow:0_0_50px_rgba(192,132,252,0.35),0_2px_4px_rgba(0,0,0,0.5)]">
           {headerTitle}
         </h1>
         {headerSub && (
-          <p className="m-0 text-[clamp(12px,2vw,15px)] font-light italic tracking-[0.04em] text-[var(--chrs-muted)]">
+          <p className="m-0 text-[clamp(12px,2vw,15px)] font-light italic tracking-[0.04em] text-characters-muted">
             {headerSub}
           </p>
         )}
-        <div className="mt-1 h-px w-[clamp(40px,10vw,80px)] border-0 bg-[linear-gradient(to_right,transparent,var(--chrs-gold),transparent)]" />
+        <div className="mt-1 h-px w-[clamp(40px,10vw,80px)] border-0 bg-[linear-gradient(to_right,transparent,#e8c97a,transparent)]" />
       </header>
 
       {/* ── Filter bar ── */}
@@ -340,11 +339,11 @@ export default function CharactersPage({ sidebarCollapsed }) {
 
       {/* ── Content ── */}
       {error ? (
-        <div className="relative z-[1] col-span-full flex flex-col items-center gap-[14px] px-5 py-20 text-center text-[14px] text-[var(--chrs-muted)]">
-          <span className="block text-[36px] text-[var(--chrs-subtle)]">✦</span>
+        <div className="relative z-[1] col-span-full flex flex-col items-center gap-[14px] px-5 py-20 text-center text-[14px] text-characters-muted">
+          <span className="block text-[36px] text-characters-subtle">✦</span>
           <p>{error}</p>
           <button
-            className="mt-1 cursor-pointer rounded-[6px] border border-solid border-[rgba(192,132,252,0.3)] bg-[rgba(192,132,252,0.1)] px-5 py-2 font-['Inter',sans-serif] text-[10px] uppercase tracking-[0.18em] text-[var(--chrs-purple)] transition-[background-color,border-color] duration-200 hover:border-[var(--chrs-purple)] hover:bg-[rgba(192,132,252,0.18)]"
+            className="mt-1 cursor-pointer rounded-[6px] border border-solid border-characters-border-bright bg-[rgba(192,132,252,0.1)] px-5 py-2 font-['Inter',sans-serif] text-[10px] uppercase tracking-[0.18em] text-characters-purple transition-[background-color,border-color] duration-200 hover:border-characters-purple hover:bg-[rgba(192,132,252,0.18)]"
             onClick={() => load(page, search, role)}
           >
             Retry
@@ -360,12 +359,12 @@ export default function CharactersPage({ sidebarCollapsed }) {
             {loading ? (
               Array.from({ length: LIMIT }, (_, i) => <SkeletonCard key={i} />)
             ) : characters.length === 0 ? (
-              <div className="relative z-[1] col-span-full flex flex-col items-center gap-[14px] px-5 py-20 text-center text-[14px] text-[var(--chrs-muted)]">
-                <span className="block text-[36px] text-[var(--chrs-subtle)]">◈</span>
+              <div className="relative z-[1] col-span-full flex flex-col items-center gap-[14px] px-5 py-20 text-center text-[14px] text-characters-muted">
+                <span className="block text-[36px] text-characters-subtle">◈</span>
                 <p>No characters found.</p>
                 {(search || role !== 'All') && (
                   <button
-                    className="mt-1 cursor-pointer rounded-[6px] border border-solid border-[rgba(192,132,252,0.3)] bg-[rgba(192,132,252,0.1)] px-5 py-2 font-['Inter',sans-serif] text-[10px] uppercase tracking-[0.18em] text-[var(--chrs-purple)] transition-[background-color,border-color] duration-200 hover:border-[var(--chrs-purple)] hover:bg-[rgba(192,132,252,0.18)]"
+                    className="mt-1 cursor-pointer rounded-[6px] border border-solid border-characters-border-bright bg-[rgba(192,132,252,0.1)] px-5 py-2 font-['Inter',sans-serif] text-[10px] uppercase tracking-[0.18em] text-characters-purple transition-[background-color,border-color] duration-200 hover:border-characters-purple hover:bg-[rgba(192,132,252,0.18)]"
                     onClick={() => {
                       setSearch('')
                       setRole('All')

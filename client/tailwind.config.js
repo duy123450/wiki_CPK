@@ -6,7 +6,61 @@ export default {
   ],
   theme: {
     extend: {
+      colors: {
+        characters: {
+          bg: '#05040f',
+          surface: 'rgba(255, 255, 255, 0.03)',
+          'surface-hover': 'rgba(255, 255, 255, 0.06)',
+          border: 'rgba(180, 140, 255, 0.12)',
+          'border-bright': 'rgba(192, 132, 252, 0.3)',
+          purple: '#c084fc',
+          teal: '#67e8f9',
+          gold: '#e8c97a',
+          rose: '#f9a8d4',
+          muted: 'rgba(240, 232, 255, 0.35)',
+          text: '#f0e8ff',
+          subtle: 'rgba(240, 232, 255, 0.18)',
+        },
+      },
       keyframes: {
+        charactersParticleDrift: {
+          '0%, 100%': {
+            opacity: '0.25',
+            transform: 'translateY(0) scale(1)',
+          },
+          '50%': {
+            opacity: '0.7',
+            transform: 'translateY(-32px) scale(1.3)',
+          },
+        },
+        charactersReveal: {
+          from: {
+            opacity: '0',
+            transform: 'translateY(20px)',
+          },
+          to: {
+            opacity: '1',
+            transform: 'translateY(0)',
+          },
+        },
+        charactersDotPulse: {
+          '0%, 100%': { opacity: '1' },
+          '50%': { opacity: '0.3' },
+        },
+        charactersCardReveal: {
+          from: {
+            opacity: '0',
+            transform: 'translateY(16px)',
+          },
+          to: {
+            opacity: '1',
+            transform: 'translateY(0)',
+          },
+        },
+        charactersSkeletonSlide: {
+          '0%': { backgroundPosition: '200% 0' },
+          '100%': { backgroundPosition: '-200% 0' },
+        },
         profileAvatarPulse: {
           '0%, 100%': { opacity: '1' },
           '50%': { opacity: '0.5' },
@@ -246,6 +300,12 @@ export default {
         },
       },
       animation: {
+        'characters-particle-drift': 'charactersParticleDrift 6s ease-in-out infinite',
+        'characters-reveal': 'charactersReveal 0.8s cubic-bezier(0.16,1,0.3,1) both',
+        'characters-filter-reveal': 'charactersReveal 0.8s 0.1s cubic-bezier(0.16,1,0.3,1) both',
+        'characters-dot-pulse': 'charactersDotPulse 2.4s ease-in-out infinite',
+        'characters-card-reveal': 'charactersCardReveal 0.55s cubic-bezier(0.16,1,0.3,1) both',
+        'characters-skeleton-slide': 'charactersSkeletonSlide 1.6s infinite',
         'profile-avatar-pulse': 'profileAvatarPulse 1.2s ease-in-out infinite',
         'profile-spin': 'profileSpin 0.8s linear infinite',
         'profile-toast-in': 'profileToastIn 0.3s ease',
