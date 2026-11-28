@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react'
-import '../styles/DragonCursor.css'
 
 import {
   SEG_DIST,
@@ -9,7 +8,10 @@ import {
 
 function Sparkle({ x, y, char, color }) {
   return (
-    <div className="dragon-sparkle" style={{ left: x, top: y, color }}>
+    <div
+      className="fixed pointer-events-none z-[9996] select-none animate-dragon-sparkle text-[14px] [transform:translate(-50%,-50%)]"
+      style={{ left: x, top: y, color }}
+    >
       {char}
     </div>
   )
@@ -18,7 +20,7 @@ function Sparkle({ x, y, char, color }) {
 function Seg({ pos, flipped, src, alt, shadow, zIndex }) {
   return (
     <div
-      className="dragon-seg"
+      className="fixed pointer-events-none h-[80px] w-[80px] will-change-[transform,left,top]"
       style={{
         left: pos.x,
         top: pos.y,
@@ -27,7 +29,7 @@ function Seg({ pos, flipped, src, alt, shadow, zIndex }) {
         filter: `drop-shadow(${shadow})`,
       }}
     >
-      <img src={src} alt={alt} />
+      <img className="h-full w-full object-contain" src={src} alt={alt} />
     </div>
   )
 }
@@ -185,7 +187,10 @@ export default function DragonCursor() {
   }, [])
 
   return (
-    <div style={{ display: isEnabled ? 'block' : 'none' }}>
+    <div
+      className="pointer-events-none"
+      style={{ display: isEnabled ? 'block' : 'none' }}
+    >
       {sparkles.map((sp) => (
         <Sparkle
           key={sp.id}

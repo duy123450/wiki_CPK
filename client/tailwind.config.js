@@ -37,6 +37,16 @@ export default {
         },
       },
       keyframes: {
+        dragonSparkle: {
+          '0%': {
+            opacity: '1',
+            transform: 'translate(-50%, -50%) scale(1)',
+          },
+          '100%': {
+            opacity: '0',
+            transform: 'translate(-50%, -130%) scale(0.3)',
+          },
+        },
         sidebarPulseOrb: {
           '0%, 100%': {
             opacity: '1',
@@ -351,6 +361,7 @@ export default {
         },
       },
       animation: {
+        'dragon-sparkle': 'dragonSparkle 0.8s ease-out forwards',
         'sidebar-pulse-orb': 'sidebarPulseOrb 2.5s ease-in-out infinite',
         'soundtracks-float': 'soundtracksFloat 6s ease-in-out infinite',
         'soundtracks-card-in': 'soundtracksCardIn 0.45s ease forwards',
