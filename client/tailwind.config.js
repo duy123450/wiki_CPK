@@ -34,12 +34,34 @@ export default {
             transform: 'scale(1.08)',
           },
         },
+        cookieSlideIn: {
+          from: {
+            opacity: '0',
+            transform: 'translateX(-50%) translateY(24px)',
+          },
+          to: {
+            opacity: '1',
+            transform: 'translateX(-50%) translateY(0)',
+          },
+        },
+        cookieSlideOut: {
+          from: {
+            opacity: '1',
+            transform: 'translateX(-50%) translateY(0)',
+          },
+          to: {
+            opacity: '0',
+            transform: 'translateX(-50%) translateY(16px)',
+          },
+        },
       },
       animation: {
         'profile-avatar-pulse': 'profileAvatarPulse 1.2s ease-in-out infinite',
         'profile-spin': 'profileSpin 0.8s linear infinite',
         'profile-toast-in': 'profileToastIn 0.3s ease',
         'scroll-to-top-pulse': 'scrollToTopPulse 2.8s ease-in-out infinite',
+        'cookie-slide-in': 'cookieSlideIn 0.45s cubic-bezier(0.34,1.56,0.64,1) both',
+        'cookie-slide-out': 'cookieSlideOut 0.38s cubic-bezier(0.4,0,0.2,1) both',
       },
     },
   },

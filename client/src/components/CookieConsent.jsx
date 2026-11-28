@@ -8,7 +8,6 @@
  */
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import '../styles/CookieConsent.css'
 
 const STORAGE_KEY = 'cookie_consent'
 
@@ -39,7 +38,7 @@ export default function CookieConsent() {
   return (
     <div
       id="cookie-consent-banner"
-      className={`fixed left-1/2 z-[99999] flex w-[min(720px,calc(100vw-32px))] -translate-x-1/2 translate-y-0 flex-wrap items-center gap-[18px] rounded-[14px] border border-solid border-[rgba(192,132,252,0.2)] bg-[rgba(10,14,26,0.92)] px-[22px] py-[18px] font-['Source_Sans_3','Segoe_UI',sans-serif] shadow-[0_8px_40px_rgba(0,0,0,0.55),0_0_0_1px_rgba(103,232,249,0.05)_inset] [backdrop-filter:blur(18px)_saturate(1.4)] [-webkit-backdrop-filter:blur(18px)_saturate(1.4)] bottom-[28px] ${hiding ? 'pointer-events-none animate-[cookieSlideOut_0.38s_cubic-bezier(0.4,0,0.2,1)_both]' : 'animate-[cookieSlideIn_0.45s_cubic-bezier(0.34,1.56,0.64,1)_both]'} max-[600px]:bottom-4 max-[600px]:gap-3 max-[600px]:rounded-xl max-[600px]:px-4 max-[600px]:py-[14px]`}
+      className={`fixed left-1/2 z-[99999] flex w-[min(720px,calc(100vw-32px))] -translate-x-1/2 translate-y-0 flex-wrap items-center gap-[18px] rounded-[14px] border border-solid border-[rgba(192,132,252,0.2)] bg-[rgba(10,14,26,0.92)] px-[22px] py-[18px] font-['Source_Sans_3','Segoe_UI',sans-serif] shadow-[0_8px_40px_rgba(0,0,0,0.55),0_0_0_1px_rgba(103,232,249,0.05)_inset] [backdrop-filter:blur(18px)_saturate(1.4)] [-webkit-backdrop-filter:blur(18px)_saturate(1.4)] bottom-[28px] ${hiding ? 'pointer-events-none animate-cookie-slide-out' : 'animate-cookie-slide-in'} max-[600px]:bottom-4 max-[600px]:gap-3 max-[600px]:rounded-xl max-[600px]:px-4 max-[600px]:py-[14px]`}
       role="dialog"
       aria-label="Cookie consent"
       aria-live="polite"
