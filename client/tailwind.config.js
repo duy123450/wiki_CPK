@@ -54,6 +54,10 @@ export default {
             transform: 'translateX(-50%) translateY(16px)',
           },
         },
+        footerHintPulse: {
+          '0%, 100%': { opacity: '0.4' },
+          '50%': { opacity: '1' },
+        },
       },
       animation: {
         'profile-avatar-pulse': 'profileAvatarPulse 1.2s ease-in-out infinite',
@@ -62,6 +66,7 @@ export default {
         'scroll-to-top-pulse': 'scrollToTopPulse 2.8s ease-in-out infinite',
         'cookie-slide-in': 'cookieSlideIn 0.45s cubic-bezier(0.34,1.56,0.64,1) both',
         'cookie-slide-out': 'cookieSlideOut 0.38s cubic-bezier(0.4,0,0.2,1) both',
+        'footer-hint-pulse': 'footerHintPulse 3s ease-in-out infinite',
       },
     },
   },

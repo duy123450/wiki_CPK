@@ -1,6 +1,5 @@
 import { Mail, ExternalLink } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import '../styles/Footer.css'
 
 import { QUICK_LINKS } from '../constants/ui.constants'
 
@@ -9,7 +8,7 @@ export default function Footer({ sidebarCollapsed }) {
 
   return (
     <footer
-      className={`cpk-footer relative box-border w-[calc(100%-var(--sidebar-current-width))] max-w-[100vw] overflow-hidden border-t border-solid border-t-[rgba(148,163,184,0.1)] bg-[#070b14] pt-[60px] font-['Source_Sans_3','Segoe_UI',sans-serif] text-[#94a3b8] [margin-left:var(--sidebar-current-width)] [transition:width_0.35s_cubic-bezier(0.4,0,0.2,1),margin-left_0.35s_cubic-bezier(0.4,0,0.2,1)] max-[768px]:ml-0 max-[768px]:w-full max-[600px]:pt-10 ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}
+      className={`cpk-footer relative box-border w-[calc(100%-var(--sidebar-current-width))] max-w-[100vw] overflow-hidden border-t border-solid border-t-[rgba(148,163,184,0.1)] bg-[#070b14] pt-[60px] font-['Source_Sans_3','Segoe_UI',sans-serif] text-[#94a3b8] before:absolute before:left-1/2 before:top-0 before:h-px before:w-[60%] before:-translate-x-1/2 before:content-[''] before:bg-[linear-gradient(to_right,transparent,rgba(192,132,252,0.4),rgba(103,232,249,0.3),transparent)] [margin-left:var(--sidebar-current-width)] [transition:width_0.35s_cubic-bezier(0.4,0,0.2,1),margin-left_0.35s_cubic-bezier(0.4,0,0.2,1)] max-[768px]:ml-0 max-[768px]:w-full max-[600px]:pt-10 ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}
     >
       <div className="footer-main mx-auto grid max-w-[1100px] grid-cols-[1.6fr_1fr_1.2fr] gap-12 px-8 pb-12 max-[900px]:grid-cols-2 max-[900px]:gap-9 max-[600px]:grid-cols-1 max-[600px]:gap-8 max-[600px]:px-5 max-[600px]:pb-9">
         {/* ── Col 1: Brand ── */}
@@ -93,12 +92,12 @@ export default function Footer({ sidebarCollapsed }) {
           <span className="footer-disclaimer-badge inline-flex max-w-full items-center overflow-hidden whitespace-nowrap rounded-full border border-solid border-[rgba(251,191,36,0.25)] bg-[rgba(251,191,36,0.06)] px-[14px] py-1 font-['Inter',sans-serif] text-[9px] uppercase tracking-[0.15em] text-[#fbbf24] text-ellipsis max-[600px]:px-[10px] max-[600px]:text-[8px]">
             Non-profit / Student Project · Dự án phi lợi nhuận / Sinh viên
           </span>
-          <span className="footer-scroll-hint shrink-0 animate-[hintPulse_3s_ease-in-out_infinite] text-[10.5px] italic tracking-[0.08em] text-[#475569]">
+          <span className="footer-scroll-hint shrink-0 animate-footer-hint-pulse text-[10.5px] italic tracking-[0.08em] text-[#475569]">
             Scroll to read · Cuộn để đọc ↓
           </span>
         </div>
 
-        <div className="footer-disclaimer-scroll box-border flex h-[220px] max-h-[220px] w-full flex-col overflow-x-hidden overflow-y-scroll rounded-[10px] border border-solid border-[rgba(148,163,184,0.1)] bg-[rgba(255,255,255,0.02)] px-[22px] py-5 [scrollbar-color:rgba(192,132,252,0.3)_rgba(255,255,255,0.03)] [scrollbar-width:thin] max-[600px]:h-[200px] max-[600px]:max-h-[200px] max-[600px]:px-[14px] max-[600px]:py-[14px]">
+        <div className="footer-disclaimer-scroll box-border flex h-[220px] max-h-[220px] w-full flex-col overflow-x-hidden overflow-y-scroll rounded-[10px] border border-solid border-[rgba(148,163,184,0.1)] bg-[rgba(255,255,255,0.02)] px-[22px] py-5 [scrollbar-color:rgba(192,132,252,0.3)_rgba(255,255,255,0.03)] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-[5px] [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-[rgba(255,255,255,0.03)] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[rgba(192,132,252,0.3)] [&::-webkit-scrollbar-thumb:hover]:bg-[rgba(192,132,252,0.55)] max-[600px]:h-[200px] max-[600px]:max-h-[200px] max-[600px]:px-[14px] max-[600px]:py-[14px]">
           {/* EN block */}
           <div className="footer-disclaimer-lang-block flex flex-col gap-[10px] px-0 py-1">
             <p className="footer-disclaimer-lang-label m-0 font-['Inter',sans-serif] text-[9px] uppercase tracking-[0.25em] text-[#c084fc] opacity-80">🇬🇧 English</p>
