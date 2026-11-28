@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
-import '../styles/ScrollToTop.css'
 
 export default function ScrollToTop() {
   const { pathname } = useLocation()
@@ -53,7 +52,7 @@ export default function ScrollToTop() {
 
       {/* Animated glow ring */}
       <span
-        className={`absolute -inset-1 rounded-[14px] border border-solid border-[rgba(192,132,252,0.18)] transition-opacity duration-[250ms] pointer-events-none animate-[stt-pulse_2.8s_ease-in-out_infinite] ${
+        className={`absolute -inset-1 rounded-[14px] border border-solid border-[rgba(192,132,252,0.18)] transition-opacity duration-[250ms] pointer-events-none animate-scroll-to-top-pulse ${
           visible ? 'opacity-100' : 'opacity-0'
         }`}
         aria-hidden="true"
