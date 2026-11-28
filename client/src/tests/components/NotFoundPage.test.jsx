@@ -81,8 +81,8 @@ describe('AccessRestrictedPage', () => {
       </MemoryRouter>
     )
     expect(container.querySelector('.nf-root')).toHaveClass('sidebar-collapsed')
-    expect(container.querySelector('.nf-code-shadow')).toHaveStyle({
-      color: 'rgba(221, 143, 176, 0.14)',
-    })
+    expect(container.querySelector('.nf-code-shadow')).toHaveClass(
+      'text-[rgba(221,143,176,0.14)]'
+    )
   })
 })

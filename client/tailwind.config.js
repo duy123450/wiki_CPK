@@ -240,6 +240,10 @@ export default {
           '0%': { backgroundPosition: '200% 0' },
           '100%': { backgroundPosition: '-200% 0' },
         },
+        notFoundFloat: {
+          '0%, 100%': { transform: 'translate3d(0,0,0) scale(0.95)' },
+          '50%': { transform: 'translate3d(0,-24px,0) scale(1.05)' },
+        },
       },
       animation: {
         'profile-avatar-pulse': 'profileAvatarPulse 1.2s ease-in-out infinite',
@@ -276,6 +280,7 @@ export default {
         'soundtrack-spin': 'soundtrackSpin 12s linear infinite',
         'soundtrack-fade-in': 'soundtrackFadeIn 0.4s ease both',
         'soundtrack-shimmer': 'soundtrackShimmer 1.6s ease-in-out infinite',
+        'not-found-float': 'notFoundFloat linear infinite',
       },
     },
   },
