@@ -17,7 +17,7 @@ export default function TrackTypeBadge({ type }) {
     },
   };
   const badgeStyle = TYPE_COLORS[type] ?? {
-    color: 'var(--st-purple)',
+    color: '#c084fc',
     backgroundColor: 'rgba(192, 132, 252, 0.15)',
     borderColor: 'rgba(192, 132, 252, 0.4)',
   };

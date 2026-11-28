@@ -7,6 +7,16 @@ export default {
   theme: {
     extend: {
       colors: {
+        soundtracks: {
+          bg: '#05040f',
+          surface: 'rgba(255, 255, 255, 0.035)',
+          border: 'rgba(180, 140, 255, 0.12)',
+          'border-bright': 'rgba(192, 132, 252, 0.3)',
+          purple: '#c084fc',
+          indigo: '#818cf8',
+          text: '#f0e8ff',
+          muted: 'rgba(240, 232, 255, 0.45)',
+        },
         characters: {
           bg: '#05040f',
           surface: 'rgba(255, 255, 255, 0.03)',
@@ -23,6 +33,33 @@ export default {
         },
       },
       keyframes: {
+        soundtracksFloat: {
+          '0%, 100%': {
+            transform: 'translateY(0) scale(1)',
+            opacity: '0.25',
+          },
+          '50%': {
+            transform: 'translateY(-32px) scale(1.3)',
+            opacity: '0.7',
+          },
+        },
+        soundtracksCardIn: {
+          from: {
+            opacity: '0',
+            transform: 'translateY(16px)',
+          },
+          to: {
+            opacity: '1',
+            transform: 'translateY(0)',
+          },
+        },
+        soundtracksSpin: {
+          to: { transform: 'rotate(360deg)' },
+        },
+        soundtracksShimmer: {
+          '0%': { backgroundPosition: '200% 0' },
+          '100%': { backgroundPosition: '-200% 0' },
+        },
         charactersParticleDrift: {
           '0%, 100%': {
             opacity: '0.25',
@@ -300,6 +337,10 @@ export default {
         },
       },
       animation: {
+        'soundtracks-float': 'soundtracksFloat 6s ease-in-out infinite',
+        'soundtracks-card-in': 'soundtracksCardIn 0.45s ease forwards',
+        'soundtracks-spin': 'soundtracksSpin 2s linear infinite',
+        'soundtracks-shimmer': 'soundtracksShimmer 1.6s ease-in-out infinite',
         'characters-particle-drift': 'charactersParticleDrift 6s ease-in-out infinite',
         'characters-reveal': 'charactersReveal 0.8s cubic-bezier(0.16,1,0.3,1) both',
         'characters-filter-reveal': 'charactersReveal 0.8s 0.1s cubic-bezier(0.16,1,0.3,1) both',
