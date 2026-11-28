@@ -21,8 +21,6 @@ import { deleteAccountThunk } from '../store/slices/authSlice'
 import { DEFAULT_AVATAR } from '../constants'
 import { formatVNDate } from '../utils/dateUtils'
 import { profileSchema } from '../schemas/profileSchemas'
-import '../styles/ProfilePage.css'
-
 export default function ProfilePage({
   sidebarCollapsed,
   currentUser,
@@ -210,7 +208,7 @@ export default function ProfilePage({
 
         {/* Toast */}
         {toast && (
-          <div className={`profile-toast flex items-center gap-2 rounded-xl px-4 py-3 text-[13px] animate-[toast-in_0.3s_ease] ${toast.type === 'success' ? 'border border-solid border-[rgba(34,197,94,0.25)] bg-[rgba(34,197,94,0.1)] text-[#4ade80]' : 'border border-solid border-[rgba(239,68,68,0.25)] bg-[rgba(239,68,68,0.1)] text-[#f87171]'}`}>
+          <div className={`profile-toast flex items-center gap-2 rounded-xl px-4 py-3 text-[13px] animate-profile-toast-in ${toast.type === 'success' ? 'border border-solid border-[rgba(34,197,94,0.25)] bg-[rgba(34,197,94,0.1)] text-[#4ade80]' : 'border border-solid border-[rgba(239,68,68,0.25)] bg-[rgba(239,68,68,0.1)] text-[#f87171]'}`}>
             {toast.type === 'success' ? <Check size={16} /> : <X size={16} />}
             {toast.msg}
           </div>
@@ -219,7 +217,7 @@ export default function ProfilePage({
         {/* Avatar section */}
         <div className="profile-avatar-section flex flex-col items-center gap-[14px] rounded-[20px] border border-solid border-[rgba(192,132,252,0.15)] bg-[rgba(12,15,31,0.7)] p-7 [backdrop-filter:blur(14px)] [-webkit-backdrop-filter:blur(14px)] max-[768px]:rounded-2xl max-[768px]:px-4 max-[768px]:py-5">
           <div
-            className={`profile-avatar-ring relative h-[100px] w-[100px] rounded-full p-[3px] [background:linear-gradient(135deg,rgba(192,132,252,0.5),rgba(103,232,249,0.4))] [transition:box-shadow_0.3s_ease] hover:shadow-[0_0_20px_rgba(192,132,252,0.3)] ${avatarUploading ? 'profile-avatar-ring--uploading animate-[avatar-pulse_1.2s_ease-in-out_infinite]' : ''}`}
+            className={`profile-avatar-ring relative h-[100px] w-[100px] rounded-full p-[3px] [background:linear-gradient(135deg,rgba(192,132,252,0.5),rgba(103,232,249,0.4))] [transition:box-shadow_0.3s_ease] hover:shadow-[0_0_20px_rgba(192,132,252,0.3)] ${avatarUploading ? 'profile-avatar-ring--uploading animate-profile-avatar-pulse' : ''}`}
           >
             <img
               src={avatarSrc}
@@ -229,7 +227,7 @@ export default function ProfilePage({
                 e.target.src = DEFAULT_AVATAR
               }}
             />
-            {avatarUploading && <div className="profile-avatar-spinner absolute -inset-[3px] rounded-full border-2 border-solid border-transparent border-t-[#c084fc] animate-[spin_0.8s_linear_infinite]" />}
+            {avatarUploading && <div className="profile-avatar-spinner absolute -inset-[3px] rounded-full border-2 border-solid border-transparent border-t-[#c084fc] animate-profile-spin" />}
           </div>
 
           <button
