@@ -6,15 +6,15 @@ export default function AbilityCard({ ability }) {
   return (
     <div className="rounded-lg border border-solid border-[rgba(255,255,255,0.06)] bg-[rgba(255,255,255,0.025)] px-4 py-[14px] transition-[border-color] duration-200 hover:border-[rgba(192,132,252,0.25)]">
       <div className="mb-2 flex items-center justify-between gap-[10px]">
-        <span className="font-['Inter',sans-serif] text-[11.5px] tracking-[0.08em] font-semibold text-[var(--chr-text)]">
+        <span className="font-['Inter',sans-serif] text-[11.5px] tracking-[0.08em] font-semibold text-[#f0e8ff]">
           {ability.skillName}
         </span>
         {ability.type && (
           <span
-            className="whitespace-nowrap rounded-[4px] border border-solid border-current px-2 py-[2px] font-['Inter',sans-serif] text-[8.5px] tracking-[0.18em] text-[var(--atype-color,var(--chr-purple))] uppercase opacity-90"
+            className="whitespace-nowrap rounded-[4px] border border-solid border-current px-2 py-[2px] font-['Inter',sans-serif] text-[8.5px] tracking-[0.18em] text-[var(--atype-color,#c084fc)] uppercase opacity-90"
             style={{
               '--atype-color':
-                ABILITY_TYPE_COLORS[ability.type] ?? 'var(--chr-muted)',
+                ABILITY_TYPE_COLORS[ability.type] ?? 'rgba(240,232,255,0.35)',
             }}
           >
             {ability.type}

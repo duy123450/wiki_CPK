@@ -83,13 +83,13 @@ describe('CharacterPage', () => {
       'src',
       '/kaguya-real.png'
     )
-    expect(screen.getByAltText('character view 1')).toHaveClass(
-      'animate-[imgFadeIn_0.28s_ease_forwards]'
+    expect(screen.getByAltText('character view 1').className).toContain(
+      'animate-character-image-fade-in'
     )
 
     fireEvent.click(screen.getByRole('button', { name: 'Tsukuyomi' }))
-    expect(screen.getByAltText('character view 1')).toHaveClass(
-      'animate-[imgFadeOut_0.26s_ease_forwards]'
+    expect(screen.getByAltText('character view 1').className).toContain(
+      'animate-character-image-fade-out'
     )
 
     await act(async () => {
@@ -100,8 +100,8 @@ describe('CharacterPage', () => {
       'src',
       '/kaguya-tsukuyomi.png'
     )
-    expect(screen.getByAltText('character view 2')).toHaveClass(
-      'animate-[imgFadeIn_0.28s_ease_forwards]'
+    expect(screen.getByAltText('character view 2').className).toContain(
+      'animate-character-image-fade-in'
     )
   })
 })

@@ -159,6 +159,52 @@ export default {
           '0%': { backgroundPosition: '200% 0' },
           '100%': { backgroundPosition: '-200% 0' },
         },
+        characterParticleDrift: {
+          '0%, 100%': {
+            opacity: '0.25',
+            transform: 'translateY(0) scale(1)',
+          },
+          '50%': {
+            opacity: '0.7',
+            transform: 'translateY(-32px) scale(1.3)',
+          },
+        },
+        characterReveal: {
+          from: {
+            opacity: '0',
+            transform: 'translateY(20px)',
+          },
+          to: {
+            opacity: '1',
+            transform: 'translateY(0)',
+          },
+        },
+        characterImageFadeIn: {
+          from: {
+            opacity: '0',
+            transform: 'scale(1.025)',
+          },
+          to: {
+            opacity: '1',
+            transform: 'scale(1)',
+          },
+        },
+        characterImageFadeOut: {
+          from: { opacity: '1' },
+          to: { opacity: '0' },
+        },
+        characterSwitchGlowSweep: {
+          '0%': { backgroundPosition: '200% 0' },
+          '100%': { backgroundPosition: '-200% 0' },
+        },
+        characterDotPulse: {
+          '0%, 100%': { opacity: '1' },
+          '50%': { opacity: '0.3' },
+        },
+        characterSkeletonSlide: {
+          '0%': { backgroundPosition: '200% 0' },
+          '100%': { backgroundPosition: '-200% 0' },
+        },
       },
       animation: {
         'profile-avatar-pulse': 'profileAvatarPulse 1.2s ease-in-out infinite',
@@ -183,6 +229,13 @@ export default {
         'movie-hero-fade': 'movieHeroFade 1.2s cubic-bezier(0.16,1,0.3,1) both',
         'movie-dot-pulse': 'movieDotPulse 2.5s ease-in-out infinite',
         'movie-shimmer-slide': 'movieShimmerSlide 1.6s infinite',
+        'character-particle-drift': 'characterParticleDrift 6s ease-in-out infinite',
+        'character-reveal': 'characterReveal 0.7s cubic-bezier(0.16,1,0.3,1) both',
+        'character-image-fade-in': 'characterImageFadeIn 0.28s ease forwards',
+        'character-image-fade-out': 'characterImageFadeOut 0.26s ease forwards',
+        'character-switch-glow': 'characterSwitchGlowSweep 2.5s linear infinite',
+        'character-dot-pulse': 'characterDotPulse 2.4s ease-in-out infinite',
+        'character-skeleton-slide': 'characterSkeletonSlide 1.6s infinite',
       },
     },
   },

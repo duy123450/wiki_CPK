@@ -21,25 +21,25 @@ export default function RelChip({ rel }) {
           <img
             src={target.image[0].url}
             alt={target.name}
-            className="h-10 w-10 shrink-0 rounded-full border border-solid border-[var(--chr-border-bright)] object-cover"
+            className="h-10 w-10 shrink-0 rounded-full border border-solid border-[rgba(192,132,252,0.3)] object-cover"
           />
         ) : (
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-solid border-[var(--chr-border-bright)] bg-[var(--chr-surface)] text-[14px] text-[var(--chr-subtle)]">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-solid border-[rgba(192,132,252,0.3)] bg-[rgba(255,255,255,0.03)] text-[14px] text-[rgba(240,232,255,0.18)]">
             ✦
           </div>
         )}
 
         <div className="flex min-w-0 flex-col gap-[2px]">
-          <span className="overflow-hidden text-ellipsis whitespace-nowrap font-['Inter',sans-serif] text-[11px] tracking-[0.06em] font-semibold text-[var(--chr-text)]">
+          <span className="overflow-hidden text-ellipsis whitespace-nowrap font-['Inter',sans-serif] text-[11px] tracking-[0.06em] font-semibold text-[#f0e8ff]">
             {target?.name ?? 'Unknown'}
           </span>
           {rel.relationType && (
-            <span className="text-[10px] tracking-[0.08em] text-[var(--chr-teal)] italic">
+            <span className="text-[10px] tracking-[0.08em] text-[#67e8f9] italic">
               {rel.relationType}
             </span>
           )}
           {rel.description && (
-            <span className="text-[11px] leading-[1.5] text-[var(--chr-muted)]">
+            <span className="text-[11px] leading-[1.5] text-[rgba(240,232,255,0.35)]">
               {rel.description}
             </span>
           )}
