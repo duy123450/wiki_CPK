@@ -385,7 +385,7 @@ export default function Playlist() {
         {isExpanded && (
           <div className="pl-panel pointer-events-auto fixed bottom-0 right-0 z-[2] flex h-[88vh] h-[88dvh] h-[calc(var(--pl-viewport-height,100vh)*0.88)] w-full flex-col overflow-hidden rounded-t-[18px] bg-[#121212] shadow-[0_-6px_28px_rgba(0,0,0,0.75)] animate-playlist-slide-up max-[480px]:h-[92vh] max-[480px]:h-[92dvh] max-[480px]:h-[calc(var(--pl-viewport-height,100vh)*0.92)] min-[769px]:bottom-5 min-[769px]:right-5 min-[769px]:h-auto min-[769px]:max-h-[calc(100vh-40px)] min-[769px]:w-[700px] min-[769px]:flex-row min-[769px]:rounded-[14px]">
             {/* ─── PLAYER ─── */}
-            <div className="pl-panel-player flex min-h-0 flex-col max-[768px]:flex-[0_1_60%] max-[768px]:overflow-hidden max-[768px]:border-b max-[768px]:border-solid max-[768px]:border-b-[#282828] min-[769px]:flex-1 min-[769px]:overflow-y-auto">
+            <div className="pl-panel-player flex min-h-0 flex-col max-[768px]:flex-[0_1_60%] max-[768px]:overflow-hidden max-[768px]:border-b max-[768px]:[border-bottom-style:solid] max-[768px]:border-b-[#282828] min-[769px]:flex-1 min-[769px]:overflow-y-auto">
               <div className="pl-panel-header relative flex shrink-0 items-center justify-center px-3 pb-1 pt-2">
                 <div className="pl-player-tabs ml-3 mr-auto flex gap-4">
                   <button
@@ -542,8 +542,8 @@ export default function Playlist() {
             </div>
 
             {/* ─── TRACK LIST ─── */}
-            <div className="pl-panel-tracks flex min-h-0 flex-col overflow-hidden max-[768px]:min-h-0 max-[768px]:flex-[1_1_40%] min-[769px]:flex-[0_0_35%] min-[769px]:border-r min-[769px]:border-solid min-[769px]:border-r-[#282828]">
-              <div className="pl-tracks-header flex shrink-0 items-center justify-between border-b border-solid border-b-[#282828] px-4 py-3 text-xs font-bold uppercase tracking-[0.5px] text-[#b3b3b3]">
+            <div className="pl-panel-tracks flex min-h-0 flex-col overflow-hidden max-[768px]:min-h-0 max-[768px]:flex-[1_1_40%] min-[769px]:flex-[0_0_35%] min-[769px]:border-r min-[769px]:[border-right-style:solid] min-[769px]:border-r-[#282828]">
+              <div className="pl-tracks-header flex shrink-0 items-center justify-between px-4 py-3 text-xs font-bold uppercase tracking-[0.5px] text-[#b3b3b3]">
                 <span>Tracks ({accessibleTracks.length})</span>
               </div>
               <div className="pl-track-list min-h-0 flex-1 overflow-x-hidden overflow-y-auto pb-[max(16px,env(safe-area-inset-bottom,0px))] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-[#404040] [&::-webkit-scrollbar-thumb:hover]:bg-[#555]">
