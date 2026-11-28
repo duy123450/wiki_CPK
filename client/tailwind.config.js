@@ -205,6 +205,41 @@ export default {
           '0%': { backgroundPosition: '200% 0' },
           '100%': { backgroundPosition: '-200% 0' },
         },
+        soundtrackParticleFloat: {
+          '0%, 100%': {
+            transform: 'translateY(0) scale(1)',
+            opacity: '0.25',
+          },
+          '50%': {
+            transform: 'translateY(-32px) scale(1.3)',
+            opacity: '0.7',
+          },
+        },
+        soundtrackGlowPulse: {
+          '0%, 100%': {
+            boxShadow: 'inset 0 0 60px rgba(192,132,252,0.08)',
+          },
+          '50%': {
+            boxShadow: 'inset 0 0 80px rgba(192,132,252,0.18)',
+          },
+        },
+        soundtrackSpin: {
+          to: { transform: 'rotate(360deg)' },
+        },
+        soundtrackFadeIn: {
+          from: {
+            opacity: '0',
+            transform: 'translateY(10px)',
+          },
+          to: {
+            opacity: '1',
+            transform: 'translateY(0)',
+          },
+        },
+        soundtrackShimmer: {
+          '0%': { backgroundPosition: '200% 0' },
+          '100%': { backgroundPosition: '-200% 0' },
+        },
       },
       animation: {
         'profile-avatar-pulse': 'profileAvatarPulse 1.2s ease-in-out infinite',
@@ -236,6 +271,11 @@ export default {
         'character-switch-glow': 'characterSwitchGlowSweep 2.5s linear infinite',
         'character-dot-pulse': 'characterDotPulse 2.4s ease-in-out infinite',
         'character-skeleton-slide': 'characterSkeletonSlide 1.6s infinite',
+        'soundtrack-particle': 'soundtrackParticleFloat 6s ease-in-out infinite',
+        'soundtrack-glow': 'soundtrackGlowPulse 4s ease-in-out infinite',
+        'soundtrack-spin': 'soundtrackSpin 12s linear infinite',
+        'soundtrack-fade-in': 'soundtrackFadeIn 0.4s ease both',
+        'soundtrack-shimmer': 'soundtrackShimmer 1.6s ease-in-out infinite',
       },
     },
   },
