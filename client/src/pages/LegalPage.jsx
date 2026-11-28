@@ -1,16 +1,15 @@
 import React, { useState } from 'react';
 import LegalDocumentView from '../components/LegalDocumentView';
 import { generateParticles } from '../utils/uiUtils';
-import '../styles/LegalPage.css';
 
 function Particles() {
   const [pts] = useState(() => generateParticles(20));
   return (
-    <div className="legal-particles" aria-hidden="true">
+    <div className="legal-particles pointer-events-none fixed inset-0 z-0" aria-hidden="true">
       {pts.map((p) => (
         <span
           key={p.id}
-          className="legal-particle"
+          className="legal-particle absolute rounded-full bg-[rgba(192,132,252,0.4)] motion-safe:animate-legal-particle-drift motion-reduce:animate-none"
           style={{
             left: p.left,
             top: p.top,

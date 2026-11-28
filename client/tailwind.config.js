@@ -121,6 +121,16 @@ export default {
           '0%': { backgroundPosition: '200% 0' },
           '100%': { backgroundPosition: '-200% 0' },
         },
+        legalParticleDrift: {
+          '0%, 100%': {
+            opacity: '0.15',
+            transform: 'translateY(0) scale(1)',
+          },
+          '50%': {
+            opacity: '0.4',
+            transform: 'translateY(-40px) scale(1.2)',
+          },
+        },
       },
       animation: {
         'profile-avatar-pulse': 'profileAvatarPulse 1.2s ease-in-out infinite',
@@ -140,6 +150,7 @@ export default {
         'hero-dot-pulse': 'heroDotPulse 2s ease-in-out infinite',
         'hero-scroll-drop': 'heroScrollDrop 2s ease-in-out infinite',
         'hero-shimmer-slide': 'heroShimmerSlide 1.5s infinite',
+        'legal-particle-drift': 'legalParticleDrift 8s ease-in-out infinite',
       },
     },
   },

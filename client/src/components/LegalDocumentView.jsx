@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useLegalDocument } from '../hooks/useLegalDocument';
-import '../styles/LegalPage.css';
 
 const legalCardClassName =
   'relative z-[1] mx-auto max-w-[840px] rounded-2xl border border-solid border-[rgba(180,140,255,0.12)] bg-[rgba(255,255,255,0.03)] p-[clamp(20px,5vw,40px)] shadow-[0_24px_60px_rgba(0,0,0,0.55),0_0_0_1px_rgba(192,132,252,0.05)] [backdrop-filter:blur(16px)] [-webkit-backdrop-filter:blur(16px)]';
@@ -56,7 +55,10 @@ const LegalDocumentView = ({ type }) => {
         </div>
       )}
       
-      <div className="legal-content" dangerouslySetInnerHTML={{ __html: data.content }} />
+      <div
+        className="legal-content text-[14.5px] leading-[1.75] text-[rgba(240,232,255,0.8)] [&_h2]:mb-4 [&_h2]:mt-9 [&_h2]:border-b [&_h2]:border-solid [&_h2]:border-[rgba(180,140,255,0.15)] [&_h2]:pb-2 [&_h2]:font-['Inter',sans-serif] [&_h2]:text-[clamp(18px,3vw,22px)] [&_h2]:font-semibold [&_h2]:text-white [&_h3]:mb-4 [&_h3]:mt-9 [&_h3]:font-['Inter',sans-serif] [&_h3]:text-base [&_h3]:font-semibold [&_h3]:text-white [&_p]:mb-4 [&_p]:mt-0 [&_ul]:mb-5 [&_ul]:mt-0 [&_ul]:pl-6 [&_ol]:mb-5 [&_ol]:mt-0 [&_ol]:pl-6 [&_li]:mb-2 [&_a]:text-[#67e8f9] [&_a]:no-underline [&_a]:transition-colors [&_a]:duration-[180ms] [&_a:hover]:text-white [&_a:hover]:underline"
+        dangerouslySetInnerHTML={{ __html: data.content }}
+      />
     </div>
   );
 };
