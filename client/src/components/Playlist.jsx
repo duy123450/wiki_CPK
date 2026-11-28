@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState, useMemo } from 'react'
-import '../styles/Playlist.css'
 import useYouTubePlayer from '../hooks/useYouTubePlayer'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
 import {
@@ -33,7 +32,7 @@ function TipBtn({ label, onClick, className = 'pl-icon-btn flex shrink-0 items-c
       onTouchEnd={endHold}
     >
       {children}
-      {show && <span className="pl-tooltip pointer-events-none absolute bottom-[calc(100%+7px)] left-1/2 z-10 whitespace-nowrap rounded-md bg-[rgba(30,30,30,0.95)] px-[9px] py-1 text-[10px] font-semibold tracking-[0.04em] text-white shadow-[0_2px_10px_rgba(0,0,0,0.4)] -translate-x-1/2 animate-[plFadeIn_0.15s_ease-out]">{label}</span>}
+      {show && <span className="pl-tooltip pointer-events-none absolute bottom-[calc(100%+7px)] left-1/2 z-10 whitespace-nowrap rounded-md bg-[rgba(30,30,30,0.95)] px-[9px] py-1 text-[10px] font-semibold tracking-[0.04em] text-white shadow-[0_2px_10px_rgba(0,0,0,0.4)] -translate-x-1/2 after:absolute after:left-1/2 after:top-full after:-translate-x-1/2 after:border-[4px] after:border-transparent after:border-t-[rgba(30,30,30,0.95)] after:content-[''] animate-playlist-tooltip-in">{label}</span>}
     </button>
   )
 }
@@ -308,7 +307,7 @@ export default function Playlist() {
   if ((allStatus === 'failed' || allError) && !currentTrack) {
     return (
       <div className="pl-container fixed bottom-[20px] right-[20px] z-[999] font-['Source_Sans_3','Segoe_UI',sans-serif] max-[480px]:bottom-[14px] max-[480px]:right-[14px]">
-        <div className="pl-sticky-bar pl-sticky-bar--error flex max-w-[280px] items-center gap-2 rounded-[10px] bg-[linear-gradient(135deg,#1DB954,#1ed760)] px-[10px] py-[6px] shadow-[0_6px_20px_rgba(0,0,0,0.4)] animate-[plSlideIn_0.35s_ease-out] [transition:transform_0.2s,box-shadow_0.2s] hover:-translate-y-0.5 hover:shadow-[0_10px_28px_rgba(0,0,0,0.5)] max-[480px]:max-w-[260px]">
+        <div className="pl-sticky-bar pl-sticky-bar--error flex max-w-[280px] items-center gap-2 rounded-[10px] bg-[linear-gradient(135deg,#1DB954,#1ed760)] px-[10px] py-[6px] shadow-[0_6px_20px_rgba(0,0,0,0.4)] animate-playlist-slide-in [transition:transform_0.2s,box-shadow_0.2s] hover:-translate-y-0.5 hover:shadow-[0_10px_28px_rgba(0,0,0,0.5)] max-[480px]:max-w-[260px]">
           <span
             className="pl-sticky-info min-w-0 flex-1 text-[0.75rem] text-[#ff6b6b]"
           >
@@ -338,7 +337,7 @@ export default function Playlist() {
 
       {isExpanded && (
         <div
-          className="pl-backdrop-overlay fixed inset-0 z-[998] bg-[rgba(0,0,0,0.5)] animate-[plFadeIn_0.25s_ease-out]"
+          className="pl-backdrop-overlay fixed inset-0 z-[998] bg-[rgba(0,0,0,0.5)] animate-playlist-fade-in"
           onClick={() => setIsExpanded(false)}
         />
       )}
@@ -346,7 +345,7 @@ export default function Playlist() {
       <div className="pl-container fixed bottom-[20px] right-[20px] z-[999] font-['Source_Sans_3','Segoe_UI',sans-serif] max-[480px]:bottom-[14px] max-[480px]:right-[14px]">
         {/* ── Collapsed bar ── */}
         {!isExpanded && (
-          <div className="pl-sticky-bar flex max-w-[280px] cursor-pointer items-center gap-2 rounded-[10px] bg-[linear-gradient(135deg,#1DB954,#1ed760)] px-[10px] py-[6px] shadow-[0_6px_20px_rgba(0,0,0,0.4)] animate-[plSlideIn_0.35s_ease-out] [transition:transform_0.2s,box-shadow_0.2s] hover:-translate-y-0.5 hover:shadow-[0_10px_28px_rgba(0,0,0,0.5)] max-[480px]:max-w-[260px]" onClick={() => setIsExpanded(true)}>
+          <div className="pl-sticky-bar flex max-w-[280px] cursor-pointer items-center gap-2 rounded-[10px] bg-[linear-gradient(135deg,#1DB954,#1ed760)] px-[10px] py-[6px] shadow-[0_6px_20px_rgba(0,0,0,0.4)] animate-playlist-slide-in [transition:transform_0.2s,box-shadow_0.2s] hover:-translate-y-0.5 hover:shadow-[0_10px_28px_rgba(0,0,0,0.5)] max-[480px]:max-w-[260px]" onClick={() => setIsExpanded(true)}>
             <div className="pl-sticky-cover h-[34px] w-[34px] shrink-0 overflow-hidden rounded-[5px] bg-[#282828]">
               <img
                 className="h-full w-full object-cover"
@@ -384,19 +383,19 @@ export default function Playlist() {
 
         {/* ── Expanded panel ── */}
         {isExpanded && (
-          <div className="pl-panel pointer-events-auto fixed bottom-0 right-0 z-[2] flex w-full flex-col overflow-hidden rounded-t-[18px] bg-[#121212] shadow-[0_-6px_28px_rgba(0,0,0,0.75)] animate-[plSlideUp_0.35s_cubic-bezier(0.4,0,0.2,1)] min-[769px]:bottom-5 min-[769px]:right-5 min-[769px]:max-h-[calc(100vh-40px)] min-[769px]:w-[700px] min-[769px]:flex-row min-[769px]:rounded-[14px]">
+          <div className="pl-panel pointer-events-auto fixed bottom-0 right-0 z-[2] flex h-[88vh] h-[88dvh] h-[calc(var(--pl-viewport-height,100vh)*0.88)] w-full flex-col overflow-hidden rounded-t-[18px] bg-[#121212] shadow-[0_-6px_28px_rgba(0,0,0,0.75)] animate-playlist-slide-up max-[480px]:h-[92vh] max-[480px]:h-[92dvh] max-[480px]:h-[calc(var(--pl-viewport-height,100vh)*0.92)] min-[769px]:bottom-5 min-[769px]:right-5 min-[769px]:h-auto min-[769px]:max-h-[calc(100vh-40px)] min-[769px]:w-[700px] min-[769px]:flex-row min-[769px]:rounded-[14px]">
             {/* ─── PLAYER ─── */}
             <div className="pl-panel-player flex min-h-0 flex-col max-[768px]:flex-[0_1_60%] max-[768px]:overflow-hidden max-[768px]:border-b max-[768px]:border-solid max-[768px]:border-b-[#282828] min-[769px]:flex-1 min-[769px]:overflow-y-auto">
               <div className="pl-panel-header relative flex shrink-0 items-center justify-center px-3 pb-1 pt-2">
                 <div className="pl-player-tabs ml-3 mr-auto flex gap-4">
                   <button
-                    className={`pl-tab-btn relative cursor-pointer border-0 border-solid bg-transparent px-2 py-1 text-[13px] font-semibold transition-colors duration-200 ${activeTab === 'cover' ? 'pl-tab-btn--active text-[#1DB954]' : 'text-[#888] hover:text-[#ccc]'}`}
+                    className={`pl-tab-btn relative cursor-pointer border-0 border-solid bg-transparent px-2 py-1 text-[13px] font-semibold transition-colors duration-200 ${activeTab === 'cover' ? "pl-tab-btn--active text-[#1DB954] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:w-full after:rounded-[2px] after:bg-[#1DB954] after:content-['']" : 'text-[#888] hover:text-[#ccc]'}`}
                     onClick={() => setActiveTab('cover')}
                   >
                     Player
                   </button>
                   <button
-                    className={`pl-tab-btn relative cursor-pointer border-0 border-solid bg-transparent px-2 py-1 text-[13px] font-semibold transition-colors duration-200 ${activeTab === 'lyrics' ? 'pl-tab-btn--active text-[#1DB954]' : 'text-[#888] hover:text-[#ccc]'}`}
+                    className={`pl-tab-btn relative cursor-pointer border-0 border-solid bg-transparent px-2 py-1 text-[13px] font-semibold transition-colors duration-200 ${activeTab === 'lyrics' ? "pl-tab-btn--active text-[#1DB954] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:w-full after:rounded-[2px] after:bg-[#1DB954] after:content-['']" : 'text-[#888] hover:text-[#ccc]'}`}
                     onClick={() => setActiveTab('lyrics')}
                   >
                     Lyrics
@@ -449,7 +448,7 @@ export default function Playlist() {
                       }}
                     />
                     {activeLine && (
-                      <div className="pl-karaoke-sub mt-3 max-w-[90%] rounded-lg bg-[rgba(0,0,0,0.6)] px-3 py-2 text-center animate-[plFadeIn_0.2s_ease-out]">
+                      <div className="pl-karaoke-sub mt-3 max-w-[90%] rounded-lg bg-[rgba(0,0,0,0.6)] px-3 py-2 text-center animate-playlist-karaoke-in">
                         <div className="pl-karaoke-line text-[14px] font-semibold text-white">{activeLine.line}</div>
                         {typeof activeLine.lineJapanese === 'string' &&
                           activeLine.lineJapanese.trim() && (
@@ -479,7 +478,7 @@ export default function Playlist() {
               <div className="pl-panel-progress shrink-0 px-3 pb-[6px] max-[480px]:px-[10px] max-[480px]:pb-1">
                 <input
                   type="range"
-                  className="pl-slider mb-1 h-1 w-full cursor-pointer rounded-[2px] outline-none [-webkit-appearance:none] [appearance:none]"
+                  className="pl-slider mb-1 h-1 w-full cursor-pointer rounded-[2px] outline-none [-webkit-appearance:none] [appearance:none] [&::-webkit-slider-thumb]:h-[12px] [&::-webkit-slider-thumb]:w-[12px] [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#1DB954] [&::-webkit-slider-thumb]:[-webkit-appearance:none] [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:shadow-[0_1px_6px_rgba(29,185,84,0.45)] [&::-moz-range-thumb]:h-[12px] [&::-moz-range-thumb]:w-[12px] [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:bg-[#1DB954] [&::-moz-range-thumb]:cursor-pointer"
                   min="0"
                   max="100"
                   value={progress}
@@ -527,7 +526,7 @@ export default function Playlist() {
                 </span>
                 <input
                   type="range"
-                  className="pl-slider pl-volume-slider mb-0 h-1 flex-1 cursor-pointer rounded-[2px] outline-none [-webkit-appearance:none] [appearance:none]"
+                  className="pl-slider pl-volume-slider mb-0 h-1 flex-1 cursor-pointer rounded-[2px] outline-none [-webkit-appearance:none] [appearance:none] [&::-webkit-slider-thumb]:h-[12px] [&::-webkit-slider-thumb]:w-[12px] [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#1DB954] [&::-webkit-slider-thumb]:[-webkit-appearance:none] [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:shadow-[0_1px_6px_rgba(29,185,84,0.45)] [&::-moz-range-thumb]:h-[12px] [&::-moz-range-thumb]:w-[12px] [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:bg-[#1DB954] [&::-moz-range-thumb]:cursor-pointer"
                   min="0"
                   max="100"
                   value={volume}
@@ -547,7 +546,7 @@ export default function Playlist() {
               <div className="pl-tracks-header flex shrink-0 items-center justify-between border-b border-solid border-b-[#282828] px-4 py-3 text-xs font-bold uppercase tracking-[0.5px] text-[#b3b3b3]">
                 <span>Tracks ({accessibleTracks.length})</span>
               </div>
-              <div className="pl-track-list min-h-0 flex-1 overflow-x-hidden overflow-y-auto pb-[max(16px,env(safe-area-inset-bottom,0px))]">
+              <div className="pl-track-list min-h-0 flex-1 overflow-x-hidden overflow-y-auto pb-[max(16px,env(safe-area-inset-bottom,0px))] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-[#404040] [&::-webkit-scrollbar-thumb:hover]:bg-[#555]">
                 {accessibleTracks.map((t, i) => (
                   <div
                     key={t._id}
